@@ -18,7 +18,7 @@ const Dashboard = () => {
     const { logout, user } = useAuth();
 
     // Fetch watchlist
-    const fetchWatchlist = async () => {
+    const loadWatchlist = async () => {
         try {
             const data = await fetchWatchlist();
             setWatchlist(data);
@@ -54,7 +54,7 @@ const Dashboard = () => {
     }, [selectedStock, chartRange]);
 
     // Fetch alerts
-    const fetchAlerts = async () => {
+    const loadAlerts = async () => {
         try {
             const data = await fetchAlerts(50, 0);
             setAlerts(data.alerts || []);
@@ -68,7 +68,7 @@ const Dashboard = () => {
     // Handlers
     const handleAddStock = async (symbol) => {
         await addToWatchlist(symbol);
-        await fetchWatchlist();
+        await loadWatchlist();
     };
 
     const handleRemoveStock = async (id) => {
@@ -83,15 +83,15 @@ const Dashboard = () => {
 
     // Initial fetch
     useEffect(() => {
-        fetchWatchlist();
-        fetchAlerts();
+        loadWatchlist();
+        loadAlerts();
     }, []);
 
     // Auto-refresh
     useEffect(() => {
         const interval = setInterval(() => {
-            fetchWatchlist();
-            fetchAlerts();
+            loadWatchlist();
+            loadAlerts();
         }, 30000);
         return () => clearInterval(interval);
     }, []);

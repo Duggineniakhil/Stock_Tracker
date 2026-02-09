@@ -1,0 +1,248 @@
+:root {
+  /* Google Finance Dark Theme Palette */
+  --bg-primary: #121212;
+  --bg-secondary: #1E1E1E;
+  --bg-tertiary: #2A2A2A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #9AA0A6;
+  --text-tertiary: #5F6368;
+  --market-green: #34A853;
+  --market-red: #EA4335;
+  --accent-blue: #8AB4F8;
+  --border-color: #3C4043;
+
+  /* Layout */
+  --sidebar-width: 360px;
+  /* Slightly wider for better info density */
+  --header-height: 64px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
+  /* App container handles scrolling */
+  height: 100vh;
+}
+
+/* Layout Containers */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-primary);
+  flex-direction: row;
+}
+
+/* Sidebar on the RIGHT */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex-shrink: 0;
+  order: 2;
+  /* Visual order: Main Content | Sidebar */
+  z-index: 10;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+  /* Slight shadow for separation */
+}
+
+/* Main Content on the LEFT */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 64px;
+  overflow-y: auto;
+  align-items: center;
+  order: 1;
+}
+
+/* Sidebar Header (Logo & Title) */
+.sidebar-header {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--bg-secondary);
+}
+
+.app-logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.5px;
+}
+
+.watchlist-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Stock List */
+.stock-list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Add Stock Section */
+.add-stock-section {
+  padding: 16px 24px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Stock List Item */
+.stock-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Main Content Components */
+.main-header {
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.stock-headline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stock-headline h1 {
+  font-size: 2.75rem;
+  /* Larger */
+  font-weight: 400;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.stock-price-large {
+  font-size: 4rem;
+  /* Even larger */
+  font-weight: 300;
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.stock-change-large {
+  font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+.chart-container-large {
+  width: 100%;
+  max-width: 1000px;
+  height: 450px;
+  /* Taller chart */
+  margin-bottom: 48px;
+  position: relative;
+}
+
+/* Empty States */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  text-align: center;
+  opacity: 0.7;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+/* Utilities */
+.text-green {
+  color: var(--market-green);
+}
+
+.text-red {
+  color: var(--market-red);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Time Interval Selector */
+.time-selector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  /* Moved to top of chart or handled inside component */
+}
+
+.time-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 6px 16px;
+  border-radius: 16px;
+  /* Pill shape */
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.time-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.time-btn.active {
+  background-color: rgba(138, 180, 248, 0.15);
+  /* Accent tint */
+  color: var(--accent-blue);
+  border-color: rgba(138, 180, 248, 0.3);
+  font-weight: 600;
+}

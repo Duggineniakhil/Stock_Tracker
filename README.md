@@ -19,6 +19,14 @@ A modern, full-stack web application for tracking stock prices with intelligent 
 - **🎨 Modern UI** - Dark theme with responsive design and smooth animations
 - **⚡ Auto-refresh** - Updates every 30 seconds
 
+## 📸 Screenshots
+
+![Stock Dashboard](assets/stock_dashboard.png)
+_Real-time Stock Dashboard with interactive charts_
+
+![Email Alert](assets/email_alert.png)
+_Automated Email Alerts for price movements_
+
 ## 🏗️ Architecture
 
 ```mermaid

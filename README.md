@@ -6,6 +6,11 @@ A modern, full-stack web application for tracking stock prices with intelligent 
 ![Node.js](https://img.shields.io/badge/Node.js-v18+-green)
 ![React](https://img.shields.io/badge/React-v18+-blue)
 
+## 🌐 Live Demo
+
+- **Live Application:** https://stock-tracker-1-sj4n.onrender.com  
+- **Backend API Base URL:** https://stock-tracker-dsut.onrender.com  
+
 ## ✨ Features
 
 - **🔐 User Authentication** - Secure Signup and Login (JWT-based)

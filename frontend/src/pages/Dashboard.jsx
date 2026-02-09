@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import { fetchWatchlist, addToWatchlist, removeFromWatchlist, fetchStockHistory, fetchAlerts } from '../services/api';
 import AddStockForm from '../components/AddStockForm';
 import StockListItem from '../components/StockListItem';
 import AlertList from '../components/AlertList';
@@ -20,7 +20,7 @@ const Dashboard = () => {
     // Fetch watchlist
     const fetchWatchlist = async () => {
         try {
-            const data = await api.fetchWatchlist();
+            const data = await fetchWatchlist();
             setWatchlist(data);
             if (data.length > 0 && !selectedStock) {
                 setSelectedStock(data[0]);
@@ -42,7 +42,7 @@ const Dashboard = () => {
 
         const loadChartData = async () => {
             try {
-                const history = await api.fetchStockHistory(selectedStock.symbol, chartRange);
+                const history = await fetchStockHistory(selectedStock.symbol, chartRange);
                 setChartData(history);
             } catch (error) {
                 console.error('Error fetching chart data:', error);
@@ -56,7 +56,7 @@ const Dashboard = () => {
     // Fetch alerts
     const fetchAlerts = async () => {
         try {
-            const data = await api.fetchAlerts(50, 0);
+            const data = await fetchAlerts(50, 0);
             setAlerts(data.alerts || []);
         } catch (error) {
             console.error('Error fetching alerts:', error);
@@ -67,14 +67,14 @@ const Dashboard = () => {
 
     // Handlers
     const handleAddStock = async (symbol) => {
-        await api.addToWatchlist(symbol);
+        await addToWatchlist(symbol);
         await fetchWatchlist();
     };
 
     const handleRemoveStock = async (id) => {
         const isSelected = selectedStock && selectedStock.id === id;
-        await api.removeFromWatchlist(id);
-        const updatedList = await api.fetchWatchlist();
+        await removeFromWatchlist(id);
+        const updatedList = await fetchWatchlist();
         setWatchlist(updatedList);
         if (isSelected) {
             setSelectedStock(updatedList.length > 0 ? updatedList[0] : null);

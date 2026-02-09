@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
-
-const API_Base_URL = 'http://localhost:5000/api';
 
 const Register = () => {
     const [email, setEmail] = useState('');
@@ -25,7 +23,7 @@ const Register = () => {
         setError('');
 
         try {
-            await axios.post(`${API_Base_URL}/auth/register`, { email, password });
+            await API.post('/auth/register', { email, password });
             // Auto login or redirect to login
             navigate('/login');
         } catch (err) {

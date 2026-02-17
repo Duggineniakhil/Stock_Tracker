@@ -11,18 +11,18 @@ A modern, full-stack web application for tracking stock prices with intelligent 
 - **Live Application:** https://stock-tracker-1-sj4n.onrender.com  
 - **Backend API Base URL:** https://stock-tracker-dsut.onrender.com  
 
-## ✨ Features
+## Features
 
-- **🔐 User Authentication** - Secure Signup and Login (JWT-based)
-- **📧 Email & Internal Alerts** - Get notified via Email and in-app when stocks hit your targets
-- **📊 Real-time Stock Tracking** - Monitor multiple stocks with live price updates
-- **🔔 Intelligent Alerts** - Automated alerts for:
+- **User Authentication** - Secure Signup and Login (JWT-based)
+- **Email & Internal Alerts** - Get notified via Email and in-app when stocks hit your targets
+- **Real-time Stock Tracking** - Monitor multiple stocks with live price updates
+- **Intelligent Alerts** - Automated alerts for:
   - Price drops >5%
   - Moving average crossovers (20-day SMA)
-- **📈 Interactive Charts** - 30-day price history with moving average overlay
-- **💾 Persistent Storage** - Postgres/SQLite database for user profiles, watchlists, and alert history
-- **🎨 Modern UI** - Dark theme with responsive design and smooth animations
-- **⚡ Auto-refresh** - Updates every 30 seconds
+- **Interactive Charts** - 30-day price history with moving average overlay
+- **Persistent Storage** - Postgres/SQLite database for user profiles, watchlists, and alert history
+- **Modern UI** - Dark theme with responsive design and smooth animations
+- **Auto-refresh** - Updates every 30 seconds
 
 ## 📸 Screenshots
 
@@ -32,7 +32,7 @@ _Real-time Stock Dashboard with interactive charts_
 ![Email Alert](assets/email_alert.png)
 _Automated Email Alerts for price movements_
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph TB
@@ -166,7 +166,7 @@ stock-tracker-agent-main/
 └── README.md
 ```
 
-## 🔌 API Endpoints
+##  API Endpoints
 
 ### Authentication
 | Method | Endpoint | Description |
@@ -194,7 +194,7 @@ stock-tracker-agent-main/
 |--------|----------|-------------|
 | GET | `/api/alerts` | Get user's alert history |
 
-## 🎯 Alert Engine & Email Notifications
+##  Alert Engine & Email Notifications
 
 The alert engine runs automatically every hour (configurable in `server.js`) and checks for:
 
@@ -205,13 +205,13 @@ When an alert is triggered:
 - An entry is saved to the `user_alerts` table.
 - An **Email Notification** is sent to the registered user's email address.
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 - **Backend**: Node.js, Express, SQLite3, Axios, node-cron, Nodemailer
 - **Frontend**: React, Vite, Chart.js, TailwindCSS (if applicable)
 - **External APIs**: Yahoo Finance (No key required)
 
-## 📊 Database Schema
+##  Database Schema
 
 ### Users Table
 ```sql

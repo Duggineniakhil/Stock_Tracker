@@ -14,6 +14,11 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
+// Enable WAL mode for better performance
+db.run('PRAGMA journal_mode=WAL');
+db.run('PRAGMA foreign_keys=ON');
+db.run('PRAGMA synchronous=NORMAL');
+
 // Initialize database with schema
 function initializeDatabase() {
     const schemaPath = path.join(__dirname, 'schema.sql');
@@ -21,10 +26,36 @@ function initializeDatabase() {
 
     db.exec(schema, (err) => {
         if (err) {
-            console.error('Error initializing database:', err.message);
+            console.error('Error initializing database schema:', err.message);
         } else {
-            console.log('Database initialized successfully');
+            console.log('Database schema initialized');
+            runMigrations();
         }
+    });
+}
+
+// Run migrations safely (ignoring already-applied ones)
+function runMigrations() {
+    const migrationsPath = path.join(__dirname, 'migrations.sql');
+    if (!fs.existsSync(migrationsPath)) return;
+
+    const migrations = fs.readFileSync(migrationsPath, 'utf8');
+    const statements = migrations
+        .split(';')
+        .map(s => s.trim())
+        .filter(s => s.length > 0 && !s.startsWith('--'));
+
+    let completed = 0;
+    statements.forEach((statement) => {
+        db.run(statement, (err) => {
+            if (err && !err.message.includes('duplicate column') && !err.message.includes('already exists')) {
+                console.warn('Migration warning:', err.message.substring(0, 80));
+            }
+            completed++;
+            if (completed === statements.length) {
+                console.log('Database migrations applied');
+            }
+        });
     });
 }
 

@@ -1,5 +1,4 @@
-const YahooFinance = require('yahoo-finance2').default;
-const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+const yahooFinance = require('yahoo-finance2').default;
 
 const stockService = {
     // Get current stock quote from Yahoo Finance

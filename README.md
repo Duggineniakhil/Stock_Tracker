@@ -1,223 +1,284 @@
-# Stock Dashboard Application
+# StockFolio — Investment Tracker
 
-A modern, full-stack web application for tracking stock prices with intelligent alerts. Built with Node.js/Express backend and React frontend, featuring **User Authentication**, **Email Notifications**, real-time price monitoring, moving average analysis, and automated alert generation.
+A full-stack stock portfolio and watchlist tracker with intelligent alerts, interactive charts, and a professional dark-mode dashboard. Built with **Node.js/Express** + **React/Vite**, backed by **SQLite**, and secured with **JWT authentication**.
 
-![Stock Dashboard](https://img.shields.io/badge/Status-Production%20Ready-success)
-![Node.js](https://img.shields.io/badge/Node.js-v18+-green)
-![React](https://img.shields.io/badge/React-v18+-blue)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
+![Node.js](https://img.shields.io/badge/Node.js-v20+-green)
+![React](https://img.shields.io/badge/React-v19+-blue)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+---
 
 ## ✨ Features
 
-- **🔐 User Authentication** - Secure Signup and Login (JWT-based)
-- **📧 Email & Internal Alerts** - Get notified via Email and in-app when stocks hit your targets
-- **📊 Real-time Stock Tracking** - Monitor multiple stocks with live price updates
-- **🔔 Intelligent Alerts** - Automated alerts for:
-  - Price drops >5%
-  - Moving average crossovers (20-day SMA)
-- **📈 Interactive Charts** - 30-day price history with moving average overlay
-- **💾 Persistent Storage** - Postgres/SQLite database for user profiles, watchlists, and alert history
-- **🎨 Modern UI** - Dark theme with responsive design and smooth animations
-- **⚡ Auto-refresh** - Updates every 30 seconds
+### 🔐 Authentication & Security
+- JWT-based login/register with **refresh tokens** (7-day expiry)
+- **Account lockout** after 5 failed login attempts (15-min cooldown)
+- **Password strength enforcement** (min 8 chars, uppercase, number)
+- Secure HTTP headers via **Helmet.js**, CORS, request body size limits
 
-## 📸 Screenshots
+### 📊 Dashboard
+- **Portfolio summary cards** — total value, P/L, top gainer/loser
+- **Top performers panel** — side-by-side gainers & losers from watchlist
+- **Recent activity timeline** — latest 6 alerts with relative timestamps
+- **Quick actions** — one-click nav to portfolio, alerts, and API docs
+- **Interactive price chart** (Chart.js) with 1D / 5D / 1M / 6M / YTD / 1Y / MAX ranges
+- Live stock detail metrics: previous close, day range, volume, market cap
 
-![Stock Dashboard](assets/stock_dashboard.png)
-_Real-time Stock Dashboard with interactive charts_
+### 💼 Portfolio
+- Track holdings with purchase price, quantity, and buy date
+- Real-time P/L calculation per holding and overall
+- Portfolio allocation pie chart
+- Add, edit, and remove holdings
 
-![Email Alert](assets/email_alert.png)
-_Automated Email Alerts for price movements_
+### 🔔 Alerts System
+- **3 alert templates**: Percentage Change, Target Price, Volume Spike
+- **4 priority levels**: LOW / MEDIUM / HIGH / CRITICAL
+- Create, toggle active/inactive, and delete alert rules
+- Alert history with per-stock filtering and clear-all
+- **Background alert engine** runs every hour via `node-cron`
+- Email notifications via Nodemailer
+
+### 🛠️ Backend Engineering
+- **API versioning** — all routes at `/api/v1/`
+- **Swagger/OpenAPI 3.0** docs at `/api/v1/docs`
+- **Winston logger** with rotating log files (`error.log`, `combined.log`)
+- **Rate limiting** — 3-tier (general: 100/min, auth: 10/min, stock: 30/min)
+- **Global error handler** with structured JSON responses
+- **Database migrations** system (SQLite WAL mode, foreign keys enabled)
+- **Health check** endpoint at `/api/v1/health`
+
+### 🧪 Testing
+- **Backend**: Jest unit tests (models, services) + Supertest integration tests
+- **Frontend**: Vitest + React Testing Library component tests
+- Coverage reports for both
+
+### 🚀 DevOps
+- Multi-stage **Dockerfiles** for backend (non-root, HEALTHCHECK) and frontend (Vite → Nginx)
+- **docker-compose.yml** with health-check service dependencies
+- **GitHub Actions CI** — runs tests then builds Docker images on `main`
+
+---
 
 ## 🏗️ Architecture
 
-```mermaid
-graph TB
-    subgraph Frontend
-        A[React App] --> B[AuthContext]
-        B --> C[Components]
-        C --> D[StockCard]
-        C --> E[AlertList]
-        C --> F[PriceChart]
-        A --> G[API Service]
-    end
-    
-    subgraph Backend
-        H[Express Server] --> I[Auth Middleware]
-        I --> J[Routes]
-        J --> K[Controllers]
-        K --> L[Services]
-        L --> M[Models]
-        M --> N[(Database)]
-        O[Cron Job] --> P[Alert Engine]
-        P --> Q[Email Service]
-        Q --> R[Resend/SMTP]
-        P --> L
-    end
-    
-    subgraph External
-        S[Yahoo Finance API]
-    end
-    
-    G -->|JWT HTTP| H
-    L -->|Fetch Data| S
 ```
+stock-tracker-agent-main/
+├── .github/
+│   └── workflows/ci.yml          # CI: test → Docker build
+│
+├── backend/
+│   ├── server.js                  # Express entry point (v1 API, helmet, swagger)
+│   ├── routes/                    # auth, watchlist, stock, alerts, portfolio
+│   ├── controllers/               # auth, watchlist, stock, alert, portfolio
+│   ├── services/
+│   │   ├── stockService.js        # Yahoo Finance integration
+│   │   ├── portfolioService.js    # P/L aggregation
+│   │   ├── alertRulesService.js   # Rule evaluation engine
+│   │   ├── alertEngine.js         # Cron-driven runner
+│   │   └── emailService.js        # Nodemailer
+│   ├── models/                    # SQLite CRUD for all entities
+│   ├── middleware/
+│   │   ├── auth.js                # JWT verify
+│   │   ├── errorHandler.js        # Global error + 404 handler
+│   │   ├── rateLimiter.js         # 3-tier rate limits
+│   │   └── requestLogger.js       # Winston HTTP logs
+│   ├── utils/
+│   │   ├── logger.js              # Winston config
+│   │   └── errors.js              # Custom error classes
+│   ├── db/
+│   │   ├── database.js            # SQLite connection + migration runner
+│   │   ├── schema.sql             # Initial schema
+│   │   └── migrations.sql         # alert_rules, refresh_tokens, login_attempts
+│   ├── swagger.js                 # OpenAPI 3.0 spec
+│   ├── Dockerfile
+│   ├── .env.example
+│   └── tests/
+│       ├── unit/                  # models.test.js, services.test.js
+│       └── integration/           # api.test.js (supertest)
+│
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx      # Main view with chart + watchlist
+│   │   │   ├── Portfolio.jsx      # Holdings management
+│   │   │   ├── Alerts.jsx         # Alert history & rule management
+│   │   │   ├── Login.jsx
+│   │   │   └── Register.jsx
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx         # Top navigation (Dashboard / Portfolio / Alerts)
+│   │   │   ├── PriceChart.jsx     # Chart.js line chart
+│   │   │   ├── DashboardSummary.jsx  # 5 metric cards
+│   │   │   ├── TopPerformers.jsx  # Gainers / Losers
+│   │   │   ├── RecentActivity.jsx # Timeline of recent alerts
+│   │   │   ├── QuickActions.jsx   # Quick nav buttons
+│   │   │   ├── AllocationPieChart.jsx
+│   │   │   └── ...
+│   │   ├── services/api.js        # Axios instance + auto token refresh
+│   │   ├── context/AuthContext.jsx
+│   │   └── tests/                 # Vitest + Testing Library
+│   ├── Dockerfile
+│   ├── .env.example
+│   └── vite.config.js             # Vitest config included
+│
+├── docker-compose.yml
+└── README.md
+```
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
-- Node.js 18+ and npm
+- Node.js 20+ and npm
 - Git
 
-### Installation
-
-1. **Clone the repository**
+### 1. Clone
 ```bash
 git clone <repository-url>
 cd stock-tracker-agent-main
 ```
 
-2. **Set up the backend**
+### 2. Backend setup
 ```bash
 cd backend
+cp .env.example .env        # fill in JWT_SECRET and email config
 npm install
+npm run dev                 # starts on http://localhost:5000
 ```
 
-3. **Set up the frontend**
-```bash
-cd ../frontend
-npm install
-```
-
-### Configuration
-
-Create a `.env` file in the `backend/` directory with the following variables:
-
-```env
-PORT=5000
-NODE_ENV=development
-JWT_SECRET=your_super_secret_jwt_key
-
-# Email Configuration (Resend/SMTP)
-EMAIL_HOST=smtp.resend.com
-EMAIL_PORT=465
-EMAIL_SECURE=true
-EMAIL_USER=resend
-EMAIL_PASS=re_123456789
-EMAIL_FROM=onboarding@resend.dev
-```
-
-### Running the Application
-
-1. **Start the backend server** (Terminal 1)
-```bash
-cd backend
-npm start
-```
-Server will run on `http://localhost:5000`
-
-2. **Start the frontend dev server** (Terminal 2)
+### 3. Frontend setup
 ```bash
 cd frontend
-npm run dev
-```
-Frontend will run on `http://localhost:5173`
-
-3. **Open your browser** and navigate to `http://localhost:5173`
-   - Register a new account
-   - Log in to start adding stocks to your watchlist
-
-## 📁 Project Structure
-
-```
-stock-tracker-agent-main/
-├── backend/
-│   ├── server.js              # Express app entry point
-│   ├── routes/                # API route definitions
-│   │   ├── auth.js            # Authentication routes
-│   │   ├── watchlist.js
-│   │   ├── stock.js
-│   │   └── alerts.js
-│   ├── controllers/           # Request handlers
-│   │   ├── authController.js
-│   │   ├── watchlistController.js
-│   │   ├── stockController.js
-│   │   └── alertController.js
-│   ├── services/              # Business logic
-│   │   ├── stockService.js    # Yahoo Finance integration
-│   │   ├── alertService.js    # Alert generation engine
-│   │   ├── emailService.js    # Email notifications
-│   │   └── alertEngine.js     # Scheduled job runner
-│   ├── models/                # Database operations
-│   │   ├── userModel.js
-│   │   ├── watchlistModel.js
-│   │   └── alertModel.js
-│   ├── db/                    # Database files
-│   │   ├── database.js        # DB connection
-│   │   ├── schema.sql         # Table definitions
-│   │   └── stocks.db          # SQLite database
-│   └── package.json
-│
-├── frontend/ (Refer to frontend docs)
-└── README.md
+cp .env.example .env        # set VITE_API_URL if needed
+npm install
+npm run dev                 # starts on http://localhost:5173
 ```
 
-## 🔌 API Endpoints
+### 4. Open the app
+Navigate to **http://localhost:5173** → Register → Start tracking stocks.
 
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new user |
-| POST | `/api/auth/login` | Login and get JWT |
+---
 
-### Watchlist (Protected)
-*Requires `Authorization: Bearer <token>` header*
+## 🐳 Docker (Full Stack)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/watchlist` | Get user's watchlist |
-| POST | `/api/watchlist` | Add stock to user's watchlist |
-| DELETE | `/api/watchlist/:id` | Remove stock from watchlist |
+```bash
+# copy and fill backend env first
+cp backend/.env.example backend/.env
+
+docker compose up --build
+```
+
+- Frontend → **http://localhost**
+- Backend API → **http://localhost:5000/api/v1**
+- Swagger UI → **http://localhost:5000/api/v1/docs**
+
+---
+
+## ⚙️ Environment Variables
+
+### `backend/.env`
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `5000` | Backend port |
+| `NODE_ENV` | `development` | `development` or `production` |
+| `JWT_SECRET` | — | **Required.** JWT signing secret |
+| `JWT_REFRESH_SECRET` | — | Refresh token secret (auto-derived if blank) |
+| `JWT_EXPIRES_IN` | `1h` | Access token lifetime |
+| `JWT_REFRESH_EXPIRES_IN` | `7d` | Refresh token lifetime |
+| `EMAIL_USER` | — | SMTP username |
+| `EMAIL_PASS` | — | SMTP password / app password |
+| `MAX_LOGIN_ATTEMPTS` | `5` | Lockout threshold |
+| `LOCKOUT_DURATION_MINUTES` | `15` | Lockout window |
+
+### `frontend/.env`
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_API_URL` | `http://localhost:5000` | Backend base URL |
+
+---
+
+## 🔌 API Reference
+
+All endpoints are prefixed with `/api/v1`. Interactive Swagger docs at `/api/v1/docs`.
+
+### Auth
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/auth/register` | Create account |
+| POST | `/auth/login` | Login → access + refresh tokens |
+| POST | `/auth/refresh` | Rotate access token using refresh token |
+| POST | `/auth/logout` | Revoke refresh token |
+
+### Watchlist *(JWT required)*
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/watchlist` | Get all watched stocks with live prices |
+| POST | `/watchlist` | Add stock by symbol |
+| DELETE | `/watchlist/:id` | Remove stock |
 
 ### Stock Data
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/stock/:symbol` | Get current stock quote |
-| GET | `/api/stock/:symbol/history?days=30` | Get historical price data |
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/stock/:symbol` | Current quote |
+| GET | `/stock/:symbol/history?range=1mo` | Historical prices (1d/5d/1mo/6mo/ytd/1y/max) |
 
-### Alerts (Protected)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/alerts` | Get user's alert history |
+### Alerts *(JWT required)*
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/alerts` | Alert history (supports `limit`, `offset`, `symbol`) |
+| POST | `/alerts` | Create manual alert |
+| DELETE | `/alerts/:id` | Delete alert |
+| DELETE | `/alerts/history/clear` | Clear all history |
+| GET | `/alerts/rules` | Get alert rules |
+| POST | `/alerts/rules` | Create rule (`PERCENTAGE_CHANGE` / `TARGET_PRICE` / `VOLUME_SPIKE`) |
+| PUT | `/alerts/rules/:id` | Update / toggle rule |
+| DELETE | `/alerts/rules/:id` | Delete rule |
 
-## 🎯 Alert Engine & Email Notifications
+### Portfolio *(JWT required)*
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/portfolio` | All holdings with live P/L |
+| POST | `/portfolio` | Add holding |
+| PUT | `/portfolio/:id` | Update holding |
+| DELETE | `/portfolio/:id` | Remove holding |
+| GET | `/portfolio/summary` | Aggregated totals |
+| GET | `/portfolio/allocation` | Percentage allocation per symbol |
 
-The alert engine runs automatically every hour (configurable in `server.js`) and checks for:
+### System
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Health check (uptime, version, env) |
 
-1. **Price Drop Alert**: Triggers when stock price drops >5% from previous close.
-2. **Moving Average Crossover**: Triggers when price crosses or deviates significantly from 20-day SMA.
+---
 
-When an alert is triggered:
-- An entry is saved to the `user_alerts` table.
-- An **Email Notification** is sent to the registered user's email address.
+## 🧪 Running Tests
 
-## 🛠️ Technology Stack
+```bash
+# Backend (Jest)
+cd backend
+npm test               # unit + integration + coverage
 
-- **Backend**: Node.js, Express, SQLite3, Axios, node-cron, Nodemailer
-- **Frontend**: React, Vite, Chart.js, TailwindCSS (if applicable)
-- **External APIs**: Yahoo Finance (No key required)
-
-## 📊 Database Schema
-
-### Users Table
-```sql
-CREATE TABLE users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+# Frontend (Vitest)
+cd frontend
+npm run test:run       # run once
+npm run test:coverage  # with coverage report
 ```
 
-### User Watchlist & Alerts
-Linked to `users` table via `user_id`.
+---
 
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, Vite, Chart.js, React Router v7 |
+| Backend | Node.js 20, Express 4, SQLite3 |
+| Auth | JSON Web Tokens (access + refresh), bcrypt |
+| Logging | Winston (rotating files + console) |
+| Docs | Swagger UI / OpenAPI 3.0 |
+| Stock Data | Yahoo Finance (no API key required) |
+| Email | Nodemailer (SMTP) |
+| Testing | Jest, Supertest, Vitest, React Testing Library |
+| DevOps | Docker, Docker Compose, GitHub Actions |

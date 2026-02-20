@@ -1,0 +1,125 @@
+.recent-activity {
+    background: var(--bg-card, #16213e);
+    border: 1px solid var(--border-color, #2a2a4a);
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.ra-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color, #2a2a4a);
+}
+
+.ra-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ra-see-all {
+    background: transparent;
+    border: none;
+    color: var(--accent-blue, #3b82f6);
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: opacity 0.2s;
+}
+
+.ra-see-all:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+
+.ra-loading,
+.ra-empty {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+.ra-timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.ra-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.ra-dot-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    width: 28px;
+}
+
+.ra-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-secondary, #1a1a2e);
+    border: 1px solid var(--border-color, #2a2a4a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.ra-line {
+    width: 2px;
+    flex: 1;
+    min-height: 16px;
+    background: var(--border-color, #2a2a4a);
+    margin: 4px 0;
+}
+
+.ra-content {
+    flex: 1;
+    padding-bottom: 14px;
+    min-width: 0;
+}
+
+.ra-message {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ra-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.ra-symbol {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-blue, #3b82f6);
+    background: rgba(59, 130, 246, 0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.ra-time {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+}

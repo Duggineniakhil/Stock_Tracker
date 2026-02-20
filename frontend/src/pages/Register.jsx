@@ -23,7 +23,7 @@ const Register = () => {
         setError('');
 
         try {
-            await API.post('/auth/register', { email, password });
+            await API.post('/v1/auth/register', { email, password });
             // Auto login or redirect to login
             navigate('/login');
         } catch (err) {

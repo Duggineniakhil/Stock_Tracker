@@ -18,7 +18,8 @@ const Login = () => {
         setError('');
 
         try {
-            const res = await API.post('/auth/login', { email, password });
+            const res = await API.post('/v1/auth/login', { email, password });
+            if (res.data.refreshToken) localStorage.setItem('refreshToken', res.data.refreshToken);
             login(res.data.token, res.data.user);
             navigate('/');
         } catch (err) {

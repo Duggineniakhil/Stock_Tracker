@@ -9,13 +9,31 @@ A full-stack stock portfolio and watchlist tracker with intelligent alerts, inte
 
 ---
 
-## ✨ Features
+## 🌐 Live Demo
 
+<<<<<<< HEAD
 ### 🔐 Authentication & Security
 - JWT-based login/register with **refresh tokens** (7-day expiry)
 - **Account lockout** after 5 failed login attempts (15-min cooldown)
 - **Password strength enforcement** (min 8 chars, uppercase, number)
 - Secure HTTP headers via **Helmet.js**, CORS, request body size limits
+=======
+- **Live Application:** https://stock-tracker-1-sj4n.onrender.com  
+- **Backend API Base URL:** https://stock-tracker-dsut.onrender.com  
+
+## Features
+
+- **User Authentication** - Secure Signup and Login (JWT-based)
+- **Email & Internal Alerts** - Get notified via Email and in-app when stocks hit your targets
+- **Real-time Stock Tracking** - Monitor multiple stocks with live price updates
+- **Intelligent Alerts** - Automated alerts for:
+  - Price drops >5%
+  - Moving average crossovers (20-day SMA)
+- **Interactive Charts** - 30-day price history with moving average overlay
+- **Persistent Storage** - Postgres/SQLite database for user profiles, watchlists, and alert history
+- **Modern UI** - Dark theme with responsive design and smooth animations
+- **Auto-refresh** - Updates every 30 seconds
+>>>>>>> dd98058de0e6bf2453873b5d55e0ab09df629393
 
 ### 📊 Dashboard
 - **Portfolio summary cards** — total value, P/L, top gainer/loser
@@ -60,7 +78,7 @@ A full-stack stock portfolio and watchlist tracker with intelligent alerts, inte
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 stock-tracker-agent-main/
@@ -155,8 +173,12 @@ npm install
 npm run dev                 # starts on http://localhost:5173
 ```
 
+<<<<<<< HEAD
 ### 4. Open the app
 Navigate to **http://localhost:5173** → Register → Start tracking stocks.
+=======
+##  API Endpoints
+>>>>>>> dd98058de0e6bf2453873b5d55e0ab09df629393
 
 ---
 
@@ -237,6 +259,7 @@ All endpoints are prefixed with `/api/v1`. Interactive Swagger docs at `/api/v1/
 | PUT | `/alerts/rules/:id` | Update / toggle rule |
 | DELETE | `/alerts/rules/:id` | Delete rule |
 
+<<<<<<< HEAD
 ### Portfolio *(JWT required)*
 | Method | Path | Description |
 |--------|------|-------------|
@@ -246,6 +269,9 @@ All endpoints are prefixed with `/api/v1`. Interactive Swagger docs at `/api/v1/
 | DELETE | `/portfolio/:id` | Remove holding |
 | GET | `/portfolio/summary` | Aggregated totals |
 | GET | `/portfolio/allocation` | Percentage allocation per symbol |
+=======
+##  Alert Engine & Email Notifications
+>>>>>>> dd98058de0e6bf2453873b5d55e0ab09df629393
 
 ### System
 | Method | Path | Description |
@@ -256,6 +282,7 @@ All endpoints are prefixed with `/api/v1`. Interactive Swagger docs at `/api/v1/
 
 ## 🧪 Running Tests
 
+<<<<<<< HEAD
 ```bash
 # Backend (Jest)
 cd backend
@@ -265,6 +292,24 @@ npm test               # unit + integration + coverage
 cd frontend
 npm run test:run       # run once
 npm run test:coverage  # with coverage report
+=======
+##  Technology Stack
+
+- **Backend**: Node.js, Express, SQLite3, Axios, node-cron, Nodemailer
+- **Frontend**: React, Vite, Chart.js, TailwindCSS (if applicable)
+- **External APIs**: Yahoo Finance (No key required)
+
+##  Database Schema
+
+### Users Table
+```sql
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+>>>>>>> dd98058de0e6bf2453873b5d55e0ab09df629393
 ```
 
 ---

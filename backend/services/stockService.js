@@ -1,4 +1,5 @@
-const yahooFinance = require('yahoo-finance2').default;
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 const stockService = {
     // Get current stock quote from Yahoo Finance
@@ -14,12 +15,17 @@ const stockService = {
                 symbol: quote.symbol,
                 currentPrice: quote.regularMarketPrice,
                 previousClose: quote.regularMarketPreviousClose,
+                open: quote.regularMarketOpen,
                 dayHigh: quote.regularMarketDayHigh,
                 dayLow: quote.regularMarketDayLow,
                 change: quote.regularMarketChange,
                 changePercent: quote.regularMarketChangePercent,
                 volume: quote.regularMarketVolume,
                 marketCap: quote.marketCap,
+                trailingPE: quote.trailingPE,
+                fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh,
+                fiftyTwoWeekLow: quote.fiftyTwoWeekLow,
+                exchange: quote.fullExchangeName || quote.exchange,
                 name: quote.longName || quote.shortName || symbol
             };
         } catch (error) {
@@ -53,6 +59,10 @@ const stockService = {
                     startDate.setMonth(startDate.getMonth() - 1);
                     interval = '1d';
                     break;
+                case '6mo':
+                    startDate.setMonth(startDate.getMonth() - 6);
+                    interval = '1d';
+                    break;
                 case 'ytd':
                     startDate = new Date(new Date().getFullYear(), 0, 1);
                     interval = '1d';
@@ -60,6 +70,10 @@ const stockService = {
                 case '1y':
                     startDate.setFullYear(startDate.getFullYear() - 1);
                     interval = '1d';
+                    break;
+                case '5y':
+                    startDate.setFullYear(startDate.getFullYear() - 5);
+                    interval = '1wk';
                     break;
                 case 'max':
                     startDate = new Date(2000, 0, 1); // Approx max

@@ -3,6 +3,7 @@ const router = express.Router();
 const portfolioController = require('../controllers/portfolioController');
 const { validate } = require('../middleware/validation/portfolioValidation');
 const authMiddleware = require('../middleware/auth');
+const exportService = require('../services/exportService');
 
 /**
  * Portfolio Routes
@@ -41,6 +42,20 @@ router.get('/summary', portfolioController.getSummary);
 router.get('/allocation', portfolioController.getAllocation);
 
 /**
+ * @route   GET /api/portfolio/history
+ * @desc    Get portfolio value history over time
+ * @access  Private
+ */
+router.get('/history', portfolioController.getHistory);
+
+/**
+ * @route   GET /api/portfolio/performance
+ * @desc    Get performance comparison data for holdings
+ * @access  Private
+ */
+router.get('/performance', portfolioController.getPerformance);
+
+/**
  * @route   GET /api/portfolio/:id
  * @desc    Get a single holding by ID
  * @access  Private
@@ -60,5 +75,21 @@ router.put('/:id', validate('updateHolding'), portfolioController.updateHolding)
  * @access  Private
  */
 router.delete('/:id', portfolioController.deleteHolding);
+
+/**
+ * @route   GET /api/portfolio/export/csv
+ * @desc    Export portfolio data as CSV file
+ * @access  Private
+ */
+router.get('/export/csv', async (req, res) => {
+    try {
+        const csv = await exportService.generatePortfolioCSV(req.user.id);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=portfolio-export.csv');
+        res.send(csv);
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to export portfolio' });
+    }
+});
 
 module.exports = router;

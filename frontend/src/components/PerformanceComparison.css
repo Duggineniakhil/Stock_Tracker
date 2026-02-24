@@ -1,0 +1,71 @@
+.performance-comparison {
+    background: var(--card-bg, rgba(20, 20, 35, 0.7));
+    border: 1px solid var(--border-color, rgba(100, 100, 140, 0.15));
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 1000px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(12px);
+}
+
+.pc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pc-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #e0e0f0);
+    margin: 0;
+}
+
+.pc-range-btns {
+    display: flex;
+    gap: 4px;
+    background: rgba(30, 30, 50, 0.6);
+    border-radius: 8px;
+    padding: 3px;
+}
+
+.pc-range-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary, #8888a0);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pc-range-btn:hover {
+    color: var(--text-primary, #e0e0f0);
+    background: rgba(100, 100, 160, 0.15);
+}
+
+.pc-range-btn.active {
+    color: #ffffff;
+    background: rgba(99, 102, 241, 0.5);
+}
+
+.pc-chart-wrapper {
+    height: 260px;
+    position: relative;
+}
+
+.pc-loading,
+.pc-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-tertiary, #6b7280);
+    font-size: 0.9rem;
+}

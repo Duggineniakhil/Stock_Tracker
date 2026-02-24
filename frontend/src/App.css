@@ -40,6 +40,104 @@
   --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Light Theme ─────────────────────────────────────── */
+[data-theme='light'] {
+  --bg-primary: #f5f7fb;
+  --bg-secondary: #edf0f7;
+  --bg-tertiary: #e2e7f0;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --text-primary: #1a1a2e;
+  --text-secondary: rgba(26, 26, 46, 0.6);
+  --text-tertiary: rgba(26, 26, 46, 0.4);
+  --accent-cyan: #0891b2;
+  --accent-cyan-dim: rgba(8, 145, 178, 0.12);
+  --accent-cyan-glow: rgba(8, 145, 178, 0.15);
+  --accent-purple: #6d28d9;
+  --accent-purple-dim: rgba(109, 40, 217, 0.1);
+  --market-green: #059669;
+  --market-green-dim: rgba(5, 150, 105, 0.1);
+  --market-red: #dc2626;
+  --market-red-dim: rgba(220, 38, 38, 0.1);
+  --market-yellow: #d97706;
+  --market-yellow-dim: rgba(217, 119, 6, 0.1);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 40px rgba(8, 145, 178, 0.06);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='light'] body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(8, 145, 178, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(109, 40, 217, 0.04) 0%, transparent 60%);
+}
+
+[data-theme='light'] .navbar {
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='light'] .navbar .brand-text h1 {
+  color: #1a1a2e;
+}
+
+[data-theme='light'] .navbar .brand-text span {
+  color: rgba(26, 26, 46, 0.5);
+}
+
+[data-theme='light'] .nav-link {
+  color: rgba(26, 26, 46, 0.5);
+}
+
+[data-theme='light'] .nav-link:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1a1a2e;
+}
+
+[data-theme='light'] .nav-link.active {
+  background: rgba(8, 145, 178, 0.08);
+  color: #0891b2;
+  border-color: rgba(8, 145, 178, 0.15);
+}
+
+[data-theme='light'] .user-info {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='light'] .user-email {
+  color: rgba(26, 26, 46, 0.6);
+}
+
+[data-theme='light'] .theme-toggle-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .theme-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme='light'] .logout-btn {
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #dc2626;
+}
+
+[data-theme='light'] .logout-btn:hover {
+  background: rgba(220, 38, 38, 0.06);
+}
+
+[data-theme='light'] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='light'] .metric-cell {
+  background: var(--bg-primary);
+}
+
 /* ── Reset & Base ─────────────────────────────────────── */
 *,
 *::before,
@@ -198,27 +296,66 @@ body {
   line-height: 1;
 }
 
-.stock-price-large {
-  font-size: 3.5rem;
-  font-weight: 300;
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  letter-spacing: -2px;
-  line-height: 1;
+/* ── Google Finance-style stock header ───────────────── */
+.gf-stock-header {
+  width: 100%;
+  max-width: 960px;
+  margin-bottom: 8px;
 }
 
-.stock-change-large {
-  font-size: 1.5rem;
+.gf-stock-name {
+  font-size: 1.65rem;
   font-weight: 500;
   letter-spacing: -0.5px;
+  margin: 0 0 4px;
+  color: var(--text-primary);
+}
+
+.gf-stock-exchange {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-bottom: 20px;
+}
+
+.gf-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.gf-price {
+  font-size: 2.8rem;
+  font-weight: 400;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.gf-price-currency {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.gf-change-row {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.gf-market-status {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
 }
 
 /* ── Chart ───────────────────────────────────────────── */
 .chart-container-large {
   width: 100%;
   max-width: 960px;
-  height: 420px;
+  min-height: 480px;
   margin-bottom: 40px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -226,7 +363,6 @@ body {
   border-radius: var(--radius-lg);
   padding: 24px;
   position: relative;
-  overflow: hidden;
 }
 
 .chart-container-large::before {
@@ -461,7 +597,7 @@ body {
   }
 
   .chart-container-large {
-    height: 260px;
+    min-height: 340px;
     padding: 16px;
   }
 

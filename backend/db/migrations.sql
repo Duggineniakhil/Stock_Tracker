@@ -49,3 +49,22 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_login_attempts_email ON login_attempts(email);
 CREATE INDEX IF NOT EXISTS idx_login_attempts_time ON login_attempts(attempted_at);
+
+-- Migration: 004 - Security Audit Log
+-- Adds security_audit_log table for tracking auth and security events
+
+CREATE TABLE IF NOT EXISTS security_audit_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_type TEXT NOT NULL,
+  user_id INTEGER,
+  email TEXT,
+  ip_address TEXT,
+  user_agent TEXT,
+  path TEXT,
+  message TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_event_type ON security_audit_log(event_type);
+CREATE INDEX IF NOT EXISTS idx_audit_user_id ON security_audit_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_created_at ON security_audit_log(created_at DESC);

@@ -142,6 +142,38 @@ const portfolioController = {
     },
 
     /**
+     * Get portfolio value history over time
+     * GET /api/portfolio/history?range=1mo
+     */
+    getHistory: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const range = req.query.range || '1mo';
+            const history = await portfolioService.getPortfolioHistory(userId, range);
+            return success(res, history, 'Portfolio history fetched successfully');
+        } catch (err) {
+            console.error('Error fetching portfolio history:', err);
+            return error(res, 'Failed to fetch portfolio history', null, 500);
+        }
+    },
+
+    /**
+     * Get performance comparison data for holdings
+     * GET /api/portfolio/performance?range=1mo
+     */
+    getPerformance: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const range = req.query.range || '1mo';
+            const performance = await portfolioService.getPortfolioPerformance(userId, range);
+            return success(res, performance, 'Portfolio performance fetched successfully');
+        } catch (err) {
+            console.error('Error fetching portfolio performance:', err);
+            return error(res, 'Failed to fetch portfolio performance', null, 500);
+        }
+    },
+
+    /**
      * Delete a holding
      * DELETE /api/portfolio/:id
      */

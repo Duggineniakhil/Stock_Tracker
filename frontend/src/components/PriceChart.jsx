@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -23,7 +23,6 @@ ChartJS.register(
 );
 
 const PriceChart = ({ data, symbol, range, onRangeChange }) => {
-    const chartRef = useRef(null);
     const [chartData, setChartData] = useState(null);
 
     useEffect(() => {
@@ -31,17 +30,17 @@ const PriceChart = ({ data, symbol, range, onRangeChange }) => {
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
+        const gradientFill = ctx.createLinearGradient(0, 0, 0, 380);
 
         const isPositive = data[data.length - 1].price >= data[0].price;
-        const color = isPositive ? 'rgba(52, 168, 83, 0.5)' : 'rgba(234, 67, 53, 0.5)';
         const lineColor = isPositive ? '#34A853' : '#EA4335';
+        const fillColor = isPositive ? 'rgba(52, 168, 83, 0.15)' : 'rgba(234, 67, 53, 0.15)';
 
-        gradientFill.addColorStop(0, color);
+        gradientFill.addColorStop(0, fillColor);
         gradientFill.addColorStop(1, 'rgba(18, 18, 18, 0)');
 
         setChartData({
-            labels: data.map(d => d.date), // Store raw ISO strings
+            labels: data.map(d => d.date),
             datasets: [
                 {
                     label: `${symbol} Price`,
@@ -52,8 +51,10 @@ const PriceChart = ({ data, symbol, range, onRangeChange }) => {
                     fill: true,
                     tension: 0.1,
                     pointRadius: 0,
-                    pointHoverRadius: 6,
+                    pointHoverRadius: 5,
                     pointBackgroundColor: lineColor,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
                 }
             ],
         });
@@ -71,8 +72,38 @@ const PriceChart = ({ data, symbol, range, onRangeChange }) => {
         { label: '6M', value: '6mo' },
         { label: 'YTD', value: 'ytd' },
         { label: '1Y', value: '1y' },
-        { label: 'MAX', value: 'max' },
+        { label: '5Y', value: '5y' },
+        { label: 'Max', value: 'max' },
     ];
+
+    /**
+     * Format X-axis labels based on selected range.
+     * Google Finance shows:
+     *   1D/5D  → time (10:30 AM)
+     *   1M     → "Feb 5"
+     *   6M     → "Oct 2025"
+     *   YTD/1Y → "Oct 2025"
+     *   5Y/Max → "2023"
+     */
+    const formatXLabel = (dateStr) => {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '';
+
+        if (range === '1d') {
+            return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        }
+        if (range === '5d') {
+            return date.toLocaleDateString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+        }
+        if (range === '1mo') {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        if (range === '6mo' || range === 'ytd' || range === '1y') {
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+        // 5y, max → year only
+        return date.getFullYear().toString();
+    };
 
     const options = {
         responsive: true,
@@ -82,27 +113,32 @@ const PriceChart = ({ data, symbol, range, onRangeChange }) => {
             tooltip: {
                 mode: 'index',
                 intersect: false,
-                backgroundColor: '#2A2A2A',
+                backgroundColor: 'rgba(32, 33, 36, 0.95)',
                 titleColor: '#E8EAED',
                 bodyColor: '#E8EAED',
-                borderColor: '#3C4043',
+                borderColor: 'rgba(255,255,255,0.1)',
                 borderWidth: 1,
                 displayColors: false,
+                padding: { x: 12, y: 8 },
+                cornerRadius: 8,
+                titleFont: { size: 11, weight: '400' },
+                bodyFont: { size: 13, weight: '600' },
                 callbacks: {
                     title: function (context) {
-                        // Full date time for tooltip
                         const dateStr = context[0].label;
                         const date = new Date(dateStr);
-                        return date.toLocaleString([], {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
+                        if (range === '1d' || range === '5d') {
+                            return date.toLocaleString([], {
+                                weekday: 'short', month: 'short', day: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                            });
+                        }
+                        return date.toLocaleDateString('en-US', {
+                            weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
                         });
                     },
                     label: function (context) {
-                        return `$${context.parsed.y.toFixed(2)}`;
+                        return `${context.parsed.y.toFixed(2)} USD`;
                     }
                 }
             },
@@ -110,43 +146,32 @@ const PriceChart = ({ data, symbol, range, onRangeChange }) => {
         scales: {
             x: {
                 grid: { display: false },
+                border: { display: false },
                 ticks: {
                     color: '#9AA0A6',
-                    maxTicksLimit: 7, // Limit ticks to keep it clean
+                    maxTicksLimit: range === '1d' ? 6 : range === '5d' ? 5 : range === '1mo' ? 6 : 6,
                     maxRotation: 0,
-                    font: { size: 11 },
-                    callback: function (value, index, values) {
+                    font: { size: 12 },
+                    padding: 8,
+                    callback: function (value) {
                         const label = this.getLabelForValue(value);
-                        const date = new Date(label);
-
-                        // Dynamic formatting based on range
-                        if (range === '1d' || range === '5d') {
-                            // Show Time
-                            return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                        } else if (range === '1mo' || range === '6mo') {
-                            // Show Day Month
-                            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-                        } else if (range === 'ytd' || range === '1y') {
-                            // Show Month
-                            return date.toLocaleDateString([], { month: 'short' });
-                        } else {
-                            // MAX: Show Year
-                            return date.getFullYear();
-                        }
+                        return formatXLabel(label);
                     }
                 }
             },
             y: {
-                position: 'right',
+                position: 'left',
                 grid: {
-                    color: '#3C4043',
-                    borderDash: [4, 4],
+                    color: 'rgba(60, 64, 67, 0.4)',
                     drawBorder: false,
                 },
+                border: { display: false },
                 ticks: {
                     color: '#9AA0A6',
-                    callback: (value) => '$' + value.toFixed(0),
-                    font: { size: 11 }
+                    callback: (value) => value.toFixed(0),
+                    font: { size: 12 },
+                    padding: 8,
+                    maxTicksLimit: 6,
                 }
             },
         },
@@ -173,7 +198,7 @@ const PriceChart = ({ data, symbol, range, onRangeChange }) => {
                 </div>
             </div>
 
-            <div className="chart-area" style={{ height: '400px', width: '100%', marginTop: '20px' }}>
+            <div className="chart-area">
                 {chartData && <Line data={chartData} options={options} />}
             </div>
         </div>

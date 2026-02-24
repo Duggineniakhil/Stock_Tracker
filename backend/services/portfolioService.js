@@ -167,6 +167,140 @@ const portfolioService = {
     },
 
     /**
+     * Get portfolio value history over time
+     * Computes daily snapshots of total portfolio value using historical prices
+     * @param {number} userId - User ID
+     * @param {string} range - Time range ('1mo', '3mo', '1y')
+     * @returns {Promise<Array>} Array of { date, value } points
+     */
+    getPortfolioHistory: async (userId, range = '1mo') => {
+        try {
+            const holdings = await portfolioModel.getHoldingsByUserId(userId);
+            if (holdings.length === 0) return [];
+
+            // Fetch historical data for all holdings in parallel
+            const historicalDataMap = {};
+            await Promise.all(
+                holdings.map(async (holding) => {
+                    try {
+                        const history = await stockService.getHistoricalData(holding.symbol, range);
+                        historicalDataMap[holding.symbol] = history || [];
+                    } catch (err) {
+                        historicalDataMap[holding.symbol] = [];
+                    }
+                })
+            );
+
+            // Build a set of all dates across all holdings
+            const allDatesSet = new Set();
+            Object.values(historicalDataMap).forEach(history => {
+                history.forEach(point => {
+                    const dateKey = point.date.split('T')[0];
+                    allDatesSet.add(dateKey);
+                });
+            });
+
+            const sortedDates = Array.from(allDatesSet).sort();
+            if (sortedDates.length === 0) return [];
+
+            // Build price lookup maps: symbol -> { dateKey -> price }
+            const priceMaps = {};
+            for (const [symbol, history] of Object.entries(historicalDataMap)) {
+                priceMaps[symbol] = {};
+                history.forEach(point => {
+                    const dateKey = point.date.split('T')[0];
+                    priceMaps[symbol][dateKey] = point.price;
+                });
+            }
+
+            // Compute total portfolio value for each date
+            const portfolioHistory = [];
+            const lastKnownPrice = {};
+
+            for (const dateKey of sortedDates) {
+                let totalValue = 0;
+                let hasData = false;
+
+                for (const holding of holdings) {
+                    // Only include holdings that were bought on or before this date
+                    if (holding.buy_date && holding.buy_date > dateKey) continue;
+
+                    const price = priceMaps[holding.symbol]?.[dateKey]
+                        || lastKnownPrice[holding.symbol]
+                        || holding.buy_price;
+
+                    if (priceMaps[holding.symbol]?.[dateKey]) {
+                        lastKnownPrice[holding.symbol] = priceMaps[holding.symbol][dateKey];
+                    }
+
+                    totalValue += holding.quantity * price;
+                    hasData = true;
+                }
+
+                if (hasData && totalValue > 0) {
+                    portfolioHistory.push({
+                        date: dateKey,
+                        value: parseFloat(totalValue.toFixed(2))
+                    });
+                }
+            }
+
+            return portfolioHistory;
+        } catch (error) {
+            console.error('Error computing portfolio history:', error.message);
+            return [];
+        }
+    },
+
+    /**
+     * Get performance comparison data (normalized % returns per holding)
+     * @param {number} userId - User ID
+     * @param {string} range - Time range ('1mo', '3mo', '1y')
+     * @returns {Promise<Array>} Array of { symbol, data: [{ date, returnPct }] }
+     */
+    getPortfolioPerformance: async (userId, range = '1mo') => {
+        try {
+            const holdings = await portfolioModel.getHoldingsByUserId(userId);
+            if (holdings.length === 0) return [];
+
+            // Sort by current value (estimated), take top 5
+            const priced = await Promise.all(
+                holdings.map(async (h) => {
+                    const price = await portfolioService.getCachedStockPrice(h.symbol);
+                    return { ...h, currentValue: h.quantity * price };
+                })
+            );
+            const top = priced.sort((a, b) => b.currentValue - a.currentValue).slice(0, 5);
+
+            const results = await Promise.all(
+                top.map(async (holding) => {
+                    try {
+                        const history = await stockService.getHistoricalData(holding.symbol, range);
+                        if (!history || history.length === 0) return null;
+
+                        const basePrice = history[0].price;
+                        if (!basePrice || basePrice === 0) return null;
+
+                        const data = history.map(point => ({
+                            date: point.date.split('T')[0],
+                            returnPct: parseFloat((((point.price - basePrice) / basePrice) * 100).toFixed(2))
+                        }));
+
+                        return { symbol: holding.symbol, data };
+                    } catch (err) {
+                        return null;
+                    }
+                })
+            );
+
+            return results.filter(r => r !== null);
+        } catch (error) {
+            console.error('Error computing portfolio performance:', error.message);
+            return [];
+        }
+    },
+
+    /**
      * Validate stock symbol exists
      * @param {string} symbol - Stock symbol
      * @returns {Promise<boolean>} True if valid

@@ -9,6 +9,8 @@ import DashboardSummary from '../components/DashboardSummary';
 import TopPerformers from '../components/TopPerformers';
 import RecentActivity from '../components/RecentActivity';
 import QuickActions from '../components/QuickActions';
+import PortfolioValueChart from '../components/PortfolioValueChart';
+import PerformanceComparison from '../components/PerformanceComparison';
 import { useAuth } from '../context/AuthContext';
 import '../App.css';
 
@@ -136,6 +138,12 @@ const Dashboard = () => {
                     {/* Summary Cards (only if portfolio has real holdings) */}
                     {portfolioSummary && <DashboardSummary summary={portfolioSummary} watchlist={watchlist} />}
 
+                    {/* Portfolio Value Chart (only if portfolio has real holdings) */}
+                    {portfolioSummary && <PortfolioValueChart />}
+
+                    {/* Performance Comparison (only if portfolio has real holdings) */}
+                    {portfolioSummary && <PerformanceComparison />}
+
                     {/* Top Performers row (only if watchlist has prices) */}
                     {watchlist.length > 1 && watchlist.some(s => s.currentPrice > 0) && (
                         <TopPerformers watchlist={watchlist} />
@@ -144,27 +152,30 @@ const Dashboard = () => {
                     {/* ── Selected Stock Detail ─────────────────────────── */}
                     {selectedStock ? (
                         <>
-                            {/* Stock headline */}
-                            <div className="main-header">
-                                <div className="stock-headline">
-                                    <h1>{selectedStock.name || selectedStock.symbol}</h1>
-                                    <div style={{ fontSize: '1.1rem', fontWeight: 400, color: 'var(--text-secondary)' }}>
-                                        {selectedStock.symbol} • Nasdaq • <span style={{ fontSize: '0.9rem' }}>Currency in USD</span>
-                                    </div>
+                            {/* Stock headline — Google Finance style */}
+                            <div className="gf-stock-header">
+                                <h1 className="gf-stock-name">{selectedStock.name || selectedStock.symbol}</h1>
+                                <div className="gf-stock-exchange">
+                                    {selectedStock.exchange || 'NASDAQ'}: {selectedStock.symbol}
                                 </div>
-                                {fmt(selectedStock.currentPrice) && (
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div className="stock-price-large">
-                                            {fmt(selectedStock.currentPrice)}
-                                            <span className="stock-change-large" style={{ color: changeColor }}>
-                                                {selectedStock.change >= 0 ? '+' : ''}{fmt(selectedStock.change)} ({fmt(selectedStock.changePercent)}%)
-                                            </span>
-                                        </div>
-                                        <div style={{ color: 'var(--text-tertiary)', marginTop: '4px', fontSize: '0.85rem' }}>
-                                            As of {new Date().toLocaleString()}
-                                        </div>
+
+                                <div className="gf-price-row">
+                                    <span className="gf-price">{fmt(selectedStock.currentPrice)}</span>
+                                    <span className="gf-price-currency">USD</span>
+                                </div>
+
+                                {fmt(selectedStock.change) !== null && (
+                                    <div className="gf-change-row" style={{ color: changeColor }}>
+                                        {selectedStock.change >= 0 ? '+' : ''}{fmt(selectedStock.change)} ({fmt(selectedStock.changePercent)}%)
+                                        {selectedStock.change >= 0 ? ' ↑' : ' ↓'}
+                                        {' '}today
                                     </div>
                                 )}
+
+                                <div className="gf-market-status">
+                                    Closed: {new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' })},{' '}
+                                    {new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                                </div>
                             </div>
 
                             {/* Chart */}
@@ -179,24 +190,21 @@ const Dashboard = () => {
 
                             {/* Stock detail metrics */}
                             {selectedStock.currentPrice > 0 && (
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                                    gap: '24px', width: '100%', maxWidth: '1000px',
-                                    marginBottom: '32px',
-                                    padding: '24px 0',
-                                    borderTop: '1px solid var(--border-color)',
-                                    borderBottom: '1px solid var(--border-color)'
-                                }}>
+                                <div className="stock-metrics-grid">
                                     {[
-                                        { label: 'Previous Close', val: fmt(selectedStock.previousClose) ? `$${fmt(selectedStock.previousClose)}` : '—' },
-                                        { label: 'Day Range', val: fmt(selectedStock.dayLow) && fmt(selectedStock.dayHigh) ? `$${fmt(selectedStock.dayLow)} – $${fmt(selectedStock.dayHigh)}` : '—' },
+                                        { label: 'Open', val: fmt(selectedStock.open) ? `$${fmt(selectedStock.open)}` : '—' },
+                                        { label: 'Mkt cap', val: selectedStock.marketCap ? (selectedStock.marketCap >= 1e12 ? `${(selectedStock.marketCap / 1e12).toFixed(2)}T` : `${(selectedStock.marketCap / 1e9).toFixed(2)}B`) : '—' },
                                         { label: 'Volume', val: selectedStock.volume ? `${(selectedStock.volume / 1e6).toFixed(2)}M` : '—' },
-                                        { label: 'Market Cap', val: selectedStock.marketCap ? `$${(selectedStock.marketCap / 1e9).toFixed(2)}B` : '—' },
+                                        { label: 'High', val: fmt(selectedStock.dayHigh) ? `$${fmt(selectedStock.dayHigh)}` : '—' },
+                                        { label: 'P/E ratio', val: fmt(selectedStock.trailingPE) || '—' },
+                                        { label: '52-wk high', val: fmt(selectedStock.fiftyTwoWeekHigh) ? `$${fmt(selectedStock.fiftyTwoWeekHigh)}` : '—' },
+                                        { label: 'Low', val: fmt(selectedStock.dayLow) ? `$${fmt(selectedStock.dayLow)}` : '—' },
+                                        { label: 'Prev close', val: fmt(selectedStock.previousClose) ? `$${fmt(selectedStock.previousClose)}` : '—' },
+                                        { label: '52-wk low', val: fmt(selectedStock.fiftyTwoWeekLow) ? `$${fmt(selectedStock.fiftyTwoWeekLow)}` : '—' },
                                     ].map(({ label, val }) => (
-                                        <div key={label}>
-                                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '4px' }}>{label}</div>
-                                            <div style={{ fontSize: '1rem', fontWeight: 500 }}>{val}</div>
+                                        <div key={label} className="stock-metric-item">
+                                            <span className="stock-metric-label">{label}</span>
+                                            <span className="stock-metric-value">{val}</span>
                                         </div>
                                     ))}
                                 </div>

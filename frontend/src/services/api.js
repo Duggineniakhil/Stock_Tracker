@@ -99,10 +99,14 @@ const api = {
     fetchPortfolio: () => axiosInstance.get('/v1/portfolio').then(r => r.data),
     fetchPortfolioSummary: () => axiosInstance.get('/v1/portfolio/summary').then(r => r.data),
     fetchPortfolioAllocation: () => axiosInstance.get('/v1/portfolio/allocation').then(r => r.data),
+    fetchPortfolioHistory: (range = '1mo') => axiosInstance.get('/v1/portfolio/history', { params: { range } }).then(r => r.data),
+    fetchPortfolioPerformance: (range = '1mo') => axiosInstance.get('/v1/portfolio/performance', { params: { range } }).then(r => r.data),
     addHolding: (symbol, quantity, buyPrice, buyDate) =>
         axiosInstance.post('/v1/portfolio', { symbol, quantity, buyPrice, buyDate }).then(r => r.data),
     updateHolding: (id, updates) => axiosInstance.put(`/v1/portfolio/${id}`, updates).then(r => r.data),
     deleteHolding: (id) => axiosInstance.delete(`/v1/portfolio/${id}`).then(r => r.data),
+    exportPortfolioCSV: () => axiosInstance.get('/v1/portfolio/export/csv', { responseType: 'blob' }).then(r => r.data),
+    fetchStockNews: (symbols) => axiosInstance.get('/v1/stock/news', { params: { symbols: symbols.join(',') } }).then(r => r.data),
 };
 
 // Named exports
@@ -125,8 +129,12 @@ export const deleteAlertRule = api.deleteAlertRule;
 export const fetchPortfolio = api.fetchPortfolio;
 export const fetchPortfolioSummary = api.fetchPortfolioSummary;
 export const fetchPortfolioAllocation = api.fetchPortfolioAllocation;
+export const fetchPortfolioHistory = api.fetchPortfolioHistory;
+export const fetchPortfolioPerformance = api.fetchPortfolioPerformance;
 export const addHolding = api.addHolding;
 export const updateHolding = api.updateHolding;
 export const deleteHolding = api.deleteHolding;
+export const exportPortfolioCSV = api.exportPortfolioCSV;
+export const fetchStockNews = api.fetchStockNews;
 
 export default axiosInstance;

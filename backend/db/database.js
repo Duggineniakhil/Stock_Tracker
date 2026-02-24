@@ -42,8 +42,14 @@ function runMigrations() {
     const migrations = fs.readFileSync(migrationsPath, 'utf8');
     const statements = migrations
         .split(';')
-        .map(s => s.trim())
-        .filter(s => s.length > 0 && !s.startsWith('--'));
+        .map(s => {
+            // Strip comment-only lines, then trim
+            return s.split('\n')
+                .filter(line => !line.trim().startsWith('--'))
+                .join('\n')
+                .trim();
+        })
+        .filter(s => s.length > 0);
 
     let completed = 0;
     statements.forEach((statement) => {

@@ -10,6 +10,7 @@ const logger = require('./utils/logger');
 const requestLogger = require('./middleware/requestLogger');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { apiLimiter, authLimiter, stockLimiter } = require('./middleware/rateLimiter');
+const sanitize = require('./middleware/sanitize');
 const swaggerSetup = require('./swagger');
 
 // Import routes
@@ -52,6 +53,9 @@ app.use(compression());
 // ── Body Parsing ──────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+// ── Input Sanitization ────────────────────────────────────────────────────────
+app.use(sanitize);
 
 // ── Request Logging ───────────────────────────────────────────────────────────
 app.use(requestLogger);

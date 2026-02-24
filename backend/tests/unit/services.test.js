@@ -3,12 +3,12 @@
  * Tests for portfolioService calculations
  */
 
-jest.mock('../models/portfolioModel');
-jest.mock('./stockService');
+jest.mock('../../models/portfolioModel');
+jest.mock('../../services/stockService');
 
-const portfolioService = require('../services/portfolioService');
-const portfolioModel = require('../models/portfolioModel');
-const stockService = require('../services/stockService');
+const portfolioService = require('../../services/portfolioService');
+const portfolioModel = require('../../models/portfolioModel');
+const stockService = require('../../services/stockService');
 
 describe('portfolioService', () => {
 

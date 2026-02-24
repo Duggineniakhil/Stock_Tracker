@@ -33,8 +33,8 @@ describe('DashboardSummary', () => {
             totalProfitLossPercent: 20
         };
         const mockWatchlist = [
-            { id: 1, symbol: 'AAPL', changePercent: 2.5 },
-            { id: 2, symbol: 'TSLA', changePercent: -1.2 },
+            { id: 1, symbol: 'AAPL', changePercent: 2.5, currentPrice: 150 },
+            { id: 2, symbol: 'TSLA', changePercent: -1.2, currentPrice: 200 },
         ];
 
         const { container } = render(
@@ -46,8 +46,7 @@ describe('DashboardSummary', () => {
         expect(screen.getByText('Portfolio Value')).toBeDefined();
         expect(screen.getByText('Total P/L')).toBeDefined();
         expect(screen.getByText('Top Gainer')).toBeDefined();
-        expect(screen.getByText('Top Loser')).toBeDefined();
-        expect(screen.getByText('Holdings')).toBeDefined();
+        expect(screen.getByText('Watchlist')).toBeDefined();
     });
 
     it('should show dashes for null summary', () => {

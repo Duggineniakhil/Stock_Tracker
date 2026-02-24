@@ -18,6 +18,13 @@ vi.mock('../context/AuthContext', () => ({
     AuthProvider: ({ children }) => children,
 }));
 
+// Mock ThemeContext so Navbar doesn't crash
+vi.mock('../context/ThemeContext', () => ({
+    ThemeProvider: ({ children }) => children,
+    useTheme: () => ({ theme: 'dark', toggleTheme: vi.fn() }),
+    default: { Provider: ({ children }) => children },
+}));
+
 vi.mock('../components/Navbar', () => ({ default: () => <nav data-testid="navbar" /> }));
 
 import Alerts from '../pages/Alerts';
@@ -38,8 +45,11 @@ describe('Alerts Page', () => {
 
     it('should show History and Rules tabs', () => {
         renderAlertsPage();
-        expect(screen.getByText(/History/i)).toBeDefined();
-        expect(screen.getByText(/Rules/i)).toBeDefined();
+        // Tabs contain emoji + text, use getByRole to be precise
+        const buttons = screen.getAllByRole('button');
+        const tabTexts = buttons.map(b => b.textContent);
+        expect(tabTexts.some(t => t.includes('History'))).toBe(true);
+        expect(tabTexts.some(t => t.includes('Rules'))).toBe(true);
     });
 
     it('should show empty state for history', async () => {
@@ -51,7 +61,9 @@ describe('Alerts Page', () => {
 
     it('should switch to rules tab on click', async () => {
         renderAlertsPage();
-        const rulesTab = screen.getAllByText(/Rules/i)[0];
+        // Find the Rules tab button specifically
+        const buttons = screen.getAllByRole('button');
+        const rulesTab = buttons.find(b => b.textContent.includes('Rules'));
         fireEvent.click(rulesTab);
         await waitFor(() => {
             expect(screen.getByText(/No alert rules yet/i)).toBeDefined();
@@ -60,9 +72,15 @@ describe('Alerts Page', () => {
 
     it('should show create form when + New Rule is clicked', async () => {
         renderAlertsPage();
-        const rulesTab = screen.getAllByText(/Rules/i)[0];
+        // Switch to rules tab first
+        const buttons = screen.getAllByRole('button');
+        const rulesTab = buttons.find(b => b.textContent.includes('Rules'));
         fireEvent.click(rulesTab);
-        await waitFor(() => { });
+
+        await waitFor(() => {
+            expect(screen.getByText(/No alert rules yet/i)).toBeDefined();
+        });
+
         const newRuleBtn = screen.getByText(/New Rule/i);
         fireEvent.click(newRuleBtn);
         expect(screen.getByText(/Create Alert Rule/i)).toBeDefined();

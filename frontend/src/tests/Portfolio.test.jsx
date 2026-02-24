@@ -7,6 +7,13 @@ vi.mock('../context/AuthContext', () => ({
     useAuth: () => ({ user: { id: 1, email: 'test@test.com' }, logout: vi.fn() })
 }));
 
+// Mock theme context so Navbar doesn't crash
+vi.mock('../context/ThemeContext', () => ({
+    ThemeProvider: ({ children }) => children,
+    useTheme: () => ({ theme: 'dark', toggleTheme: vi.fn() }),
+    default: { Provider: ({ children }) => children },
+}));
+
 // Mock API service
 const mockPortfolio = [
     { id: 1, symbol: 'AAPL', quantity: 10, buy_price: 150, currentPrice: 175, currentValue: 1750, totalInvestment: 1500, profitLoss: 250, profitLossPercent: 16.67 },

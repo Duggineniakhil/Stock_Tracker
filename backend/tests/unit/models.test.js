@@ -4,7 +4,7 @@
  */
 
 // Mock the database
-jest.mock('../db/database', () => {
+jest.mock('../../db/database', () => {
     const mockDb = {
         run: jest.fn(),
         get: jest.fn(),
@@ -13,8 +13,8 @@ jest.mock('../db/database', () => {
     return mockDb;
 });
 
-const db = require('../db/database');
-const alertModel = require('../models/alertModel');
+const db = require('../../db/database');
+const alertModel = require('../../models/alertModel');
 
 describe('alertModel', () => {
 

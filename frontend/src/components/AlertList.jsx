@@ -6,8 +6,8 @@ const AlertList = ({ alerts, loading }) => {
             case 'PRICE_DROP': return { color: 'var(--market-red)', bg: 'var(--market-red-dim)', icon: '↓' };
             case 'MA_CROSSOVER_UP': return { color: 'var(--market-green)', bg: 'var(--market-green-dim)', icon: '↑' };
             case 'MA_CROSSOVER_DOWN': return { color: 'var(--market-yellow)', bg: 'var(--market-yellow-dim)', icon: '~' };
-            case 'PERCENTAGE_CHANGE': return { color: 'var(--accent-purple)', bg: 'var(--accent-purple-dim)', icon: '%' };
-            case 'TARGET_PRICE': return { color: 'var(--accent-cyan)', bg: 'var(--accent-cyan-dim)', icon: '⊙' };
+            case 'PERCENTAGE_CHANGE': return { color: 'var(--accent-green)', bg: 'var(--accent-green-dim)', icon: '%' };
+            case 'TARGET_PRICE': return { color: 'var(--accent-green)', bg: 'var(--accent-green-dim)', icon: '⊙' };
             default: return { color: 'var(--text-secondary)', bg: 'rgba(255,255,255,0.05)', icon: '●' };
         }
     };

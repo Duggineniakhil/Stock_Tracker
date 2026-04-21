@@ -1,6 +1,6 @@
 .recent-activity {
-    background: var(--bg-card, #16213e);
-    border: 1px solid var(--border-color, #2a2a4a);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 18px;
 }
@@ -25,7 +25,7 @@
 .ra-see-all {
     background: transparent;
     border: none;
-    color: var(--accent-blue, #3b82f6);
+    color: var(--accent-green);
     font-size: 0.8rem;
     cursor: pointer;
     padding: 2px 6px;
@@ -113,8 +113,8 @@
 .ra-symbol {
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--accent-blue, #3b82f6);
-    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-green);
+    background: rgba(0, 220, 130, 0.1);
     padding: 1px 6px;
     border-radius: 4px;
 }

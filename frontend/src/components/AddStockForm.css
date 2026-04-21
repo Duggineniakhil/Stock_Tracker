@@ -1,9 +1,9 @@
 .add-stock-form {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-card);
     margin-bottom: 32px;
 }
 
@@ -22,18 +22,19 @@
 .stock-input {
     flex: 1;
     padding: 12px 16px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 2px solid rgba(96, 165, 250, 0.3);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
-    color: #f1f5f9;
+    color: var(--text-primary);
     font-size: 16px;
     transition: all 0.2s;
 }
 
 .stock-input:focus {
     outline: none;
-    border-color: #60a5fa;
-    background: rgba(15, 23, 42, 0.8);
+    border-color: var(--accent-green);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px rgba(0, 220, 130, 0.1);
 }
 
 .stock-input::placeholder {
@@ -42,21 +43,20 @@
 
 .add-btn {
     padding: 12px 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: var(--accent-green);
     border: none;
     border-radius: 8px;
-    color: white;
+    color: #000;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
 }
 
 .add-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 220, 130, 0.3);
 }
 
 .add-btn:disabled {

@@ -28,13 +28,13 @@
 }
 
 .btn-create-rule {
-    background: var(--accent-blue);
-    color: white;
+    background: var(--accent-green);
+    color: #000;
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -69,9 +69,9 @@
 }
 
 .toast-success {
-    background: #16a34a22;
-    color: #22c55e;
-    border: 1px solid #22c55e44;
+    background: rgba(0, 220, 130, 0.1);
+    color: var(--accent-green);
+    border: 1px solid rgba(0, 220, 130, 0.2);
 }
 
 .toast-error {
@@ -108,18 +108,18 @@
 }
 
 .tab-btn.active {
-    background: var(--bg-card, #16213e);
-    color: var(--text-primary);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: rgba(0, 220, 130, 0.08);
+    color: var(--accent-green);
+    border: 1px solid rgba(0, 220, 130, 0.15);
 }
 
 .badge {
-    background: var(--accent-blue, #3b82f6);
-    color: white;
+    background: var(--accent-green);
+    color: #000;
     border-radius: 10px;
-    padding: 1px 7px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
 }
 
 /* Create Rule Form */
@@ -174,17 +174,18 @@
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: var(--accent-blue, #3b82f6);
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px rgba(0, 220, 130, 0.1);
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
-    color: white;
+    background: var(--accent-green);
+    color: #000;
     border: none;
     padding: 12px 28px;
     border-radius: 8px;
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
     margin-top: 8px;
@@ -336,7 +337,7 @@
 .alert-history-symbol {
     font-weight: 700;
     font-size: 0.85rem;
-    color: var(--accent-blue, #3b82f6);
+    color: var(--accent-green);
     margin-bottom: 4px;
 }
 

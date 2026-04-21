@@ -17,9 +17,9 @@ const StockListItem = ({ stock, isSelected, onClick, onRemove }) => {
                 borderRadius: '14px',
                 cursor: 'pointer',
                 background: isSelected
-                    ? 'rgba(0, 229, 255, 0.07)'
+                    ? 'rgba(0, 220, 130, 0.07)'
                     : 'transparent',
-                border: `1px solid ${isSelected ? 'rgba(0, 229, 255, 0.2)' : 'transparent'}`,
+                border: `1px solid ${isSelected ? 'rgba(0, 220, 130, 0.2)' : 'transparent'}`,
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
             onMouseEnter={e => {
@@ -40,16 +40,16 @@ const StockListItem = ({ stock, isSelected, onClick, onRemove }) => {
                 width: '38px',
                 height: '38px',
                 borderRadius: '10px',
-                background: isSelected ? 'rgba(0,229,255,0.15)' : 'rgba(255,255,255,0.06)',
+                background: isSelected ? 'rgba(0, 220, 130, 0.15)' : 'rgba(255, 255, 255, 0.06)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '0.65rem',
                 fontWeight: 700,
-                color: isSelected ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+                color: isSelected ? 'var(--accent-green)' : 'var(--text-secondary)',
                 letterSpacing: '0.3px',
                 flexShrink: 0,
-                border: '1px solid rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
             }}>
                 {stock.symbol.slice(0, 3)}
             </div>

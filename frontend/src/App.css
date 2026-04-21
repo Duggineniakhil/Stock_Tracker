@@ -1,34 +1,27 @@
 :root {
   /* Stem-inspired Color Palette */
-  --bg-primary: #050810;
-  --bg-secondary: #0c1120;
-  --bg-tertiary: #111827;
+  /* Quotra Design System Tokens */
+  --accent-green: #00dc82;
+  --accent-green-dim: rgba(0, 220, 130, 0.12);
+  --accent-green-glow: rgba(0, 220, 130, 0.2);
+  
+  --bg-deep: #05050a;
+  --bg-surface: #0c0c12;
   --bg-card: rgba(255, 255, 255, 0.04);
-  --bg-card-hover: rgba(255, 255, 255, 0.07);
-
-  /* Glass effect */
-  --glass-bg: rgba(16, 24, 48, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: blur(20px);
-
-  /* Text */
+  
   --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.55);
-  --text-tertiary: rgba(255, 255, 255, 0.3);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
 
-  /* Accent Colors */
-  --accent-cyan: #00dc82;
-  --accent-cyan-dim: rgba(0, 220, 130, 0.15);
-  --accent-cyan-glow: rgba(0, 220, 130, 0.25);
-  --accent-purple: #7b61ff;
-  --accent-purple-dim: rgba(123, 97, 255, 0.15);
-  --market-green: #00e09e;
-  --market-green-dim: rgba(0, 224, 158, 0.15);
+  --market-green: #00dc82;
+  --market-green-dim: rgba(0, 220, 130, 0.15);
   --market-red: #ff4d6a;
   --market-red-dim: rgba(255, 77, 106, 0.15);
   --market-yellow: #ffbe3d;
   --market-yellow-dim: rgba(255, 190, 61, 0.15);
-  --border-color: rgba(255, 255, 255, 0.08);
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(0, 220, 130, 0.4);
 
   /* Layout */
   --sidebar-width: 340px;
@@ -38,104 +31,6 @@
   --radius-lg: 24px;
   --shadow-glow: 0 0 40px rgba(0, 220, 130, 0.08);
   --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.4);
-}
-
-/* ── Light Theme ─────────────────────────────────────── */
-[data-theme='light'] {
-  --bg-primary: #f5f7fb;
-  --bg-secondary: #edf0f7;
-  --bg-tertiary: #e2e7f0;
-  --bg-card: rgba(255, 255, 255, 0.8);
-  --bg-card-hover: rgba(255, 255, 255, 0.95);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --text-primary: #1a1a2e;
-  --text-secondary: rgba(26, 26, 46, 0.6);
-  --text-tertiary: rgba(26, 26, 46, 0.4);
-  --accent-cyan: #0891b2;
-  --accent-cyan-dim: rgba(8, 145, 178, 0.12);
-  --accent-cyan-glow: rgba(8, 145, 178, 0.15);
-  --accent-purple: #6d28d9;
-  --accent-purple-dim: rgba(109, 40, 217, 0.1);
-  --market-green: #00dc82;
-  --market-green-dim: rgba(0, 220, 130, 0.15);
-  --market-red: #dc2626;
-  --market-red-dim: rgba(220, 38, 38, 0.1);
-  --market-yellow: #d97706;
-  --market-yellow-dim: rgba(217, 119, 6, 0.1);
-  --border-color: rgba(0, 0, 0, 0.08);
-  --shadow-glow: 0 0 40px rgba(8, 145, 178, 0.06);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
-}
-
-[data-theme='light'] body {
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(8, 145, 178, 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(109, 40, 217, 0.04) 0%, transparent 60%);
-}
-
-[data-theme='light'] .navbar {
-  background: rgba(255, 255, 255, 0.85);
-  border-bottom-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme='light'] .navbar .brand-text h1 {
-  color: #1a1a2e;
-}
-
-[data-theme='light'] .navbar .brand-text span {
-  color: rgba(26, 26, 46, 0.5);
-}
-
-[data-theme='light'] .nav-link {
-  color: rgba(26, 26, 46, 0.5);
-}
-
-[data-theme='light'] .nav-link:hover {
-  background: rgba(0, 0, 0, 0.04);
-  color: #1a1a2e;
-}
-
-[data-theme='light'] .nav-link.active {
-  background: rgba(8, 145, 178, 0.08);
-  color: #0891b2;
-  border-color: rgba(8, 145, 178, 0.15);
-}
-
-[data-theme='light'] .user-info {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme='light'] .user-email {
-  color: rgba(26, 26, 46, 0.6);
-}
-
-[data-theme='light'] .theme-toggle-btn {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme='light'] .theme-toggle-btn:hover {
-  background: rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.15);
-}
-
-[data-theme='light'] .logout-btn {
-  border-color: rgba(220, 38, 38, 0.3);
-  color: #dc2626;
-}
-
-[data-theme='light'] .logout-btn:hover {
-  background: rgba(220, 38, 38, 0.06);
-}
-
-[data-theme='light'] ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-[data-theme='light'] .metric-cell {
-  background: var(--bg-primary);
 }
 
 /* ── Reset & Base ─────────────────────────────────────── */

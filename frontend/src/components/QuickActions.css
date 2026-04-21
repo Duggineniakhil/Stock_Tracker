@@ -1,6 +1,6 @@
 .quick-actions {
-    background: var(--bg-card, #16213e);
-    border: 1px solid var(--border-color, #2a2a4a);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 18px;
 }
@@ -35,10 +35,10 @@
 }
 
 .qa-btn:hover {
-    border-color: var(--qa-color, #3b82f6);
-    background: color-mix(in srgb, var(--qa-color, #3b82f6) 10%, transparent);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: var(--accent-green);
+    background: rgba(0, 220, 130, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .qa-icon {

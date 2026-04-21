@@ -51,9 +51,11 @@
 }
 
 .chart-card {
-    background: #1a1a1a;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     overflow: hidden;
+    box-shadow: var(--shadow-card);
 }
 
 .last-updated {

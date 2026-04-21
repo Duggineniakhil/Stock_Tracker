@@ -1,10 +1,10 @@
 .stock-card {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card);
   transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stock-card:hover {
@@ -22,7 +22,7 @@
 .stock-symbol {
   font-size: 24px;
   font-weight: 700;
-  color: #60a5fa;
+  color: var(--accent-green);
   margin: 0;
 }
 
@@ -69,8 +69,8 @@
 }
 
 .price-change.positive {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
+  color: var(--market-green);
+  background: var(--market-green-dim);
 }
 
 .price-change.negative {

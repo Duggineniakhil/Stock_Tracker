@@ -14,9 +14,9 @@ const RecentActivity = ({ alerts = [], loading }) => {
         switch (type) {
             case 'PRICE_DROP': return 'var(--market-red)';
             case 'MA_CROSSOVER_UP': return 'var(--market-green)';
-            case 'TARGET_PRICE': return 'var(--accent-cyan)';
+            case 'TARGET_PRICE': return 'var(--accent-green)';
             case 'VOLUME_SPIKE': return 'var(--market-yellow)';
-            default: return 'var(--accent-purple)';
+            default: return 'var(--accent-green)';
         }
     };
 

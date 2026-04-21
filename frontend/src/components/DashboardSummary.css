@@ -8,9 +8,9 @@
 
 .summary-card {
     position: relative;
-    background: var(--bg-card, #16213e);
-    border: 1px solid var(--border-color, #2a2a4a);
-    border-top: 3px solid var(--card-accent, #3b82f6);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-top: 3px solid var(--accent-green);
     border-radius: 12px;
     padding: 18px 16px;
     display: flex;
@@ -29,10 +29,10 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 80px;
-    height: 80px;
-    background: radial-gradient(circle, var(--card-accent, #3b82f6) 0%, transparent 70%);
-    opacity: 0.08;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, var(--accent-green) 0%, transparent 70%);
+    opacity: 0.1;
     border-radius: 50%;
     transform: translate(20px, -20px);
     pointer-events: none;

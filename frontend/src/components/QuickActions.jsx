@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const actions = [
-    { label: 'View Portfolio', icon: '◈', path: '/portfolio', accent: 'var(--accent-cyan)' },
-    { label: 'Manage Alerts', icon: '◎', path: '/alerts', accent: 'var(--accent-purple)' },
+    { label: 'View Portfolio', icon: '◈', path: '/portfolio', accent: 'var(--accent-green)' },
+    { label: 'Manage Alerts', icon: '◎', path: '/alerts', accent: 'var(--accent-green)' },
 ];
 
 const QuickActions = () => {

@@ -1,9 +1,9 @@
 .alert-list {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-card);
 }
 
 .alert-list h2 {
@@ -26,17 +26,16 @@
 }
 
 .alerts-container::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.5);
-    border-radius: 4px;
+    background: transparent;
 }
 
 .alerts-container::-webkit-scrollbar-thumb {
-    background: rgba(96, 165, 250, 0.3);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
 }
 
 .alerts-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(96, 165, 250, 0.5);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .alert-item {
@@ -53,23 +52,23 @@
 }
 
 .alert-danger {
-    background: rgba(239, 68, 68, 0.1);
-    border-left-color: #ef4444;
+    background: var(--market-red-dim);
+    border-left-color: var(--market-red);
 }
 
 .alert-success {
-    background: rgba(16, 185, 129, 0.1);
-    border-left-color: #10b981;
+    background: var(--market-green-dim);
+    border-left-color: var(--market-green);
 }
 
 .alert-warning {
-    background: rgba(251, 191, 36, 0.1);
-    border-left-color: #fbbf24;
+    background: var(--market-yellow-dim);
+    border-left-color: var(--market-yellow);
 }
 
 .alert-info {
-    background: rgba(96, 165, 250, 0.1);
-    border-left-color: #60a5fa;
+    background: var(--accent-green-dim);
+    border-left-color: var(--accent-green);
 }
 
 .alert-icon {
@@ -97,8 +96,8 @@
 }
 
 .alert-symbol {
-    color: #60a5fa;
-    font-weight: 600;
+    color: var(--accent-green);
+    font-weight: 700;
 }
 
 .alert-time {

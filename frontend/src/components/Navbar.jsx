@@ -1,14 +1,12 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
-    const { theme, toggleTheme } = useTheme();
 
     const handleLogout = () => {
         logout();
@@ -56,13 +54,6 @@ const Navbar = () => {
 
                 {/* User Menu */}
                 <div className="navbar-user">
-                    <button
-                        onClick={toggleTheme}
-                        className="theme-toggle-btn"
-                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                    >
-                        {theme === 'dark' ? '☀️' : '🌙'}
-                    </button>
                     <div className="user-info">
                         <span className="user-icon">👤</span>
                         <span className="user-email">{user?.email}</span>

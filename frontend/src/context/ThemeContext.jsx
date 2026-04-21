@@ -5,25 +5,15 @@ const ThemeContext = createContext();
 const THEME_KEY = 'stock-tracker-theme';
 
 export const ThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState(() => {
-        try {
-            return localStorage.getItem(THEME_KEY) || 'dark';
-        } catch {
-            return 'dark';
-        }
-    });
+    // Quotra design is strictly dark theme. Support for legacy light theme removed.
+    const theme = 'dark';
 
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme);
-        try {
-            localStorage.setItem(THEME_KEY, theme);
-        } catch {
-            // localStorage may be unavailable
-        }
-    }, [theme]);
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }, []);
 
     const toggleTheme = () => {
-        setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+        // No-op: Quotra branding is locked to dark mode
     };
 
     return (

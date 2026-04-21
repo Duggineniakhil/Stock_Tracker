@@ -23,7 +23,7 @@ const DashboardSummary = ({ summary, watchlist = [] }) => {
             label: 'Portfolio Value',
             value: fmtBig(summary?.totalValue) ?? '—',
             sub: summary?.totalInvested ? `Invested: ${fmtBig(summary.totalInvested)}` : null,
-            accent: 'var(--accent-cyan)',
+            accent: 'var(--accent-green)',
             icon: '◈',
         },
         {
@@ -44,7 +44,7 @@ const DashboardSummary = ({ summary, watchlist = [] }) => {
             label: 'Watchlist',
             value: `${watchlist.length}`,
             sub: watchlist.length > 0 ? `${watchlist.length} stock${watchlist.length !== 1 ? 's' : ''} tracked` : null,
-            accent: 'var(--accent-purple)',
+            accent: 'var(--accent-green)',
             icon: '⊞',
         },
     ];

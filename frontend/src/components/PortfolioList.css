@@ -1,8 +1,9 @@
 .portfolio-list {
-    background: #1a1a1a;
+    background: var(--bg-surface);
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 24px;
+    border: 1px solid var(--border-subtle);
 }
 
 .portfolio-list h3 {
@@ -17,9 +18,10 @@
     display: flex;
     flex-direction: column;
     gap: 1px;
-    background: #2a2a2a;
+    background: var(--border-subtle);
     border-radius: 8px;
     overflow: hidden;
+    border: 1px solid var(--border-subtle);
 }
 
 .table-header {
@@ -27,10 +29,12 @@
     grid-template-columns: 1fr 0.8fr 0.9fr 1fr 1fr 1.1fr 0.9fr 0.9fr 0.8fr;
     gap: 12px;
     padding: 12px 16px;
-    background: #2a5298;
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 0.875rem;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .table-row {
@@ -38,29 +42,29 @@
     grid-template-columns: 1fr 0.8fr 0.9fr 1fr 1fr 1.1fr 0.9fr 0.9fr 0.8fr;
     gap: 12px;
     padding: 14px 16px;
-    background: #1a1a1a;
-    color: #ffffff;
+    background: var(--bg-surface);
+    color: var(--text-primary);
     align-items: center;
     transition: background 0.2s ease;
 }
 
 .table-row:hover {
-    background: #252525;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .table-row .symbol {
     font-weight: 700;
-    font-size: 1.1rem;
-    color: #667eea;
+    font-size: 1rem;
+    color: var(--accent-green);
 }
 
 .table-row .profit {
-    color: #38ef7d;
+    color: var(--market-green);
     font-weight: 600;
 }
 
 .table-row .loss {
-    color: #f45c43;
+    color: var(--market-red);
     font-weight: 600;
 }
 
@@ -99,10 +103,10 @@
 }
 
 .holding-card {
-    background: #252525;
-    border-radius: 8px;
+    background: var(--bg-surface);
+    border-radius: 12px;
     padding: 16px;
-    border: 1px solid #333;
+    border: 1px solid var(--border-subtle);
 }
 
 .card-header {
@@ -111,13 +115,13 @@
     align-items: center;
     margin-bottom: 12px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .card-header .symbol {
     font-weight: 700;
     font-size: 1.25rem;
-    color: #667eea;
+    color: var(--accent-green);
 }
 
 .card-grid {
@@ -134,21 +138,21 @@
 
 .card-item .label {
     font-size: 0.75rem;
-    color: #aaa;
+    color: var(--text-tertiary);
 }
 
 .card-item .value {
     font-size: 0.95rem;
-    color: #ffffff;
-    font-weight: 500;
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 .card-item .value.profit {
-    color: #38ef7d;
+    color: var(--market-green);
 }
 
 .card-item .value.loss {
-    color: #f45c43;
+    color: var(--market-red);
 }
 
 /* Empty state */

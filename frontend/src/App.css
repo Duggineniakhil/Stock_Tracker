@@ -17,9 +17,9 @@
   --text-tertiary: rgba(255, 255, 255, 0.3);
 
   /* Accent Colors */
-  --accent-cyan: #00e5ff;
-  --accent-cyan-dim: rgba(0, 229, 255, 0.15);
-  --accent-cyan-glow: rgba(0, 229, 255, 0.25);
+  --accent-cyan: #00dc82;
+  --accent-cyan-dim: rgba(0, 220, 130, 0.15);
+  --accent-cyan-glow: rgba(0, 220, 130, 0.25);
   --accent-purple: #7b61ff;
   --accent-purple-dim: rgba(123, 97, 255, 0.15);
   --market-green: #00e09e;
@@ -36,7 +36,7 @@
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
-  --shadow-glow: 0 0 40px rgba(0, 229, 255, 0.08);
+  --shadow-glow: 0 0 40px rgba(0, 220, 130, 0.08);
   --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.4);
 }
 
@@ -57,8 +57,8 @@
   --accent-cyan-glow: rgba(8, 145, 178, 0.15);
   --accent-purple: #6d28d9;
   --accent-purple-dim: rgba(109, 40, 217, 0.1);
-  --market-green: #059669;
-  --market-green-dim: rgba(5, 150, 105, 0.1);
+  --market-green: #00dc82;
+  --market-green-dim: rgba(0, 220, 130, 0.15);
   --market-red: #dc2626;
   --market-red-dim: rgba(220, 38, 38, 0.1);
   --market-yellow: #d97706;
@@ -150,7 +150,7 @@ body {
   padding: 0;
   background-color: var(--bg-primary);
   background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0, 229, 255, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0, 220, 130, 0.07) 0%, transparent 70%),
     radial-gradient(ellipse 60% 50% at 80% 80%, rgba(123, 97, 255, 0.06) 0%, transparent 60%);
   background-attachment: fixed;
   color: var(--text-primary);

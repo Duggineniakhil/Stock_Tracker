@@ -1,6 +1,6 @@
-# Stock_Tracker
+# Quotra
 
-A comprehensive, full-stack stock portfolio and market tracking application built with **Node.js, Express, React, and SQLite**. Designed for real-time market analysis, automated alerts, and seamless portfolio management.
+A comprehensive, full-stack stock portfolio and market tracking application — **Simplified**. Built with Node.js, Express, React, and SQLite.
 
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
 ![Node.js](https://img.shields.io/badge/Node.js-v20+-green)
@@ -12,8 +12,8 @@ A comprehensive, full-stack stock portfolio and market tracking application buil
 
 ## Live Demo & Deployment
 
-- **Live Application:** [StockFolio Web App](https://stock-tracker-1-sj4n.onrender.com)
-- **Backend API Base URL:** [StockFolio API](https://stock-tracker-dsut.onrender.com)
+- **Live Application:** [Quotra Web App](https://stock-tracker-1-sj4n.onrender.com)
+- **Backend API Base URL:** [Quotra API](https://stock-tracker-dsut.onrender.com)
 
 ---
 

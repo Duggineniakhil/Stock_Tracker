@@ -21,19 +21,19 @@ const Navbar = () => {
         <nav className="navbar">
             <div className="navbar-container">
                 {/* Logo/Brand */}
-                <div className="navbar-brand">
-                    <div className="brand-icon">📊</div>
+                <Link to="/dashboard" className="navbar-brand">
+                    <div className="brand-dot"></div>
                     <div className="brand-text">
-                        <h1>StockFolio</h1>
-                        <span>Investment Tracker</span>
+                        <h1>Quotra</h1>
+                        <span>The Market, Simplified.</span>
                     </div>
-                </div>
+                </Link>
 
                 {/* Navigation Links */}
                 <div className="navbar-links">
                     <Link
-                        to="/"
-                        className={`nav-link ${isActive('/') ? 'active' : ''}`}
+                        to="/dashboard"
+                        className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
                     >
                         <span className="nav-icon">📈</span>
                         Dashboard

@@ -29,11 +29,22 @@ const stockService = {
                 name: quote.longName || quote.shortName || symbol
             };
         } catch (error) {
-            console.error(`Error fetching ${symbol}:`, error.message);
-            if (error.message.includes('No data found') || error.message.includes('Not Found')) {
-                throw new Error('Invalid stock symbol');
+            // Enhanced logging with stack for "fetch failed" issues
+            if (error.message.includes('fetch failed')) {
+                console.error(`NETWORK ERROR fetching ${symbol}:`, error);
+            } else {
+                console.error(`Error fetching ${symbol}:`, error.message);
             }
-            throw new Error(`Failed to fetch stock data: ${error.message}`);
+
+            if (error.message.includes('No data found') || error.message.includes('Not Found')) {
+                const invalidError = new Error('Invalid stock symbol');
+                invalidError.statusCode = 404;
+                throw invalidError;
+            }
+
+            const networkError = new Error(`Failed to fetch stock data: ${error.message}`);
+            networkError.statusCode = error.message.includes('fetch failed') ? 502 : 500;
+            throw networkError;
         }
     },
 

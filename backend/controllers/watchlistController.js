@@ -16,7 +16,9 @@ const watchlistController = {
             try {
                 await stockService.getStockQuote(symbol);
             } catch (error) {
-                return res.status(400).json({ error: 'Invalid stock symbol' });
+                const status = error.statusCode || 400;
+                const message = error.message === 'Invalid stock symbol' ? error.message : 'Stock service currently unavailable';
+                return res.status(status).json({ error: message });
             }
 
             // Check if already in watchlist

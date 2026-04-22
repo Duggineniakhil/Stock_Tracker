@@ -137,4 +137,10 @@ export const deleteHolding = api.deleteHolding;
 export const exportPortfolioCSV = api.exportPortfolioCSV;
 export const fetchStockNews = api.fetchStockNews;
 
+// Attach methods to axiosInstance for easier access in AuthContext
+axiosInstance.login = api.login;
+axiosInstance.register = api.register;
+axiosInstance.refreshToken = api.refreshToken;
+axiosInstance.logout = api.logout;
+
 export default axiosInstance;

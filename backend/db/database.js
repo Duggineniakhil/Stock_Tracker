@@ -14,23 +14,25 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
-// Enable WAL mode for better performance
-db.run('PRAGMA journal_mode=WAL');
-db.run('PRAGMA foreign_keys=ON');
-db.run('PRAGMA synchronous=NORMAL');
-
 // Initialize database with schema
 function initializeDatabase() {
-    const schemaPath = path.join(__dirname, 'schema.sql');
-    const schema = fs.readFileSync(schemaPath, 'utf8');
+    db.serialize(() => {
+        // Enable WAL mode for better performance
+        db.run('PRAGMA journal_mode=WAL');
+        db.run('PRAGMA foreign_keys=ON');
+        db.run('PRAGMA synchronous=NORMAL');
 
-    db.exec(schema, (err) => {
-        if (err) {
-            console.error('Error initializing database schema:', err.message);
-        } else {
-            console.log('Database schema initialized');
-            runMigrations();
-        }
+        const schemaPath = path.join(__dirname, 'schema.sql');
+        const schema = fs.readFileSync(schemaPath, 'utf8');
+
+        db.exec(schema, (err) => {
+            if (err) {
+                console.error('Error initializing database schema:', err.message);
+            } else {
+                console.log('Database schema initialized');
+                runMigrations();
+            }
+        });
     });
 }
 
@@ -52,15 +54,17 @@ function runMigrations() {
         .filter(s => s.length > 0);
 
     let completed = 0;
-    statements.forEach((statement) => {
-        db.run(statement, (err) => {
-            if (err && !err.message.includes('duplicate column') && !err.message.includes('already exists')) {
-                console.warn('Migration warning:', err.message.substring(0, 80));
-            }
-            completed++;
-            if (completed === statements.length) {
-                console.log('Database migrations applied');
-            }
+    db.serialize(() => {
+        statements.forEach((statement) => {
+            db.run(statement, (err) => {
+                if (err && !err.message.includes('duplicate column') && !err.message.includes('already exists')) {
+                    console.warn('Migration warning:', err.message.substring(0, 80));
+                }
+                completed++;
+                if (completed === statements.length) {
+                    console.log('Database migrations applied');
+                }
+            });
         });
     });
 }

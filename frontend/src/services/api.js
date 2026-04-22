@@ -62,7 +62,7 @@ axiosInstance.interceptors.response.use((response) => response, async (error) =>
 const api = {
     // Auth
     login: (email, password) => axios.post(`${API_BASE_URL}/api/v1/auth/login`, { email, password }).then(r => r.data),
-    register: (email, password) => axios.post(`${API_BASE_URL}/api/v1/auth/register`, { email, password }).then(r => r.data),
+    register: (name, email, password) => axios.post(`${API_BASE_URL}/api/v1/auth/register`, { name, email, password }).then(r => r.data),
     refreshToken: (refreshToken) => axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, { refreshToken }).then(r => r.data),
     logout: (refreshToken) => axios.post(`${API_BASE_URL}/api/v1/auth/logout`, { refreshToken }).then(r => r.data),
 

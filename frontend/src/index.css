@@ -1,66 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
 :root {
-  --accent-green: #00dc82;
-  --accent-green-muted: rgba(0, 220, 130, 0.15);
-  --bg-deep: #05050a;
-  --bg-surface: #0c0c14;
-  --bg-surface-elevated: #151520;
-  --text-primary: #f0f0f5;
-  --text-secondary: #a0a0b0;
-  --text-tertiary: #606070;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --market-green: #00dc82;
-  --market-red: #ff4d4d;
+  --bg-site: #080c14;
+  --bg-surface: #0f1420;
+  --bg-surface-alt: #0b0f1b;
+  --accent-green: #00e887;
+  --accent-green-dim: rgba(0, 232, 135, 0.08);
+  --accent-green-glow: rgba(0, 232, 135, 0.2);
+  
+  --text-main: #e2e8f4;
+  --text-muted: rgba(226, 232, 244, 0.45);
+  --text-dim: rgba(226, 232, 244, 0.25);
+  
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --market-red: #f05050;
+  --market-green: #00e887;
+  --market-yellow: #f0a500;
+  --market-blue: #3882dc;
 }
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: var(--bg-site);
+  color: var(--text-main);
+  font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--bg-deep);
-  color: var(--text-primary);
   overflow-x: hidden;
 }
 
+.syne { font-family: 'Syne', sans-serif; }
+.dm-sans { font-family: 'DM Sans', sans-serif; }
+
+/* Global Utility Classes derived from Landing */
+.g-text { color: var(--accent-green); }
+.g-bg { background: var(--accent-green); }
+.muted { color: var(--text-muted); }
+.sep { border: none; border-top: 0.5px solid var(--border-subtle); margin: 0; }
+
 a {
-  text-decoration: none;
   color: inherit;
-  transition: all 0.2s ease;
+  text-decoration: none;
+  transition: opacity 0.2s;
 }
 
 button {
+  font-family: 'DM Sans', sans-serif;
   cursor: pointer;
   border: none;
   background: none;
-  font-family: inherit;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-deep);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--bg-surface-elevated);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-tertiary);
+  transition: all 0.2s;
 }

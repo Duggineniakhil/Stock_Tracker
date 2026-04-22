@@ -1,0 +1,107 @@
+.markets-page {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.search-bar {
+    margin: 2rem 0;
+    position: relative;
+    max-width: 600px;
+}
+
+.search-bar input {
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    color: var(--text-main);
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    box-shadow: 0 0 20px rgba(0, 232, 135, 0.1);
+}
+
+.mkt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.mkt-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+
+.mkt-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-green-glow);
+}
+
+.mk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.mk-symbol {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.mk-name {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.mk-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.mk-badge.up { background: rgba(0, 232, 135, 0.1); color: var(--market-green); }
+.mk-badge.dn { background: rgba(240, 80, 80, 0.1); color: var(--market-red); }
+
+.mk-price {
+    font-size: 22px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.sparkline-box {
+    margin-top: 1rem;
+    height: 40px;
+    width: 100%;
+}
+
+.search-result-card {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--accent-green);
+    border-radius: 12px;
+    margin-top: 8px;
+    padding: 1rem;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}

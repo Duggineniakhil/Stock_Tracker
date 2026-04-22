@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -12,7 +13,6 @@ export const AuthProvider = ({ children }) => {
         if (token) {
             try {
                 const decoded = jwtDecode(token);
-                // Check expiry?
                 if (decoded.exp * 1000 < Date.now()) {
                     logout();
                 } else {
@@ -26,11 +26,21 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = (token, userData) => {
+    const login = async (email, password) => {
+        const data = await api.login(email, password);
+        const { token, user: userData } = data;
+        
         localStorage.setItem('token', token);
-        // Decode token to get user info if userData not provided full
         const decoded = jwtDecode(token);
         setUser({ ...decoded, ...userData });
+        return data;
+    };
+
+    const register = async (name, email, password) => {
+        const data = await api.register(name, email, password);
+        // Automatically login after registration if the API returns a token,
+        // otherwise redirect to login (the UI will handle the redirect based on return)
+        return data;
     };
 
     const logout = () => {
@@ -39,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

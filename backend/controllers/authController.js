@@ -44,7 +44,7 @@ const clearLoginAttempts = (email) => {
 
 // ── Register ──────────────────────────────────────────────────────────────────
 const register = async (req, res) => {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
     if (!email || !password) {
         return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Email and password are required' } });
@@ -63,7 +63,7 @@ const register = async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 12);
-        db.run('INSERT INTO users (email, password_hash) VALUES (?, ?)', [email.toLowerCase(), hashedPassword], function (err) {
+        db.run('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', [name, email.toLowerCase(), hashedPassword], function (err) {
             if (err) {
                 if (err.message.includes('UNIQUE constraint failed')) {
                     return res.status(409).json({ error: { code: 'CONFLICT', message: 'Email already registered' } });

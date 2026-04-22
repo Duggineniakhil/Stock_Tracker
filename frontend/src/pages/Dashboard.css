@@ -1,65 +1,140 @@
-.dashboard-container {
-    padding-bottom: 4rem;
+.dashboard-page {
+  padding-top: 100px;
+  padding-bottom: var(--sp-20);
 }
 
-.scards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+.dashboard-header {
+  margin-bottom: var(--sp-12);
 }
 
-.sc {
-    background: rgba(255, 255, 255, 0.03);
-    border: 0.5px solid var(--border-subtle);
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-    transition: transform 0.2s, border-color 0.2s;
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--sp-8);
 }
 
-.sc:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent-green-glow);
+.main-chart-card {
+  padding: var(--sp-8);
 }
 
-.sc-sym {
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-main);
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
 }
 
-.sc-nm {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 8px;
+/* Stat Cards */
+.stat-cards-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-8);
 }
 
-.sc-px {
-    font-size: 16px;
-    font-weight: 500;
-    color: #f0f5ff;
+.db-stat-card {
+  padding: var(--sp-6);
 }
 
-.sc-ch {
-    font-size: 11px;
-    margin-top: 4px;
+.db-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--sp-2);
 }
 
-.sc-ch.up { color: var(--market-green); }
-.sc-ch.dn { color: var(--market-red); }
-
-.page-loader {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-    color: var(--accent-green);
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
+.db-stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
-@media (max-width: 768px) {
-    .scards {
-        grid-template-columns: 1fr 1fr;
-    }
+.db-stat-delta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.db-stat-delta.up { color: var(--market-green); }
+.db-stat-delta.down { color: var(--market-red); }
+
+/* Holdings List */
+.holdings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.holding-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-4);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  transition: var(--transition-base);
+}
+
+.holding-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-glow);
+}
+
+.holding-main {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.holding-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--accent-green);
+}
+
+.holding-name {
+  display: flex;
+  flex-direction: column;
+}
+
+.holding-symbol {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.holding-shares {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.holding-stats {
+  text-align: right;
+}
+
+.holding-px {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.holding-ch {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }

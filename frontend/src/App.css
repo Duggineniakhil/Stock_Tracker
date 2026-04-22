@@ -1,59 +1,75 @@
 /* Global Quotra App Styles */
 
-:root {
-  --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 .site {
   background: var(--bg-site);
   color: var(--text-main);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-header.hero {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 4rem 2rem;
+main {
+  flex: 1;
 }
 
+/* Hero Badge */
 .hbadge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: var(--accent-green-dim);
   border: 1px solid var(--accent-green-glow);
   color: var(--accent-green);
-  padding: 6px 14px;
-  border-radius: 20px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 1.5rem;
+  letter-spacing: 1.5px;
+  margin-bottom: var(--sp-6);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .ldot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   background: var(--accent-green);
   border-radius: 50%;
   box-shadow: 0 0 10px var(--accent-green);
+  position: relative;
+}
+
+.ldot::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--accent-green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  70% { transform: scale(2.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
 }
 
 /* Page Transitions */
-.page-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-.page-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.4s, transform 0.4s;
+.page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--accent-green);
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  background: var(--bg-site);
 }
 
-/* Scrollbar Styling */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-site);
@@ -61,7 +77,19 @@ header.hero {
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
+  border: 2px solid var(--bg-site);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .section {
+    padding: var(--sp-12) 0;
+  }
+  
+  .container {
+    padding: 0 var(--sp-4);
+  }
 }

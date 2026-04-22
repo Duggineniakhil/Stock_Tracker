@@ -20,7 +20,7 @@ const Insights = () => {
         getInsights();
     }, []);
 
-    if (loading) return <div className="page-loader">Gathering Market Intel...</div>;
+    if (loading) return <div className="page-loader"><span className="animate-up">ANALYZING...</span></div>;
 
     const mockSignals = [
         {
@@ -40,34 +40,34 @@ const Insights = () => {
     ];
 
     return (
-        <div className="insights-page">
-            <header className="hero" style={{ padding: '2rem 0', textAlign: 'left' }}>
+        <div className="insights-page container">
+            <header className="dashboard-header animate-up">
                 <div className="hbadge"><span className="ldot"></span> Signal Detection</div>
-                <h1 className="syne" style={{ fontSize: '32px', margin: 0 }}>Market<br /><span className="g-text">Insights.</span></h1>
+                <h1>Market<br /><span className="g-text">Insights.</span></h1>
             </header>
 
-            <div className="ins-grid">
+            <div className="ins-grid animate-up" style={{ animationDelay: '0.1s' }}>
                 {mockSignals.map((s, i) => (
-                    <div className="ins-card" key={i}>
+                    <div className="glass-card ins-card" key={i}>
                         <div className={`ins-tag ${s.tagClass}`}>{s.tag}</div>
-                        <div className="ins-title">{s.title}</div>
-                        <div className="ins-body">{s.body}</div>
+                        <h3 className="ins-title">{s.title}</h3>
+                        <p className="ins-body">{s.body}</p>
                         <div className="ins-meta">{s.meta}</div>
                     </div>
                 ))}
 
                 {alerts.length > 0 ? alerts.map((a, i) => (
-                    <div className="ins-card" key={a._id || i}>
+                    <div className="glass-card ins-card" key={a._id || i}>
                         <div className="ins-tag tag-info">Price Target</div>
-                        <div className="ins-title">{a.symbol} reached target of ${a.targetPrice?.toFixed(2)}</div>
-                        <div className="ins-body">
+                        <h3 className="ins-title">{a.symbol} reached target of ${a.targetPrice?.toFixed(2)}</h3>
+                        <p className="ins-body">
                             The stock has crossed the alert threshold. Current recorded price at trigger was ${a.triggerPrice?.toFixed(2)}.
-                        </div>
+                        </p>
                         <div className="ins-meta">{new Date(a.createdAt).toLocaleDateString()} · System Alert</div>
                     </div>
                 )  ) : (
-                    <div className="ins-card" style={{ borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', opacity: 0.5 }}>
-                        <div className="muted" style={{ textAlign: 'center' }}>
+                    <div className="glass-card" style={{ borderStyle: 'dashed', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+                        <div className="muted" style={{ textAlign: 'center', padding: '2rem' }}>
                             Your custom alerts will appear here once triggered.
                         </div>
                     </div>

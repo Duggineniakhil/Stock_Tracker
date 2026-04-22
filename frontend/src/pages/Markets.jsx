@@ -50,11 +50,11 @@ const Markets = () => {
             setSearchQuery('');
             loadWatchlist();
         } catch (err) {
-            alert('Failed to add to watchlist');
+            console.error('Failed to add to watchlist', err);
         }
     };
 
-    if (loading) return <div className="page-loader">Scanning Markets...</div>;
+    if (loading) return <div className="page-loader"><span className="animate-up">SCANNING...</span></div>;
 
     const defaultStocks = [
         { symbol: 'AAPL', name: 'Apple Inc.', price: 189.42, change: 1.24, trend: 'up' },
@@ -66,47 +66,50 @@ const Markets = () => {
     ];
 
     return (
-        <div className="markets-page">
-            <header className="hero" style={{ padding: '2rem 0', textAlign: 'left' }}>
+        <div className="markets-page container">
+            <header className="dashboard-header animate-up">
                 <div className="hbadge"><span className="ldot"></span> Global Equities</div>
-                <h1 className="syne" style={{ fontSize: '32px', margin: 0 }}>Market<br /><span className="g-text">Explorer.</span></h1>
+                <h1>Market<br /><span className="g-text">Explorer.</span></h1>
             </header>
 
-            <div className="search-bar">
-                <input 
-                    type="text" 
-                    placeholder="Search by symbol (e.g., RELIANCE, MSFT)..." 
-                    value={searchQuery}
-                    onChange={handleSearch}
-                />
-                {(searching || searchResult) && (
-                    <div className="search-result-card">
-                        {searching ? (
-                            <div className="muted">Searching...</div>
-                        ) : searchResult ? (
-                            <>
-                                <div>
-                                    <div className="syne" style={{ fontWeight: 800 }}>{searchResult.symbol}</div>
-                                    <div className="muted" style={{ fontSize: '11px' }}>{searchResult.companyName}</div>
+            <div className="search-section animate-up" style={{ animationDelay: '0.1s' }}>
+                <div className="search-bar-wrap">
+                    <input 
+                        type="text" 
+                        placeholder="Search by symbol (e.g., AAPL, RELIANCE)..." 
+                        className="search-input"
+                        value={searchQuery}
+                        onChange={handleSearch}
+                    />
+                    {(searching || searchResult) && (
+                        <div className="search-results-popover glass-card">
+                            {searching ? (
+                                <div className="muted" style={{ padding: '1rem' }}>Searching markets...</div>
+                            ) : searchResult ? (
+                                <div className="search-result-item">
+                                    <div className="result-info">
+                                        <div className="syne" style={{ fontWeight: 800 }}>{searchResult.symbol}</div>
+                                        <div className="muted" style={{ fontSize: '11px' }}>{searchResult.companyName}</div>
+                                    </div>
+                                    <div className="result-actions">
+                                        <div className="syne" style={{ fontWeight: 700 }}>${searchResult.price?.toFixed(2)}</div>
+                                        <button className="btn btn-primary" onClick={() => handleAddToWatchlist(searchResult.symbol)} style={{ padding: '6px 12px', fontSize: '11px' }}>
+                                            + Watchlist
+                                        </button>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                    <div className="syne" style={{ fontWeight: 700 }}>${searchResult.price?.toFixed(2)}</div>
-                                    <button className="bp" onClick={() => handleAddToWatchlist(searchResult.symbol)} style={{ padding: '6px 12px', fontSize: '11px' }}>
-                                        + Watchlist
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="muted">No results found</div>
-                        )}
-                    </div>
-                )}
+                            ) : (
+                                <div className="muted" style={{ padding: '1rem' }}>No assets found</div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <div className="sec-label">Active Watchlist</div>
-            <div className="mkt-grid">
+            <div className="sec-label animate-up" style={{ animationDelay: '0.2s', marginBottom: 'var(--sp-6)' }}>Trending & Watchlist</div>
+            <div className="mkt-grid animate-up" style={{ animationDelay: '0.3s' }}>
                 {[...defaultStocks, ...watchlist.map(w => ({ ...w, trend: w.change >= 0 ? 'up' : 'dn' }))].map((s, i) => (
-                    <div className="mkt-card" key={s.id || s.symbol || i}>
+                    <div className="glass-card mkt-card" key={s.id || s.symbol || i}>
                         <div className="mk-header">
                             <div>
                                 <div className="mk-symbol">{s.symbol}</div>
@@ -125,8 +128,8 @@ const Markets = () => {
                                         : "M0,5 C20,7 40,10 60,14 C80,18 100,15 120,20 C140,25 160,22 180,28 L200,32"
                                     }
                                     fill="none" 
-                                    stroke={s.trend === 'up' ? "#00e887" : "#f05050"} 
-                                    strokeWidth="1.5" 
+                                    stroke={s.trend === 'up' ? "var(--market-green)" : "var(--market-red)"} 
+                                    strokeWidth="2" 
                                 />
                             </svg>
                         </div>

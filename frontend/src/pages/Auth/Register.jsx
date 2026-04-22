@@ -22,11 +22,22 @@ const Register = () => {
             await register(name, email, password);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.error?.message || err.response?.data?.message || 'Failed to create account');
+            // Extract error from nested Axios error structure
+            const msg = err?.response?.data?.error?.message 
+                     || err?.response?.data?.message
+                     || err?.message 
+                     || 'Failed to create account';
+            setError(msg);
         } finally {
             setLoading(false);
         }
     };
+
+    // Live password strength indicators
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const isStrong = hasLength && hasUpper && hasNumber;
 
     return (
         <div className="auth-page">
@@ -68,14 +79,21 @@ const Register = () => {
                         <label>Password</label>
                         <input 
                             type="password" 
-                            placeholder="••••••••" 
+                            placeholder="Min. 8 characters" 
                             required 
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                        {password.length > 0 && (
+                            <div className="pw-hints">
+                                <span className={hasLength ? 'pw-ok' : 'pw-fail'}>✓ 8+ characters</span>
+                                <span className={hasUpper ? 'pw-ok' : 'pw-fail'}>✓ Uppercase</span>
+                                <span className={hasNumber ? 'pw-ok' : 'pw-fail'}>✓ Number</span>
+                            </div>
+                        )}
                     </div>
                     
-                    <button type="submit" className="auth-submit" disabled={loading}>
+                    <button type="submit" className="auth-submit" disabled={loading || !isStrong}>
                         {loading ? 'Creating account...' : 'Create account'}
                     </button>
                 </form>

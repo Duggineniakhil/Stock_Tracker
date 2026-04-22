@@ -17,9 +17,10 @@ const Dashboard = () => {
                     fetchPortfolio()
                 ]);
                 setSummary(summaryRes.data);
+                // Sort by value and take top 6
                 const sortedHoldings = [...portfolioRes.data].sort((a, b) => 
                     (b.currentPrice * b.quantity) - (a.currentPrice * a.quantity)
-                ).slice(0, 8);
+                ).slice(0, 6);
                 setHoldings(sortedHoldings);
             } catch (err) {
                 console.error('Failed to fetch dashboard data', err);
@@ -31,99 +32,86 @@ const Dashboard = () => {
         getDashboardData();
     }, []);
 
-    if (loading) return <div className="page-loader"><span className="animate-up">QUOTRA...</span></div>;
+    if (loading) return <div className="page-loader">Loading Dashboard...</div>;
 
     const totalValue = summary?.totalValue || 0;
+    const totalChange = summary?.totalChange || 0;
     const totalChangePercent = summary?.totalChangePercent || 0;
-    const isPositive = totalChangePercent >= 0;
+    const isPositive = totalChange >= 0;
 
     return (
-        <div className="dashboard-page container">
-            <header className="dashboard-header animate-up">
-                <div className="hbadge"><span className="ldot"></span> Account Overview</div>
-                <h1>
+        <div className="dashboard-container">
+            <header className="hero reveal" style={{ padding: 'var(--sp-48) 0 var(--sp-32)' }}>
+                <div className="hbadge"><span className="ldot"></span> Performance Overview</div>
+                <h1 className="h1">
                     {user?.name ? `Welcome back, ${user.name.split(' ')[0]}` : 'Your Portfolio'},<br />
                     <span className="g-text">At a Glance.</span>
                 </h1>
             </header>
 
-            <div className="stat-cards-row animate-up" style={{ animationDelay: '0.1s' }}>
-                <div className="glass-card db-stat-card">
-                    <div className="db-stat-label">Total Balance</div>
-                    <div className="db-stat-value">
-                        ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+        <div className="db-wrap reveal" style={{ maxWidth: '800px', marginBottom: 'var(--sp-64)' }}>
+                <div className="db-bar">
+                    <div className="dots">
+                        <div className="dot" style={{ background: 'var(--market-red)' }}></div>
+                        <div className="dot" style={{ background: 'var(--market-yellow)' }}></div>
+                        <div className="dot" style={{ background: 'var(--market-green)' }}></div>
                     </div>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>quotra — dashboard summary</span>
+                    <div style={{ width: '46px' }}></div>
                 </div>
-                <div className="glass-card db-stat-card">
-                    <div className="db-stat-label">24h Change</div>
-                    <div className="db-stat-value">
-                        <span className={`db-stat-delta ${isPositive ? 'up' : 'down'}`}>
-                            {isPositive ? '+' : ''}{totalChangePercent.toFixed(2)}%
-                        </span>
-                    </div>
-                </div>
-                <div className="glass-card db-stat-card">
-                    <div className="db-stat-label">Active Alerts</div>
-                    <div className="db-stat-value">12</div>
-                </div>
-                <div className="glass-card db-stat-card">
-                    <div className="db-stat-label">Market Status</div>
-                    <div className="db-stat-value" style={{ fontSize: '14px', color: 'var(--market-green)' }}>
-                        ● OPEN
-                    </div>
-                </div>
-            </div>
-
-            <div className="dashboard-grid animate-up" style={{ animationDelay: '0.2s' }}>
-                <div className="glass-card main-chart-card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-8)' }}>
-                        <h3 style={{ fontSize: '18px' }}>Portfolio Performance</h3>
-                        <div className="hero-ctas" style={{ margin: 0, gap: 'var(--sp-2)' }}>
-                            <button className="btn btn-secondary" style={{ padding: '4px 12px', fontSize: '11px', borderRadius: '6px' }}>1W</button>
-                            <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '11px', borderRadius: '6px' }}>1M</button>
-                            <button className="btn btn-secondary" style={{ padding: '4px 12px', fontSize: '11px', borderRadius: '6px' }}>1Y</button>
+                <div className="db-body">
+                    <div className="db-top">
+                        <div>
+                            <div className="bal-lbl">Total portfolio value</div>
+                            <div className="bal-val">
+                                ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                <span style={{ 
+                                    fontSize: '14px', 
+                                    color: isPositive ? 'var(--market-green)' : 'var(--market-red)', 
+                                    fontFamily: "'DM Sans'",
+                                    marginLeft: 'var(--sp-16)'
+                                }}>
+                                    {isPositive ? '+' : ''}{totalChangePercent.toFixed(2)}%
+                                </span>
+                            </div>
+                        </div>
+                        <div className="tabs">
+                            <button className="tab">1D</button>
+                            <button className="tab">1W</button>
+                            <button className="tab a">1M</button>
+                            <button className="tab">1Y</button>
                         </div>
                     </div>
-                    <div style={{ height: '300px', width: '100%', position: 'relative' }}>
-                        <svg viewBox="0 0 800 300" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                    
+                    <div className="chart-box" style={{ height: '120px' }}>
+                        <svg viewBox="0 0 590 80" preserveAspectRatio="none">
                             <defs>
-                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="var(--accent-green)" stopOpacity="0.2" />
-                                    <stop offset="100%" stopColor="var(--accent-green)" stopOpacity="0" />
+                                <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#00e887" stopOpacity=".15" />
+                                    <stop offset="100%" stopColor="#00e887" stopOpacity="0" />
                                 </linearGradient>
                             </defs>
-                            <path d="M0,250 C100,230 200,260 300,180 C400,100 500,150 600,80 C700,10 800,40 800,40 L800,300 L0,300Z" fill="url(#chartGradient)" />
-                            <path d="M0,250 C100,230 200,260 300,180 C400,100 500,150 600,80 C700,10 800,40 800,40" fill="none" stroke="var(--accent-green)" strokeWidth="3" />
+                            <path d="M0,70 C25,66 45,62 75,54 C105,46 120,50 150,42 C180,34 200,38 230,28 C260,18 280,24 310,16 C340,8 360,13 390,8 C420,3 450,6 480,4 C510,2 550,5 590,2 L590,80 L0,80Z" fill="url(#cg)" />
+                            <path d="M0,70 C25,66 45,62 75,54 C105,46 120,50 150,42 C180,34 200,38 230,28 C260,18 280,24 310,16 C340,8 360,13 390,8 C420,3 450,6 480,4 C510,2 550,5 590,2" fill="none" stroke="#00e887" strokeWidth="1.5" />
                         </svg>
                     </div>
-                </div>
 
-                <div className="side-panel">
-                    <div className="glass-card" style={{ padding: 'var(--sp-6)', flex: 1 }}>
-                        <h3 style={{ fontSize: '16px', marginBottom: 'var(--sp-6)' }}>Top Holdings</h3>
-                        <div className="holdings-list">
-                            {holdings.length > 0 ? holdings.map((h, i) => (
-                                <div className="holding-item" key={i}>
-                                    <div className="holding-main">
-                                        <div className="holding-icon">{h.symbol[0]}</div>
-                                        <div className="holding-name">
-                                            <span className="holding-symbol">{h.symbol}</span>
-                                            <span className="holding-shares">{h.quantity} Shares</span>
-                                        </div>
-                                    </div>
-                                    <div className="holding-stats">
-                                        <div className="holding-px">${h.currentPrice?.toFixed(2)}</div>
-                                        <div className={`holding-ch ${h.change >= 0 ? 'up' : 'down'}`}>
-                                            {h.change >= 0 ? '+' : ''}{h.changePercent?.toFixed(2)}%
-                                        </div>
-                                    </div>
+                    <div className="sec-label" style={{ marginBottom: 'var(--sp-16)' }}>Top Holdings</div>
+                    <div className="scards" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
+                        {holdings.length > 0 ? holdings.map((h, i) => (
+                            <div className="sc" key={i}>
+                                <div className="sc-sym">{h.symbol}</div>
+                                <div className="sc-nm">{h.quantity} shares</div>
+                                <div className="sc-px">${h.currentPrice?.toFixed(2)}</div>
+                                <div className={`sc-ch ${h.change >= 0 ? 'up' : 'dn'}`}>
+                                    {h.change >= 0 ? '+' : ''}{h.changePercent?.toFixed(2)}%
                                 </div>
-                            )) : (
-                                <div className="muted" style={{ textAlign: 'center', padding: '2rem', fontSize: '13px' }}>
-                                    No assets found.
-                                </div>
-                            )}
-                        </div>
+                            </div>
+                        )) : (
+                            <div className="muted" style={{ fontSize: '13px', gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--sp-32)' }}>
+                                No holdings yet. Start by adding an asset in Portfolio.
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -36,12 +36,12 @@ const Login = () => {
                     <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '1.5rem', fontSize: '24px' }}>
                         <span className="ldot"></span>Quotra
                     </Link>
-                    <h2 className="syne">Welcome back</h2>
+                    <h2>Welcome back</h2>
                     <p>Enter your details to access your dashboard</p>
                 </div>
                 
                 <form className="auth-form" onSubmit={handleSubmit}>
-                    {successMsg && <div className="auth-success" style={{ padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', backgroundColor: 'rgba(0, 232, 135, 0.1)', color: '#00e887', fontSize: '14px', textAlign: 'center', border: '1px solid rgba(0, 232, 135, 0.2)' }}>{successMsg}</div>}
+                    {successMsg && <div className="auth-success">{successMsg}</div>}
                     {error && <div className="auth-error">{error}</div>}
                     
                     <div className="input-group">
@@ -66,7 +66,7 @@ const Login = () => {
                         />
                     </div>
                     
-                    <button type="submit" className="bp auth-submit" disabled={loading}>
+                    <button type="submit" className="auth-submit" disabled={loading}>
                         {loading ? 'Signing in...' : 'Sign in'}
                     </button>
                 </form>

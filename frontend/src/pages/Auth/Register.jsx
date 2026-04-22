@@ -35,7 +35,7 @@ const Register = () => {
                     <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '1.5rem', fontSize: '24px' }}>
                         <span className="ldot"></span>Quotra
                     </Link>
-                    <h2 className="syne">Create account</h2>
+                    <h2>Create account</h2>
                     <p>Join 50k+ investors today</p>
                 </div>
                 
@@ -75,7 +75,7 @@ const Register = () => {
                         />
                     </div>
                     
-                    <button type="submit" className="bp auth-submit" disabled={loading}>
+                    <button type="submit" className="auth-submit" disabled={loading}>
                         {loading ? 'Creating account...' : 'Create account'}
                     </button>
                 </form>

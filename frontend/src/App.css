@@ -4,72 +4,21 @@
   background: var(--bg-site);
   color: var(--text-main);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
-main {
-  flex: 1;
-}
-
-/* Hero Badge */
-.hbadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--accent-green-dim);
-  border: 1px solid var(--accent-green-glow);
-  color: var(--accent-green);
-  padding: 8px 16px;
-  border-radius: var(--radius-full);
+/* Shared Section Label */
+.sec-label {
   font-size: 11px;
-  font-weight: 700;
+  color: var(--accent-green);
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  margin-bottom: var(--sp-6);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+  margin-bottom: var(--sp-16);
 }
 
-.ldot {
-  width: 8px;
-  height: 8px;
-  background: var(--accent-green);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--accent-green);
-  position: relative;
-}
-
-.ldot::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: var(--accent-green);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.8; }
-  70% { transform: scale(2.5); opacity: 0; }
-  100% { transform: scale(1); opacity: 0; }
-}
-
-/* Page Transitions */
-.page-loader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  color: var(--accent-green);
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 4px;
-  background: var(--bg-site);
-}
-
-/* Custom Scrollbar */
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-site);
@@ -77,19 +26,13 @@ main {
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  border: 2px solid var(--bg-site);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Responsive Utilities */
-@media (max-width: 768px) {
-  .section {
-    padding: var(--sp-12) 0;
-  }
-  
-  .container {
-    padding: 0 var(--sp-4);
-  }
+/* Selection */
+::selection {
+  background: var(--accent-green);
+  color: var(--bg-site);
 }

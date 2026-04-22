@@ -5,15 +5,17 @@ const MainLayout = ({ children }) => {
     return (
         <div className="site">
             <Navbar />
-            <main style={{ minHeight: 'calc(100vh - 70px)' }}>
-                {children}
-            </main>
-            
-            <footer className="footer" style={{ marginTop: '4rem' }}>
-                <div className="ft-bottom">
-                    <div className="ft-copy">© 2025 Quotra. All rights reserved.</div>
-                    <div className="ft-tagline">The Market, Simplified.</div>
+            <main className="container" style={{ paddingBottom: 'var(--sp-64)' }}>
+                <div className="reveal">
+                    {children}
                 </div>
+            </main>
+            <footer className="container" style={{ 
+                padding: 'var(--sp-64) var(--sp-24)', 
+                borderTop: '1px solid var(--border-subtle)',
+                textAlign: 'center'
+            }}>
+                <p className="small-text">© 2026 Quotra. Premium Stock Intelligence.</p>
             </footer>
         </div>
     );

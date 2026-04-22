@@ -1,126 +1,169 @@
+/* Portfolio Page Styles */
+
 .portfolio-page {
-  padding-top: 100px;
-  padding-bottom: var(--sp-20);
+    /* Using global container for layout, this class is just for specific overrides */
+    margin-bottom: var(--sp-64);
 }
 
-.portfolio-layout {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: var(--sp-8);
+.portfolio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: var(--sp-48);
 }
 
-.holdings-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: var(--sp-24);
 }
 
-.holding-item-large {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--sp-6);
+.holdings-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-16);
 }
 
-.holding-item-large:hover {
-  transform: translateX(4px);
-}
-
-.btn-remove {
-  background: none;
-  border: none;
-  color: var(--market-red);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-top: var(--sp-2);
-  cursor: pointer;
-  opacity: 0.6;
-  transition: var(--transition-fast);
-}
-
-.btn-remove:hover {
-  opacity: 1;
-  text-decoration: underline;
-}
-
-/* Allocation Card */
+/* Override .card for Allocation specifically if needed */
 .allocation-card {
-  padding: var(--sp-6);
-  position: sticky;
-  top: 100px;
+    height: fit-content;
 }
 
 .allocation-title {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: var(--sp-6);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.status-badge {
-  font-size: 10px;
-  background: var(--accent-green-dim);
-  color: var(--accent-green);
-  padding: 2px 8px;
-  border-radius: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: var(--sp-24);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .alloc-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-16);
+}
+
+.alloc-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-8);
 }
 
 .alloc-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--sp-2);
-  font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--fs-small);
 }
 
 .alloc-bar-bg {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
-  overflow: hidden;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    overflow: hidden;
 }
 
 .alloc-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease-in-out;
 }
 
-.strategy-card {
-  margin-top: var(--sp-8);
-  padding: var(--sp-4);
-  background: rgba(0, 232, 135, 0.05);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(0, 232, 135, 0.1);
+.holding-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    padding: var(--sp-16) var(--sp-24);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition-base);
 }
 
-.strategy-label {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--accent-green);
-  margin-bottom: 4px;
+.holding-item:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-green-glow);
+    box-shadow: var(--shadow-subtle);
 }
 
-.strategy-text {
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.5;
+.h-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-16);
 }
 
-@media (max-width: 1024px) {
-  .portfolio-layout {
-    grid-template-columns: 1fr;
-  }
-  
-  .allocation-card {
-    position: static;
-  }
+.h-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-btn);
+    background: var(--accent-green-dim);
+    color: var(--accent-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.h-meta-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.h-meta-qty {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+}
+
+.h-data {
+    text-align: right;
+}
+
+.h-price {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.h-change {
+    font-size: var(--fs-small);
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+/* Modals / Forms */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(8, 12, 20, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.add-asset-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-16);
+}
+
+@media (max-width: 900px) {
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .portfolio-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--sp-16);
+    }
+    .add-asset-btn {
+        width: 100%;
+    }
 }

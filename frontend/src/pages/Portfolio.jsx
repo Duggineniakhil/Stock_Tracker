@@ -8,6 +8,7 @@ const Portfolio = () => {
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
     
+    // Simple form state for adding
     const [newAsset, setNewAsset] = useState({ symbol: '', quantity: '', buyPrice: '' });
 
     const loadData = async () => {
@@ -37,7 +38,7 @@ const Portfolio = () => {
             setShowAddForm(false);
             loadData();
         } catch (err) {
-            console.error('Failed to add asset', err);
+            alert('Failed to add asset');
         }
     };
 
@@ -47,112 +48,127 @@ const Portfolio = () => {
             await deleteHolding(id);
             loadData();
         } catch (err) {
-            console.error('Failed to delete asset', err);
+            alert('Failed to delete asset');
         }
     };
 
-    if (loading) return <div className="page-loader"><span className="animate-up">PORTFOLIO...</span></div>;
+    if (loading) return <div className="page-loader">Loading Portfolio Details...</div>;
 
-    const COLORS = ['var(--accent-green)', 'var(--market-blue)', 'var(--market-yellow)', 'var(--text-dim)'];
+    const COLORS = ['#00e887', '#3882dc', '#f0a500', 'rgba(226,232,244,0.2)'];
 
     return (
-        <div className="portfolio-page container">
-            <header className="dashboard-header animate-up">
-                <div className="hbadge"><span className="ldot"></span> Assets & Allocation</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-4)' }}>
-                    <h1>Detailed<br /><span className="g-text">Portfolio.</span></h1>
-                    <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
-                        {showAddForm ? 'Close' : '+ Add Asset'}
-                    </button>
+        <div className="portfolio-page">
+            <header className="portfolio-header reveal">
+                <div>
+                    <div className="hbadge"><span className="ldot"></span> Assets & Allocation</div>
+                    <h1 className="h1" style={{ margin: 0 }}>Detailed<br /><span className="g-text">Portfolio.</span></h1>
                 </div>
+                <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
+                    {showAddForm ? 'Close' : '+ Add Asset'}
+                </button>
             </header>
 
             {showAddForm && (
-                <div className="glass-card animate-up" style={{ padding: 'var(--sp-8)', marginBottom: 'var(--sp-12)' }}>
-                    <form className="auth-form" onSubmit={handleAdd} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--sp-6)', alignItems: 'flex-end' }}>
-                        <div className="input-group">
-                            <label>Symbol</label>
-                            <input type="text" placeholder="AAPL" required value={newAsset.symbol} onChange={e => setNewAsset({...newAsset, symbol: e.target.value.toUpperCase()})} />
+                <div className="card reveal" style={{ marginBottom: 'var(--sp-32)' }}>
+                    <form className="add-asset-form" onSubmit={handleAdd} style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                        <div className="input-group" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label className="small-text">Symbol</label>
+                            <input 
+                                type="text" 
+                                placeholder="AAPL" 
+                                required 
+                                value={newAsset.symbol} 
+                                onChange={e => setNewAsset({...newAsset, symbol: e.target.value.toUpperCase()})}
+                                style={{ background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', padding: '12px', borderRadius: 'var(--radius-btn)' }}
+                            />
                         </div>
-                        <div className="input-group">
-                            <label>Quantity</label>
-                            <input type="number" step="any" placeholder="10" required value={newAsset.quantity} onChange={e => setNewAsset({...newAsset, quantity: e.target.value})} />
+                        <div className="input-group" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label className="small-text">Quantity</label>
+                            <input 
+                                type="number" 
+                                step="any" 
+                                placeholder="10" 
+                                required 
+                                value={newAsset.quantity} 
+                                onChange={e => setNewAsset({...newAsset, quantity: e.target.value})} 
+                                style={{ background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', padding: '12px', borderRadius: 'var(--radius-btn)' }}
+                            />
                         </div>
-                        <div className="input-group">
-                            <label>Buy Price</label>
-                            <input type="number" step="any" placeholder="150.00" required value={newAsset.buyPrice} onChange={e => setNewAsset({...newAsset, buyPrice: e.target.value})} />
+                        <div className="input-group" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label className="small-text">Buy Price</label>
+                            <input 
+                                type="number" 
+                                step="any" 
+                                placeholder="150.00" 
+                                required 
+                                value={newAsset.buyPrice} 
+                                onChange={e => setNewAsset({...newAsset, buyPrice: e.target.value})} 
+                                style={{ background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', padding: '12px', borderRadius: 'var(--radius-btn)' }}
+                            />
                         </div>
-                        <button type="submit" className="btn btn-primary" style={{ height: '48px' }}>Add Holding</button>
+                        <button type="submit" className="btn btn-primary">Add Asset</button>
                     </form>
                 </div>
             )}
 
-            <div className="portfolio-layout animate-up" style={{ animationDelay: '0.1s' }}>
-                <div className="holdings-column">
-                    <div className="sec-label" style={{ marginBottom: 'var(--sp-4)' }}>My Holdings</div>
-                    <div className="holdings-list">
-                        {holdings.length > 0 ? holdings.map((h, i) => (
-                            <div className="glass-card holding-item-large" key={h._id || i}>
-                                <div className="holding-main">
-                                    <div className="holding-icon">{h.symbol.substring(0, 2)}</div>
-                                    <div className="holding-name">
-                                        <span className="holding-symbol">{h.symbol}</span>
-                                        <span className="holding-shares">{h.quantity} shares @ ${h.buyPrice?.toFixed(2)}</span>
-                                    </div>
+            <div className="portfolio-grid">
+                <div className="holdings-section">
+                    <div className="sec-label">My Holdings</div>
+                    {holdings.length > 0 ? holdings.map((h, i) => (
+                        <div className="holding-item" key={h._id || i}>
+                            <div className="h-brand">
+                                <div className="h-icon-box">{h.symbol.substring(0, 2)}</div>
+                                <div>
+                                    <div className="h-meta-name">{h.symbol}</div>
+                                    <div className="h-meta-qty">{h.quantity} shares @ ${h.buyPrice?.toFixed(2)}</div>
                                 </div>
-                                <div className="holding-stats">
-                                    <div className="holding-px">${(h.currentPrice * h.quantity).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                                    <div className={`holding-ch ${h.change >= 0 ? 'up' : 'down'}`}>
-                                        {h.change >= 0 ? '+' : ''}{h.changePercent?.toFixed(2)}%
-                                    </div>
-                                    <button onClick={() => handleDelete(h._id)} className="btn-remove">Remove</button>
+                            </div>
+                            <div className="h-data">
+                                <div className="h-price">${(h.currentPrice * h.quantity).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                <div className={`h-change ${h.change >= 0 ? 'up' : 'dn'}`}>
+                                    {h.change >= 0 ? '+' : ''}{h.changePercent?.toFixed(2)}%
+                                </div>
+                                <button onClick={() => handleDelete(h._id)} style={{ fontSize: '10px', color: '#f05050', marginTop: '4px' }}>Remove</button>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="card muted" style={{ textAlign: 'center', padding: 'var(--sp-48)' }}>
+                            Your portfolio is currently empty.
+                        </div>
+                    )}
+                </div>
+
+                <div className="card allocation-card reveal">
+                    <div className="allocation-title h2" style={{ fontSize: '18px' }}>
+                        Current Allocation
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent-green)', fontFamily: 'DM Sans' }}>Real-time</span>
+                    </div>
+                    <div className="alloc-list">
+                        {allocation.length > 0 ? allocation.map((a, i) => (
+                            <div className="alloc-item" key={i}>
+                                <div className="alloc-info">
+                                    <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{a.symbol}</span>
+                                    <span className="muted">{a.percentage.toFixed(1)}%</span>
+                                </div>
+                                <div className="alloc-bar-bg">
+                                    <div 
+                                        className="alloc-bar-fill" 
+                                        style={{ 
+                                            width: `${a.percentage}%`, 
+                                            background: COLORS[i % COLORS.length] 
+                                        }} 
+                                    />
                                 </div>
                             </div>
                         )) : (
-                            <div className="glass-card muted" style={{ padding: '4rem', textAlign: 'center' }}>
-                                Your portfolio is currently empty. Start by adding an asset.
-                            </div>
+                            <div className="muted" style={{ fontSize: '12px', textAlign: 'center' }}>No data available</div>
                         )}
                     </div>
-                </div>
-
-                <div className="side-panel">
-                    <div className="glass-card allocation-card">
-                        <div className="allocation-title syne">
-                            Asset Allocation
-                            <span className="status-badge">Real-time</span>
+                    <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(0, 232, 135, 0.05)', borderRadius: '12px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--accent-green)', fontWeight: 700, marginBottom: '4px' }}>STRATEGY TIP</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                            High concentration in {allocation[0]?.symbol || 'one asset'} detected. Consider diversifying to reduce risk.
                         </div>
-                        <div className="alloc-list">
-                            {allocation.length > 0 ? allocation.map((a, i) => (
-                                <div className="alloc-item" key={i}>
-                                    <div className="alloc-info">
-                                        <span className="syne" style={{ fontWeight: 700 }}>{a.symbol}</span>
-                                        <span className="muted">{a.percentage.toFixed(1)}%</span>
-                                    </div>
-                                    <div className="alloc-bar-bg">
-                                        <div 
-                                            className="alloc-bar-fill" 
-                                            style={{ 
-                                                width: `${a.percentage}%`, 
-                                                background: COLORS[i % COLORS.length] 
-                                            }} 
-                                        />
-                                    </div>
-                                </div>
-                            )) : (
-                                <div className="muted" style={{ textAlign: 'center', fontSize: '13px' }}>No data available</div>
-                            )}
-                        </div>
-                        {allocation.length > 0 && (
-                            <div className="strategy-card">
-                                <div className="strategy-label">STRATEGY TIP</div>
-                                <div className="strategy-text">
-                                    {allocation[0]?.percentage > 50 
-                                        ? `High concentration in ${allocation[0].symbol} detected. Consider diversifying to reduce risk.`
-                                        : "Your portfolio distribution looks healthy. Continue monitoring for rebalancing opportunities."}
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>

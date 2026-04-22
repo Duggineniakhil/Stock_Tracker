@@ -38,8 +38,13 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (name, email, password) => {
         const data = await api.register(name, email, password);
-        // Automatically login after registration if the API returns a token,
-        // otherwise redirect to login (the UI will handle the redirect based on return)
+        const { token, user: userData } = data;
+        
+        if (token) {
+            localStorage.setItem('token', token);
+            const decoded = jwtDecode(token);
+            setUser({ ...decoded, ...userData });
+        }
         return data;
     };
 

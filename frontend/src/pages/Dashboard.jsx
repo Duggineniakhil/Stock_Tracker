@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { fetchPortfolioSummary, fetchPortfolio } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
 const Dashboard = () => {
+    const { user } = useAuth();
     const [summary, setSummary] = useState(null);
     const [holdings, setHoldings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -41,7 +43,10 @@ const Dashboard = () => {
         <div className="dashboard-container">
             <header className="hero" style={{ padding: '3rem 2rem 2rem' }}>
                 <div className="hbadge"><span className="ldot"></span> Performance Overview</div>
-                <h1 className="syne" style={{ fontSize: '36px' }}>Your Portfolio,<br /><span className="g-text">At a Glance.</span></h1>
+                <h1 className="syne" style={{ fontSize: '36px' }}>
+                    {user?.name ? `Welcome back, ${user.name.split(' ')[0]}` : 'Your Portfolio'},<br />
+                    <span className="g-text">At a Glance.</span>
+                </h1>
             </header>
 
             <div className="db-wrap" style={{ marginTop: '0', maxWidth: '800px' }}>

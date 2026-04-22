@@ -71,7 +71,32 @@ const register = async (req, res) => {
                 return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Registration failed' } });
             }
             logger.info(`New user registered: ${email}`);
-            res.status(201).json({ message: 'Account created successfully', userId: this.lastID });
+            
+            // Auto-login: Issue tokens immediately
+            const accessToken = jwt.sign(
+                { id: this.lastID, email: email.toLowerCase(), name: name },
+                JWT_SECRET,
+                { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+            );
+
+            const refreshToken = jwt.sign(
+                { id: this.lastID, type: 'refresh' },
+                JWT_REFRESH_SECRET,
+                { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+            );
+
+            // Store refresh token hash
+            const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            db.run('INSERT OR REPLACE INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
+                [this.lastID, tokenHash, expiresAt]);
+
+            res.status(201).json({
+                message: 'Account created successfully',
+                token: accessToken,
+                refreshToken,
+                user: { id: this.lastID, email: email.toLowerCase(), name }
+            });
         });
     } catch (error) {
         logger.error('Registration error', { error: error.message });

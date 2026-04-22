@@ -30,6 +30,9 @@ const Navbar = () => {
             <div className="nav-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                 {user ? (
                     <>
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                            Hi, {user.name?.split(' ')[0] || user.email.split('@')[0]}
+                        </span>
                         <Link to="/dashboard" className="muted" style={{ fontSize: '13px' }}>Dashboard</Link>
                         <button onClick={handleLogout} className="ncta" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-main)' }}>
                             Logout

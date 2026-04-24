@@ -1,4 +1,5 @@
 const stockService = require('../services/stockService');
+const { success, error: apiError } = require('../utils/responseWrapper');
 
 const stockController = {
     // Get current stock data
@@ -7,15 +8,15 @@ const stockController = {
             const { symbol } = req.params;
 
             const quote = await stockService.getStockQuote(symbol);
-            res.json(quote);
+            return success(res, quote, 'Stock data fetched successfully');
         } catch (error) {
             console.error('Error fetching stock data:', error);
 
             if (error.message.includes('Invalid stock symbol')) {
-                return res.status(404).json({ error: 'Stock symbol not found' });
+                return apiError(res, 'Stock symbol not found', null, 404);
             }
 
-            res.status(500).json({ error: 'Failed to fetch stock data' });
+            return apiError(res, `Failed to fetch stock data: ${error.message}`, null, error.statusCode || 500);
         }
     },
 
@@ -26,10 +27,10 @@ const stockController = {
             const range = req.query.range || '1mo'; // Default to 1 month
 
             const historicalData = await stockService.getHistoricalData(symbol, range);
-            res.json(historicalData);
+            return success(res, historicalData, 'Historical data fetched successfully');
         } catch (error) {
             console.error('Error fetching historical data:', error);
-            res.status(500).json({ error: 'Failed to fetch historical data' });
+            return apiError(res, 'Failed to fetch historical data', null, 500);
         }
     }
 };

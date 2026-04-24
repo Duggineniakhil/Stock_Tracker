@@ -1,6 +1,6 @@
 # Quotra
 
-A comprehensive, full-stack stock portfolio and market tracking application — **Simplified**. Built with Node.js, Express, React, and SQLite.
+A comprehensive, full-stack stock portfolio and market tracking application — **Simplified and AI-Powered**. Built with Node.js, Express, React, SQLite, and OpenAI.
 
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
 ![Node.js](https://img.shields.io/badge/Node.js-v20+-green)
@@ -24,6 +24,16 @@ A comprehensive, full-stack stock portfolio and market tracking application — 
 - **Portfolio Tracking:** Manage holdings, track purchase prices, calculate real-time P/L, and visualize allocation with interactive chart overlays.
 - **Advanced Charting:** View historical price trends ranging from 1D, 5D, 1M, YTD up to Max using Chart.js.
 - **Dark Mode UI:** A professional and sleek dark-themed interface crafted for a modern user experience.
+
+### 🤖 AI-Powered Insights (New)
+- **AI Advisor:** A GPT-4o powered chatbot that understands your portfolio and answers market questions.
+- **Sentiment Analysis:** Real-time news sentiment (Bullish/Bearish) mapped to your watchlist.
+- **Smart Reports:** Auto-generated portfolio health summaries highlighting diversification and risks.
+- **Smart Alerts:** AI-generated plain-English explanations attached to automated price alerts.
+
+### 💎 SaaS Tiers
+- **Flexible Plans:** Built-in infrastructure for Free, Student, and Pro tiers with feature gating.
+- **Scalable Design:** Ready for Stripe integration (Phase 4).
 
 ### Intelligent Alerts Engine
 - **Automated Rules:** Configure alerts for percentage drops/gains, target prices, or volume spikes.
@@ -131,6 +141,8 @@ Ensure you have configured the following crucial environment variables:
 | `EMAIL_USER` | SMTP username for alert emails | *Required* |
 | `EMAIL_PASS` | SMTP application password | *Required* |
 | `MAX_LOGIN_ATTEMPTS` | Brute-force threshold | `5` |
+| `OPENAI_API_KEY` | Key for AI features | *Required for AI* |
+| `AI_MODEL` | OpenAI Model to use | `gpt-4o-mini` |
 
 **`frontend/.env`**
 | Variable | Description | Default / Example |

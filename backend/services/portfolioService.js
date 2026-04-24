@@ -31,7 +31,7 @@ const portfolioService = {
         // Fetch fresh price
         try {
             const quote = await stockService.getStockQuote(symbol);
-            const price = quote.regularMarketPrice || 0;
+            const price = quote.currentPrice || 0;
 
             // Cache it
             priceCache.set(symbol, {
@@ -308,7 +308,7 @@ const portfolioService = {
     validateSymbol: async (symbol) => {
         try {
             const quote = await stockService.getStockQuote(symbol);
-            return quote && quote.regularMarketPrice !== undefined;
+            return quote && quote.currentPrice !== undefined;
         } catch (error) {
             return false;
         }

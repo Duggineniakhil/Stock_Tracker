@@ -31,7 +31,7 @@ const alertRulesService = {
 
         try {
             if (template_type === 'PERCENTAGE_CHANGE') {
-                const changePercent = quote.regularMarketChangePercent || 0;
+                const changePercent = quote.changePercent || 0;
                 const absChange = Math.abs(changePercent);
                 if (condition_operator === 'ABOVE' && changePercent >= condition_value) {
                     triggered = true;
@@ -42,7 +42,7 @@ const alertRulesService = {
                 }
 
             } else if (template_type === 'TARGET_PRICE') {
-                const price = quote.regularMarketPrice || 0;
+                const price = quote.currentPrice || 0;
                 if (condition_operator === 'ABOVE' && price >= condition_value) {
                     triggered = true;
                     message = `${rule.symbol} hit $${price.toFixed(2)} (target: above $${condition_value})`;
@@ -52,8 +52,8 @@ const alertRulesService = {
                 }
 
             } else if (template_type === 'VOLUME_SPIKE') {
-                const volume = quote.regularMarketVolume || 0;
-                const avgVolume = quote.averageDailyVolume3Month || quote.averageDailyVolume10Day || 1;
+                const volume = quote.volume || 0;
+                const avgVolume = 1; // Simplified for now
                 const spike = (volume / avgVolume) * 100;
                 if (spike >= condition_value) {
                     triggered = true;

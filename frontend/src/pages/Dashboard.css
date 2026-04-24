@@ -92,7 +92,19 @@
     font-size: 32px;
     font-weight: 700;
     color: var(--text-main);
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-16);
 }
+
+.bal-ch {
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+}
+
+.bal-ch.up { color: var(--market-green); }
+.bal-ch.dn { color: var(--market-red); }
 
 .tabs {
     display: flex;
@@ -106,6 +118,7 @@
     color: var(--text-muted);
     background: transparent;
     transition: var(--transition-base);
+    cursor: pointer;
 }
 
 .tab.a {
@@ -115,18 +128,19 @@
 }
 
 .chart-box {
-    margin-bottom: var(--sp-32);
+    margin-bottom: var(--sp-48);
 }
 
 .chart-box svg {
     width: 100%;
-    height: 100%;
+    height: 120px;
+    filter: drop-shadow(0 0 10px rgba(0, 232, 135, 0.1));
 }
 
 /* Holdings Grid */
 .scards {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: var(--sp-16);
 }
 

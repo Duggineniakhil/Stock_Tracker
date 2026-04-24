@@ -107,6 +107,11 @@ const api = {
     deleteHolding: (id) => axiosInstance.delete(`/v1/portfolio/${id}`).then(r => r.data),
     exportPortfolioCSV: () => axiosInstance.get('/v1/portfolio/export/csv', { responseType: 'blob' }).then(r => r.data),
     fetchStockNews: (symbols) => axiosInstance.get('/v1/stock/news', { params: { symbols: symbols.join(',') } }).then(r => r.data),
+    chatWithAI: (message) => axiosInstance.post('/v1/ai/chat', { message }).then(r => r.data),
+    fetchChatHistory: () => axiosInstance.get('/v1/ai/chat/history').then(r => r.data),
+    fetchStockSentiment: (symbol) => axiosInstance.get(`/v1/ai/sentiment/${symbol}`).then(r => r.data),
+    generateAIReport: () => axiosInstance.post('/v1/ai/report/generate').then(r => r.data),
+    fetchLatestAIReport: () => axiosInstance.get('/v1/ai/report/latest').then(r => r.data),
 };
 
 // Named exports
@@ -136,6 +141,11 @@ export const updateHolding = api.updateHolding;
 export const deleteHolding = api.deleteHolding;
 export const exportPortfolioCSV = api.exportPortfolioCSV;
 export const fetchStockNews = api.fetchStockNews;
+export const chatWithAI = api.chatWithAI;
+export const fetchChatHistory = api.fetchChatHistory;
+export const fetchStockSentiment = api.fetchStockSentiment;
+export const generateAIReport = api.generateAIReport;
+export const fetchLatestAIReport = api.fetchLatestAIReport;
 
 // Attach methods to axiosInstance for easier access in AuthContext
 axiosInstance.login = api.login;

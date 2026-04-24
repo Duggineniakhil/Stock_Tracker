@@ -145,10 +145,61 @@
     z-index: 1000;
 }
 
+.add-card {
+    margin-bottom: var(--sp-32);
+    border-color: var(--accent-green-glow);
+}
+
 .add-asset-form {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-end;
     gap: var(--sp-16);
+    flex-wrap: wrap;
+}
+
+.add-asset-form .input-group {
+    flex: 1;
+    min-width: 120px;
+}
+
+.h-del {
+    background: transparent;
+    border: none;
+    color: var(--market-red);
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: var(--sp-8);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: var(--transition-base);
+}
+
+.h-del:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.strategy-card {
+    margin-top: var(--sp-32);
+    padding: var(--sp-16);
+    background: var(--accent-green-dim);
+    border-radius: var(--radius-btn);
+    border: 1px solid var(--accent-green-glow);
+}
+
+.strat-lbl {
+    font-size: 10px;
+    color: var(--accent-green);
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.strat-body {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
 }
 
 @media (max-width: 900px) {

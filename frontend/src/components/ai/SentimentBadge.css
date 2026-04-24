@@ -1,0 +1,42 @@
+.sentiment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+.sentiment-badge.bullish {
+    background: rgba(0, 232, 135, 0.1);
+    color: #00e887;
+    border: 1px solid rgba(0, 232, 135, 0.2);
+}
+
+.sentiment-badge.bearish {
+    background: rgba(240, 80, 80, 0.1);
+    color: #f05050;
+    border: 1px solid rgba(240, 80, 80, 0.2);
+}
+
+.sentiment-badge.neutral {
+    background: rgba(255, 255, 255, 0.05);
+    color: #888;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sb-loading {
+    font-size: 0.7rem;
+    color: #555;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}

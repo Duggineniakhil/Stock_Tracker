@@ -1,0 +1,111 @@
+.pricing-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 1rem;
+}
+
+.pricing-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.pricing-header h1 {
+    font-size: 3.5rem;
+    margin: 1rem 0;
+}
+
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.plan-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.plan-card:hover {
+    border-color: #444;
+    transform: translateY(-5px);
+}
+
+.plan-card.featured {
+    border-color: var(--accent-green);
+    background: linear-gradient(180deg, rgba(0, 232, 135, 0.05) 0%, rgba(0,0,0,0) 100%);
+}
+
+.plan-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: var(--accent-green);
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.plan-header {
+    margin-bottom: 2.5rem;
+}
+
+.plan-header h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.plan-price-box {
+    display: flex;
+    align-items: baseline;
+}
+
+.price-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.price-period {
+    color: #555;
+    margin-left: 4px;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 3rem 0;
+    flex: 1;
+}
+
+.plan-features li {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: #ccc;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.check {
+    color: var(--accent-green);
+    font-weight: 800;
+}
+
+.pricing-footer {
+    text-align: center;
+}
+
+.full-width {
+    width: 100%;
+}

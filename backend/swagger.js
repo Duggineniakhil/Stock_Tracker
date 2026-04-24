@@ -5,9 +5,9 @@ const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'Stock Tracker API',
-            version: '1.0.0',
-            description: 'Professional stock tracking dashboard API with portfolio management, watchlist, and intelligent alerts',
+            title: 'Quotra SaaS API',
+            version: '2.0.0',
+            description: 'Professional stock tracking SaaS API with AI Advisor, portfolio health reports, and tier-based feature access.',
             contact: {
                 name: 'Stock Tracker',
                 url: 'http://localhost:5000'
@@ -75,6 +75,24 @@ const options = {
                         condition_value: { type: 'number' },
                         priority: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] },
                         is_active: { type: 'boolean' }
+                    }
+                },
+                AIReport: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' },
+                        report_type: { type: 'string' },
+                        content_html: { type: 'string' },
+                        summary: { type: 'string' },
+                        generated_at: { type: 'string', format: 'date-time' }
+                    }
+                },
+                SentimentDetails: {
+                    type: 'object',
+                    properties: {
+                        headline: { type: 'string' },
+                        sentiment: { type: 'string', enum: ['bullish', 'bearish', 'neutral'] },
+                        score: { type: 'number' }
                     }
                 }
             }

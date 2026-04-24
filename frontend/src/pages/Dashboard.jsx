@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchPortfolioSummary, fetchPortfolio } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import InsightCard from '../components/ai/InsightCard';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -56,7 +57,7 @@ const Dashboard = () => {
                         <div className="dot" style={{ background: 'var(--market-yellow)' }}></div>
                         <div className="dot" style={{ background: 'var(--market-green)' }}></div>
                     </div>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>quotra — dashboard summary</span>
+                    <span className="small-text muted">quotra — dashboard summary</span>
                     <div style={{ width: '46px' }}></div>
                 </div>
                 <div className="db-body">
@@ -65,12 +66,7 @@ const Dashboard = () => {
                             <div className="bal-lbl">Total portfolio value</div>
                             <div className="bal-val">
                                 ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                <span style={{ 
-                                    fontSize: '14px', 
-                                    color: isPositive ? 'var(--market-green)' : 'var(--market-red)', 
-                                    fontFamily: "'DM Sans'",
-                                    marginLeft: 'var(--sp-16)'
-                                }}>
+                                <span className={`bal-ch ${isPositive ? 'up' : 'dn'}`}>
                                     {isPositive ? '+' : ''}{totalChangePercent.toFixed(2)}%
                                 </span>
                             </div>
@@ -96,8 +92,8 @@ const Dashboard = () => {
                         </svg>
                     </div>
 
-                    <div className="sec-label" style={{ marginBottom: 'var(--sp-16)' }}>Top Holdings</div>
-                    <div className="scards" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
+                    <div className="sec-label">Top Holdings</div>
+                    <div className="scards">
                         {holdings.length > 0 ? holdings.map((h, i) => (
                             <div className="sc" key={i}>
                                 <div className="sc-sym">{h.symbol}</div>
@@ -108,11 +104,15 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         )) : (
-                            <div className="muted" style={{ fontSize: '13px', gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--sp-32)' }}>
+                            <div className="card muted" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--sp-32)' }}>
                                 No holdings yet. Start by adding an asset in Portfolio.
                             </div>
                         )}
                     </div>
+                </div>
+
+                <div className="db-sidebar reveal">
+                    <InsightCard />
                 </div>
             </div>
         </div>

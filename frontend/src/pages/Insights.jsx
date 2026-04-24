@@ -10,7 +10,8 @@ const Insights = () => {
         const getInsights = async () => {
             try {
                 const res = await fetchAlerts(20);
-                setAlerts(res.alerts || res.data || []);
+                // Standardized wrapper has actual payload in .data
+                setAlerts(res.data?.alerts || res.data || []);
             } catch (err) {
                 console.error('Error fetching insights:', err);
             } finally {

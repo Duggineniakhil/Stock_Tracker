@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const db = require('../db/database');
 const logger = require('../utils/logger');
+const { success, error: apiError } = require('../utils/responseWrapper');
 
 const MAX_LOGIN_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS) || 5;
 const LOCKOUT_DURATION_MS = (parseInt(process.env.LOCKOUT_DURATION_MINUTES) || 15) * 60 * 1000;
@@ -47,18 +48,18 @@ const register = async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Email and password are required' } });
+        return apiError(res, 'Email and password are required', null, 400);
     }
 
     // Password strength check
     const strength = isStrongPassword(password);
     if (!strength.valid) {
-        return res.status(400).json({ error: { code: 'WEAK_PASSWORD', message: strength.reason } });
+        return apiError(res, strength.reason, null, 400);
     }
 
     // Basic email validation
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid email format' } });
+        return apiError(res, 'Invalid email format', null, 400);
     }
 
     try {
@@ -66,15 +67,15 @@ const register = async (req, res) => {
         db.run('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', [name, email.toLowerCase(), hashedPassword], function (err) {
             if (err) {
                 if (err.message.includes('UNIQUE constraint failed')) {
-                    return res.status(409).json({ error: { code: 'CONFLICT', message: 'Email already registered' } });
+                    return apiError(res, 'Email already registered', null, 409);
                 }
-                return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Registration failed' } });
+                return apiError(res, 'Registration failed', null, 500);
             }
             logger.info(`New user registered: ${email}`);
             
             // Auto-login: Issue tokens immediately
             const accessToken = jwt.sign(
-                { id: this.lastID, email: email.toLowerCase(), name: name },
+                { id: this.lastID, email: email.toLowerCase(), name: name, plan: 'free' },
                 JWT_SECRET,
                 { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
             );
@@ -91,16 +92,15 @@ const register = async (req, res) => {
             db.run('INSERT OR REPLACE INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
                 [this.lastID, tokenHash, expiresAt]);
 
-            res.status(201).json({
-                message: 'Account created successfully',
+            return success(res, {
                 token: accessToken,
                 refreshToken,
-                user: { id: this.lastID, email: email.toLowerCase(), name }
-            });
+                user: { id: this.lastID, email: email.toLowerCase(), name, plan: 'free' }
+            }, 'Account created successfully', 201);
         });
     } catch (error) {
         logger.error('Registration error', { error: error.message });
-        res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Server error during registration' } });
+        return apiError(res, 'Server error during registration', null, 500);
     }
 };
 
@@ -118,19 +118,14 @@ const login = async (req, res) => {
         const attempts = await checkLockout(email.toLowerCase());
         if (attempts >= MAX_LOGIN_ATTEMPTS) {
             logger.warn(`Account locked: ${email} - ${attempts} failed attempts`);
-            return res.status(423).json({
-                error: {
-                    code: 'ACCOUNT_LOCKED',
-                    message: `Account temporarily locked due to ${MAX_LOGIN_ATTEMPTS} failed attempts. Try again in ${process.env.LOCKOUT_DURATION_MINUTES || 15} minutes.`
-                }
-            });
+            return apiError(res, `Account temporarily locked due to ${MAX_LOGIN_ATTEMPTS} failed attempts. Try again in ${process.env.LOCKOUT_DURATION_MINUTES || 15} minutes.`, null, 423);
         }
 
         db.get('SELECT * FROM users WHERE email = ?', [email.toLowerCase()], async (err, user) => {
-            if (err) return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Login failed' } });
+            if (err) return apiError(res, 'Login failed', null, 500);
             if (!user) {
                 recordLoginAttempt(email, ip, false);
-                return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' } });
+                return apiError(res, 'Invalid email or password', null, 401);
             }
 
             const passwordMatch = await bcrypt.compare(password, user.password_hash);
@@ -140,7 +135,7 @@ const login = async (req, res) => {
                 const msg = remaining <= 0
                     ? 'Account will be locked on next failure'
                     : `Invalid credentials. ${remaining} attempts remaining before lockout.`;
-                return res.status(401).json({ error: { code: 'INVALID_CREDENTIALS', message: msg } });
+                return apiError(res, msg, null, 401);
             }
 
             // Success - clear failed attempts and issue tokens
@@ -148,7 +143,7 @@ const login = async (req, res) => {
             recordLoginAttempt(email, ip, true);
 
             const accessToken = jwt.sign(
-                { id: user.id, email: user.email },
+                { id: user.id, email: user.email, plan: user.plan || 'free' },
                 JWT_SECRET,
                 { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
             );
@@ -166,23 +161,23 @@ const login = async (req, res) => {
                 [user.id, tokenHash, expiresAt]);
 
             logger.info(`User logged in: ${email}`);
-            res.json({
+            return success(res, {
                 token: accessToken,
                 refreshToken,
                 expiresIn: 3600,
-                user: { id: user.id, email: user.email }
-            });
+                user: { id: user.id, email: user.email, plan: user.plan || 'free' }
+            }, 'Login successful');
         });
     } catch (err) {
         logger.error('Login error', { error: err.message });
-        res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Server error during login' } });
+        return apiError(res, 'Server error during login', null, 500);
     }
 };
 
 // ── Refresh Token ─────────────────────────────────────────────────────────────
 const refreshToken = async (req, res) => {
     const { refreshToken: token } = req.body;
-    if (!token) return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Refresh token required' } });
+    if (!token) return apiError(res, 'Refresh token required', null, 400);
 
     try {
         const decoded = jwt.verify(token, JWT_REFRESH_SECRET);
@@ -191,7 +186,7 @@ const refreshToken = async (req, res) => {
         db.get('SELECT * FROM refresh_tokens WHERE token_hash = ? AND revoked = 0 AND expires_at > CURRENT_TIMESTAMP',
             [tokenHash], (err, storedToken) => {
                 if (err || !storedToken) {
-                    return res.status(401).json({ error: { code: 'INVALID_TOKEN', message: 'Invalid or expired refresh token' } });
+                    return apiError(res, 'Invalid or expired refresh token', null, 401);
                 }
 
                 const newAccessToken = jwt.sign(
@@ -200,10 +195,10 @@ const refreshToken = async (req, res) => {
                     { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
                 );
 
-                res.json({ token: newAccessToken, expiresIn: 3600 });
+                return success(res, { token: newAccessToken, expiresIn: 3600 }, 'Token refreshed successfully');
             });
     } catch (err) {
-        res.status(401).json({ error: { code: 'INVALID_TOKEN', message: 'Invalid refresh token' } });
+        return apiError(res, 'Invalid refresh token', null, 401);
     }
 };
 
@@ -214,7 +209,7 @@ const logout = (req, res) => {
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
         db.run('UPDATE refresh_tokens SET revoked = 1 WHERE token_hash = ?', [tokenHash]);
     }
-    res.json({ message: 'Logged out successfully' });
+    return success(res, null, 'Logged out successfully');
 };
 
 module.exports = { register, login, refreshToken, logout };

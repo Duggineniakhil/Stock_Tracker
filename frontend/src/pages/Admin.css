@@ -1,0 +1,96 @@
+.admin-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+}
+
+.admin-header {
+    margin-bottom: 3rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.stat-card.highlight {
+    border-color: var(--accent-green);
+    background: rgba(0, 232, 135, 0.05);
+}
+
+.stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.admin-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.sec-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 1.2rem 2rem;
+    font-size: 0.8rem;
+    color: #555;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table td {
+    padding: 1.2rem 2rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.p-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.p-badge.pro { background: rgba(0, 232, 135, 0.1); color: var(--accent-green); }
+.p-badge.student { background: rgba(0, 100, 255, 0.1); color: #0070ff; }
+.p-badge.free { background: rgba(255, 255, 255, 0.05); color: #888; }
+
+.small-link {
+    background: none;
+    border: none;
+    color: var(--accent-green);
+    cursor: pointer;
+    text-decoration: underline;
+}

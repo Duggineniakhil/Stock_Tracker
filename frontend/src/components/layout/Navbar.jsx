@@ -26,6 +26,7 @@ const Navbar = () => {
                 <ul className="nl">
                     <li><Link to="/markets">Markets</Link></li>
                     <li><Link to="/portfolio">Portfolio</Link></li>
+                    <li><Link to="/advisor">AI Advisor</Link></li>
                     <li><Link to="/insights">Insights</Link></li>
                 </ul>
 

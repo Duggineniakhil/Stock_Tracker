@@ -27,25 +27,25 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const data = await api.login(email, password);
-        const { token, user: userData } = data;
+        const res = await api.login(email, password);
+        const { token, user: userData } = res.data;
         
         localStorage.setItem('token', token);
         const decoded = jwtDecode(token);
         setUser({ ...decoded, ...userData });
-        return data;
+        return res.data;
     };
 
     const register = async (name, email, password) => {
-        const data = await api.register(name, email, password);
-        const { token, user: userData } = data;
+        const res = await api.register(name, email, password);
+        const { token, user: userData } = res.data;
         
         if (token) {
             localStorage.setItem('token', token);
             const decoded = jwtDecode(token);
             setUser({ ...decoded, ...userData });
         }
-        return data;
+        return res.data;
     };
 
     const logout = () => {

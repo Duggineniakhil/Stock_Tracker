@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchPortfolio, fetchPortfolioAllocation, addHolding, deleteHolding } from '../services/api';
 import './Portfolio.css';
 
 const Portfolio = () => {
+    const navigate = useNavigate();
     const [holdings, setHoldings] = useState([]);
     const [allocation, setAllocation] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -69,21 +71,20 @@ const Portfolio = () => {
             </header>
 
             {showAddForm && (
-                <div className="card reveal" style={{ marginBottom: 'var(--sp-32)' }}>
-                    <form className="add-asset-form" onSubmit={handleAdd} style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                        <div className="input-group" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label className="small-text">Symbol</label>
+                <div className="card reveal add-card">
+                    <form className="add-asset-form" onSubmit={handleAdd}>
+                        <div className="input-group">
+                            <label>Symbol</label>
                             <input 
                                 type="text" 
                                 placeholder="AAPL" 
                                 required 
                                 value={newAsset.symbol} 
                                 onChange={e => setNewAsset({...newAsset, symbol: e.target.value.toUpperCase()})}
-                                style={{ background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', padding: '12px', borderRadius: 'var(--radius-btn)' }}
                             />
                         </div>
-                        <div className="input-group" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label className="small-text">Quantity</label>
+                        <div className="input-group">
+                            <label>Quantity</label>
                             <input 
                                 type="number" 
                                 step="any" 
@@ -91,11 +92,10 @@ const Portfolio = () => {
                                 required 
                                 value={newAsset.quantity} 
                                 onChange={e => setNewAsset({...newAsset, quantity: e.target.value})} 
-                                style={{ background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', padding: '12px', borderRadius: 'var(--radius-btn)' }}
                             />
                         </div>
-                        <div className="input-group" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label className="small-text">Buy Price</label>
+                        <div className="input-group">
+                            <label>Buy Price</label>
                             <input 
                                 type="number" 
                                 step="any" 
@@ -103,7 +103,6 @@ const Portfolio = () => {
                                 required 
                                 value={newAsset.buyPrice} 
                                 onChange={e => setNewAsset({...newAsset, buyPrice: e.target.value})} 
-                                style={{ background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', padding: '12px', borderRadius: 'var(--radius-btn)' }}
                             />
                         </div>
                         <button type="submit" className="btn btn-primary">Add Asset</button>
@@ -115,7 +114,11 @@ const Portfolio = () => {
                 <div className="holdings-section">
                     <div className="sec-label">My Holdings</div>
                     {holdings.length > 0 ? holdings.map((h, i) => (
-                        <div className="holding-item" key={h._id || i}>
+                        <div 
+                            className="holding-item clickable" 
+                            key={h._id || i}
+                            onClick={() => navigate(`/stock/${h.symbol}`)}
+                        >
                             <div className="h-brand">
                                 <div className="h-icon-box">{h.symbol.substring(0, 2)}</div>
                                 <div>
@@ -128,7 +131,10 @@ const Portfolio = () => {
                                 <div className={`h-change ${h.change >= 0 ? 'up' : 'dn'}`}>
                                     {h.change >= 0 ? '+' : ''}{h.changePercent?.toFixed(2)}%
                                 </div>
-                                <button onClick={() => handleDelete(h._id)} style={{ fontSize: '10px', color: '#f05050', marginTop: '4px' }}>Remove</button>
+                                <button className="h-del" onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(h._id);
+                                }}>Remove</button>
                             </div>
                         </div>
                     )) : (
@@ -139,9 +145,9 @@ const Portfolio = () => {
                 </div>
 
                 <div className="card allocation-card reveal">
-                    <div className="allocation-title h2" style={{ fontSize: '18px' }}>
+                    <div className="allocation-title h2">
                         Current Allocation
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent-green)', fontFamily: 'DM Sans' }}>Real-time</span>
+                        <span className="small-text accent">Real-time</span>
                     </div>
                     <div className="alloc-list">
                         {allocation.length > 0 ? allocation.map((a, i) => (
@@ -161,12 +167,12 @@ const Portfolio = () => {
                                 </div>
                             </div>
                         )) : (
-                            <div className="muted" style={{ fontSize: '12px', textAlign: 'center' }}>No data available</div>
+                            <div className="muted small-text" style={{ textAlign: 'center' }}>No data available</div>
                         )}
                     </div>
-                    <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(0, 232, 135, 0.05)', borderRadius: '12px' }}>
-                        <div style={{ fontSize: '11px', color: 'var(--accent-green)', fontWeight: 700, marginBottom: '4px' }}>STRATEGY TIP</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                    <div className="strategy-card">
+                        <div className="strat-lbl">STRATEGY TIP</div>
+                        <div className="strat-body">
                             High concentration in {allocation[0]?.symbol || 'one asset'} detected. Consider diversifying to reduce risk.
                         </div>
                     </div>

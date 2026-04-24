@@ -1,12 +1,13 @@
 const db = require('../db/database');
 const stockService = require('./stockService');
 const emailService = require('./emailService');
+const aiService = require('./aiService');
 
 const runAlertEngine = async () => {
     console.log('--- Starting User Alert Engine ---');
 
     // 1. Get all users
-    db.all('SELECT id, email FROM users', [], async (err, users) => {
+    db.all('SELECT id, email, plan FROM users', [], async (err, users) => {
         if (err) {
             console.error('Error fetching users:', err);
             return;
@@ -35,18 +36,31 @@ const runAlertEngine = async () => {
                         if (analysis.shouldAlert) {
                             console.log(`Triggering alert for ${user.email}: ${item.symbol} - ${analysis.reason}`);
 
-                            // 5. Send Email
+                            // 5. AI Explanation (Pro/Student only)
+                            let aiExplanation = '';
+                            if (user.plan === 'pro' || user.plan === 'student') {
+                                aiExplanation = await aiService.explainAlert(
+                                    quote.symbol, 
+                                    'TREND', 
+                                    quote.currentPrice, 
+                                    quote.currentPrice, 
+                                    quote.changePercent
+                                );
+                            }
+
+                            // 6. Send Email
                             await emailService.sendAlertEmail(user.email, {
                                 symbol: quote.symbol,
                                 price: quote.currentPrice,
                                 change: quote.change,
-                                changePercent: quote.changePercent
+                                changePercent: quote.changePercent,
+                                aiExplanation: aiExplanation
                             }, analysis.reason);
 
-                            // 6. Save to User Alerts DB
+                            // 7. Save to User Alerts DB
                             const sql = 'INSERT INTO user_alerts (user_id, symbol, message, reason) VALUES (?, ?, ?, ?)';
                             const message = `${quote.symbol} moved ${quote.changePercent.toFixed(2)}%`;
-                            db.run(sql, [user.id, quote.symbol, message, analysis.reason]);
+                            db.run(sql, [user.id, quote.symbol, message, aiExplanation || analysis.reason]);
                         }
 
                     } catch (sErr) {

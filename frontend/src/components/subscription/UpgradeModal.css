@@ -1,0 +1,101 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.upgrade-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 3rem 2rem;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+}
+
+.close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.modal-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.upgrade-modal h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.upgrade-modal p {
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.plan-comparison-mini {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.mini-plan {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.mini-plan.featured {
+    border-color: var(--accent-green);
+    background: rgba(0,255,140,0.05);
+}
+
+.plan-name {
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 0.25rem;
+}
+
+.featured .plan-name {
+    color: var(--accent-green);
+}
+
+.plan-price {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    color: #fff;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.full-width {
+    width: 100%;
+}

@@ -1,5 +1,6 @@
 const watchlistModel = require('../models/watchlistModel');
 const stockService = require('../services/stockService');
+const { success, error: apiError } = require('../utils/responseWrapper');
 
 const watchlistController = {
     // Add stock to watchlist
@@ -9,7 +10,7 @@ const watchlistController = {
             const { symbol } = req.body;
 
             if (!symbol) {
-                return res.status(400).json({ error: 'Stock symbol is required' });
+                return apiError(res, 'Stock symbol is required', null, 400);
             }
 
             // Validate symbol
@@ -18,20 +19,20 @@ const watchlistController = {
             } catch (error) {
                 const status = error.statusCode || 400;
                 const message = error.message === 'Invalid stock symbol' ? error.message : 'Stock service currently unavailable';
-                return res.status(status).json({ error: message });
+                return apiError(res, message, null, status);
             }
 
             // Check if already in watchlist
             const existing = await watchlistModel.getStockBySymbol(userId, symbol);
             if (existing) {
-                return res.status(409).json({ error: 'Stock already in watchlist' });
+                return apiError(res, 'Stock already in watchlist', null, 409);
             }
 
             const result = await watchlistModel.addStock(userId, symbol);
-            res.status(201).json(result);
+            return success(res, result, 'Stock added to watchlist', 201);
         } catch (error) {
             console.error('Error adding to watchlist:', error);
-            res.status(500).json({ error: 'Failed to add stock to watchlist' });
+            return apiError(res, 'Failed to add stock to watchlist', null, 500);
         }
     },
 
@@ -52,10 +53,10 @@ const watchlistController = {
                 })
             );
 
-            res.json(watchlistWithPrices);
+            return success(res, watchlistWithPrices, 'Watchlist fetched successfully');
         } catch (error) {
             console.error('Error getting watchlist:', error);
-            res.status(500).json({ error: 'Failed to fetch watchlist' });
+            return apiError(res, 'Failed to fetch watchlist', null, 500);
         }
     },
 
@@ -68,13 +69,13 @@ const watchlistController = {
             const result = await watchlistModel.removeStock(userId, id);
 
             if (result.changes === 0) {
-                return res.status(404).json({ error: 'Stock not found in watchlist' });
+                return apiError(res, 'Stock not found in watchlist', null, 404);
             }
 
-            res.json({ message: 'Stock removed from watchlist' });
+            return success(res, null, 'Stock removed from watchlist');
         } catch (error) {
             console.error('Error removing from watchlist:', error);
-            res.status(500).json({ error: 'Failed to remove stock from watchlist' });
+            return apiError(res, 'Failed to remove stock from watchlist', null, 500);
         }
     }
 };

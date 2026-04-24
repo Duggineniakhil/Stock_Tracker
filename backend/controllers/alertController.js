@@ -1,5 +1,6 @@
 const alertModel = require('../models/alertModel');
 const logger = require('../utils/logger');
+const { success, error: apiError } = require('../utils/responseWrapper');
 
 /**
  * @openapi
@@ -24,7 +25,7 @@ const alertController = {
                 alertModel.getAlertCount(userId)
             ]);
 
-            res.json({ alerts, totalCount, limit, offset });
+            return success(res, { alerts, totalCount, limit, offset }, 'Alerts fetched successfully');
         } catch (err) {
             next(err);
         }
@@ -33,8 +34,8 @@ const alertController = {
     deleteAlert: async (req, res, next) => {
         try {
             const result = await alertModel.deleteAlert(parseInt(req.params.id), req.user.id);
-            if (!result.deleted) return res.status(404).json({ error: { message: 'Alert not found', code: 'NOT_FOUND' } });
-            res.json({ message: 'Alert deleted successfully' });
+            if (!result.deleted) return apiError(res, 'Alert not found', null, 404);
+            return success(res, null, 'Alert deleted successfully');
         } catch (err) {
             next(err);
         }
@@ -43,7 +44,7 @@ const alertController = {
     clearHistory: async (req, res, next) => {
         try {
             const result = await alertModel.clearAlertHistory(req.user.id);
-            res.json({ message: `Cleared ${result.deleted} alerts` });
+            return success(res, { deleted: result.deleted }, `Cleared ${result.deleted} alerts`);
         } catch (err) {
             next(err);
         }
@@ -54,10 +55,10 @@ const alertController = {
             const userId = req.user.id;
             const { symbol, message, alertType, priority } = req.body;
             if (!symbol || !message) {
-                return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Symbol and message are required' } });
+                return apiError(res, 'Symbol and message are required', null, 400);
             }
             const result = await alertModel.createAlert(userId, symbol, message, alertType || 'MANUAL', priority || 'MEDIUM', '');
-            res.status(201).json(result);
+            return success(res, result, 'Manual alert created', 201);
         } catch (err) {
             next(err);
         }
@@ -68,7 +69,7 @@ const alertController = {
     getRules: async (req, res, next) => {
         try {
             const rules = await alertModel.getRules(req.user.id, req.query.symbol || null);
-            res.json({ rules, count: rules.length });
+            return success(res, { rules, count: rules.length }, 'Alert rules fetched successfully');
         } catch (err) {
             next(err);
         }

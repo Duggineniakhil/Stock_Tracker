@@ -27,9 +27,9 @@ function initializeDatabase() {
 
         db.exec(schema, (err) => {
             if (err) {
-                console.error('Error initializing database schema:', err.message);
+                console.error('❌ Error initializing database schema:', err.message);
             } else {
-                console.log('Database schema initialized');
+                console.log('✅ Database schema initialized');
                 runMigrations();
             }
         });
@@ -42,27 +42,37 @@ function runMigrations() {
     if (!fs.existsSync(migrationsPath)) return;
 
     const migrations = fs.readFileSync(migrationsPath, 'utf8');
+    
+    // We use db.exec for the whole file. 
+    // Note: If some migrations already ran, they might fail (e.g. ALTER TABLE adding existing column).
+    // To handle this gracefully in SQLite without complex versioning, we can split by statement 
+    // and ignore specific "already exists" errors.
+    
     const statements = migrations
         .split(';')
-        .map(s => {
-            // Strip comment-only lines, then trim
-            return s.split('\n')
-                .filter(line => !line.trim().startsWith('--'))
-                .join('\n')
-                .trim();
-        })
+        .map(s => s.trim())
         .filter(s => s.length > 0);
 
-    let completed = 0;
     db.serialize(() => {
+        let successCount = 0;
+        let skipCount = 0;
+        
         statements.forEach((statement) => {
             db.run(statement, (err) => {
-                if (err && !err.message.includes('duplicate column') && !err.message.includes('already exists')) {
-                    console.warn('Migration warning:', err.message.substring(0, 80));
+                if (err) {
+                    if (err.message.includes('duplicate column') || 
+                        err.message.includes('already exists') || 
+                        err.message.includes('duplicate column name')) {
+                        skipCount++;
+                    } else {
+                        console.error('❌ Migration error:', err.message, '\nStatement:', statement);
+                    }
+                } else {
+                    successCount++;
                 }
-                completed++;
-                if (completed === statements.length) {
-                    console.log('Database migrations applied');
+                
+                if (successCount + skipCount === statements.length) {
+                    console.log(`📊 Migrations complete: ${successCount} applied, ${skipCount} skipped/already-present`);
                 }
             });
         });

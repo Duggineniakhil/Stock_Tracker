@@ -1,17 +1,33 @@
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
 
+// Basic in-memory cache
+const quoteCache = new Map();
+const historicalCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const HISTORICAL_TTL = 15 * 60 * 1000; // 15 minutes
+
 const stockService = {
     // Get current stock quote from Yahoo Finance
     getStockQuote: async (symbol) => {
+        const stockSymbol = symbol.toUpperCase();
+        
+        // 1. Check Cache
+        if (quoteCache.has(stockSymbol)) {
+            const cached = quoteCache.get(stockSymbol);
+            if (Date.now() - cached.timestamp < CACHE_TTL) {
+                return cached.data;
+            }
+        }
+
         try {
-            const quote = await yahooFinance.quote(symbol.toUpperCase());
+            const quote = await yahooFinance.quote(stockSymbol);
 
             if (!quote) {
                 throw new Error('Stock symbol not found');
             }
 
-            return {
+            const data = {
                 symbol: quote.symbol,
                 currentPrice: quote.regularMarketPrice,
                 previousClose: quote.regularMarketPreviousClose,
@@ -26,14 +42,25 @@ const stockService = {
                 fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh,
                 fiftyTwoWeekLow: quote.fiftyTwoWeekLow,
                 exchange: quote.fullExchangeName || quote.exchange,
-                name: quote.longName || quote.shortName || symbol
+                name: quote.longName || quote.shortName || stockSymbol
             };
+
+            // 2. Update Cache
+            quoteCache.set(stockSymbol, { data, timestamp: Date.now() });
+
+            return data;
         } catch (error) {
+            // 3. Fallback to expired cache if available during network failure
+            if (quoteCache.has(stockSymbol)) {
+                console.warn(`⚠️ Fetch failed for ${stockSymbol}, serving stale cache: ${error.message}`);
+                return quoteCache.get(stockSymbol).data;
+            }
+
             // Enhanced logging with stack for "fetch failed" issues
             if (error.message.includes('fetch failed')) {
-                console.error(`NETWORK ERROR fetching ${symbol}:`, error);
+                console.error(`❌ NETWORK ERROR fetching ${stockSymbol}:`, error.message);
             } else {
-                console.error(`Error fetching ${symbol}:`, error.message);
+                console.error(`❌ Error fetching ${stockSymbol}:`, error.message);
             }
 
             if (error.message.includes('No data found') || error.message.includes('Not Found')) {
@@ -50,6 +77,17 @@ const stockService = {
 
     // Get historical data for charts
     getHistoricalData: async (symbol, range = '1mo') => {
+        const stockSymbol = symbol.toUpperCase();
+        const cacheKey = `${stockSymbol}_${range}`;
+
+        // 1. Check Cache
+        if (historicalCache.has(cacheKey)) {
+            const cached = historicalCache.get(cacheKey);
+            if (Date.now() - cached.timestamp < HISTORICAL_TTL) {
+                return cached.data;
+            }
+        }
+
         try {
             const endDate = new Date();
             let startDate = new Date();
@@ -86,20 +124,29 @@ const stockService = {
 
             try {
                 // Using chart() instead of deprecated historical()
-                const result = await yahooFinance.chart(symbol.toUpperCase(), queryOptions);
+                const result = await yahooFinance.chart(stockSymbol, queryOptions);
                 if (result && result.quotes && result.quotes.length > 0) {
-                    return result.quotes.map(item => ({
+                    const data = result.quotes.map(item => ({
                         date: new Date(item.date).toISOString(),
                         price: item.close
                     })).filter(item => item.price !== null);
+
+                    // 2. Update Cache
+                    historicalCache.set(cacheKey, { data, timestamp: Date.now() });
+
+                    return data;
                 }
             } catch (err) {
-                console.warn(`Failed to fetch chart data for ${symbol} (${range}, ${interval}): ${err.message}`);
+                console.warn(`⚠️ Failed to fetch chart data for ${stockSymbol} (${range}): ${err.message}`);
+                // Fallback to stale cache if fetch fails
+                if (historicalCache.has(cacheKey)) {
+                    return historicalCache.get(cacheKey).data;
+                }
             }
 
             return [];
         } catch (error) {
-            console.error(`Error fetching historical data for ${symbol}:`, error.message);
+            console.error(`❌ Error fetching historical data for ${symbol}:`, error.message);
             return [];
         }
     },

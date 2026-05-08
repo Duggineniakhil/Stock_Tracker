@@ -50,7 +50,7 @@ describe('portfolioService', () => {
     describe('getPortfolioSummary', () => {
         it('should return zeros for empty portfolio', async () => {
             portfolioModel.getHoldingsByUserId.mockResolvedValue([]);
-            stockService.getStockQuote.mockResolvedValue({ regularMarketPrice: 100 });
+            stockService.getStockQuote.mockResolvedValue({ currentPrice: 100 });
 
             const summary = await portfolioService.getPortfolioSummary(1);
             expect(summary.totalHoldings).toBe(0);
@@ -64,8 +64,8 @@ describe('portfolioService', () => {
                 { symbol: 'MSFT', quantity: 5, buy_price: 200 }
             ]);
             stockService.getStockQuote
-                .mockResolvedValueOnce({ regularMarketPrice: 120 })
-                .mockResolvedValueOnce({ regularMarketPrice: 250 });
+                .mockResolvedValueOnce({ currentPrice: 120 })
+                .mockResolvedValueOnce({ currentPrice: 250 });
 
             const summary = await portfolioService.getPortfolioSummary(1);
             expect(summary.totalHoldings).toBe(2);
@@ -80,7 +80,7 @@ describe('portfolioService', () => {
             portfolioModel.getHoldingsByUserId.mockResolvedValue([
                 { symbol: 'AAPL', quantity: 10, buy_price: 100 }
             ]);
-            stockService.getStockQuote.mockResolvedValue({ regularMarketPrice: 100 });
+            stockService.getStockQuote.mockResolvedValue({ currentPrice: 100 });
 
             const allocation = await portfolioService.getPortfolioAllocation(1);
             expect(allocation[0].percentage).toBe(100);

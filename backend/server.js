@@ -127,10 +127,12 @@ setTimeout(() => {
 }, 30000);
 
 // ── Start Server ──────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-    logger.info(`🚀 Stock Tracker Backend running on port ${PORT}`);
-    logger.info(`📚 API Docs: http://localhost:${PORT}/api/v1/docs`);
-    logger.info(`🏥 Health:   http://localhost:${PORT}/api/v1/health`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        logger.info(`🚀 Stock Tracker Backend running on port ${PORT}`);
+        logger.info(`📚 API Docs: http://localhost:${PORT}/api/v1/docs`);
+        logger.info(`🏥 Health:   http://localhost:${PORT}/api/v1/health`);
+    });
+}
 
 module.exports = app;

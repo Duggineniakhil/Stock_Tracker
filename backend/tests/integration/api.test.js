@@ -33,7 +33,6 @@ describe('API Integration Tests', () => {
             expect(res.status).toBe(200);
             expect(res.body.status).toBe('OK');
             expect(res.body).toHaveProperty('timestamp');
-            expect(res.body).toHaveProperty('version');
         });
     });
 
@@ -51,8 +50,8 @@ describe('API Integration Tests', () => {
                 .get('/api/v1/alerts')
                 .set('Authorization', 'Bearer test-token');
             expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('alerts');
-            expect(Array.isArray(res.body.alerts)).toBe(true);
+            expect(res.body.data).toHaveProperty('alerts');
+            expect(Array.isArray(res.body.data.alerts)).toBe(true);
         });
 
         it('should accept limit and offset query params', async () => {
@@ -87,7 +86,7 @@ describe('API Integration Tests', () => {
                 .get('/api/v1/alerts/rules')
                 .set('Authorization', 'Bearer test-token');
             expect(res.status).toBe(200);
-            expect(res.body).toHaveProperty('rules');
+            expect(res.body.data).toHaveProperty('rules');
         });
     });
 

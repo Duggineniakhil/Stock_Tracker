@@ -37,6 +37,7 @@ const stockService = {
                 change: quote.regularMarketChange,
                 changePercent: quote.regularMarketChangePercent,
                 volume: quote.regularMarketVolume,
+                avgVolume: quote.averageDailyVolume3Month || quote.averageDailyVolume10Day || 0,
                 marketCap: quote.marketCap,
                 trailingPE: quote.trailingPE,
                 fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh,
@@ -155,13 +156,46 @@ const stockService = {
 
     // Calculate Simple Moving Average
     calculateMovingAverage: (prices, period = 20) => {
-        if (prices.length < period) {
+        if (!prices || prices.length < period) {
             return null;
         }
 
         const recentPrices = prices.slice(-period);
         const sum = recentPrices.reduce((acc, val) => acc + val, 0);
         return sum / period;
+    },
+
+    // Calculate RSI (Relative Strength Index)
+    calculateRSI: (prices, period = 14) => {
+        if (!prices || prices.length <= period) return null;
+
+        let gains = 0;
+        let losses = 0;
+
+        for (let i = 1; i <= period; i++) {
+            const diff = prices[i] - prices[i - 1];
+            if (diff >= 0) gains += diff;
+            else losses -= diff;
+        }
+
+        let avgGain = gains / period;
+        let avgLoss = losses / period;
+
+        for (let i = period + 1; i < prices.length; i++) {
+            const diff = prices[i] - prices[i - 1];
+            let currentGain = 0;
+            let currentLoss = 0;
+
+            if (diff >= 0) currentGain = diff;
+            else currentLoss = -diff;
+
+            avgGain = (avgGain * (period - 1) + currentGain) / period;
+            avgLoss = (avgLoss * (period - 1) + currentLoss) / period;
+        }
+
+        if (avgLoss === 0) return 100;
+        const rs = avgGain / avgLoss;
+        return 100 - (100 / (1 + rs));
     },
 
     // Get trending symbols and their current data

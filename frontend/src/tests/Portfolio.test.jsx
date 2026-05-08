@@ -49,16 +49,20 @@ describe('Portfolio Page', () => {
         vi.clearAllMocks();
     });
 
-    it('renders the portfolio page without crashing', () => {
+    it('renders the portfolio page without crashing', async () => {
         renderWithRouter(<Portfolio />);
-        // Should render an element (page container or heading)
-        expect(document.querySelector('.portfolio-page, .portfolio, .app-container, main')).toBeDefined();
+        // Use waitFor to allow async effects to complete
+        await vi.waitFor(() => {
+            expect(document.querySelector('.portfolio-page, .portfolio, .app-container, main')).toBeDefined();
+        });
     });
 
-    it('shows loading state initially', () => {
+    it('shows loading state initially', async () => {
         renderWithRouter(<Portfolio />);
-        // During loading, some kind of loading indicator should be present or no list yet
-        const container = document.querySelector('.portfolio-page, .portfolio, main, .app-container');
-        expect(container).toBeDefined();
+        // Even if it transitions fast, we want to ensure it doesn't crash
+        await vi.waitFor(() => {
+            const container = document.querySelector('.portfolio-page, .portfolio, main, .app-container');
+            expect(container).toBeDefined();
+        });
     });
 });

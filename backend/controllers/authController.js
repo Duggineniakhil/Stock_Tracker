@@ -212,4 +212,33 @@ const logout = (req, res) => {
     return success(res, null, 'Logged out successfully');
 };
 
-module.exports = { register, login, refreshToken, logout };
+// ── Update Plan (Mock Stripe Integration) ──────────────────────────────────
+const updatePlan = (req, res) => {
+    // In a real app, this route would be protected by verifyToken, 
+    // and would either initiate a Stripe checkout session or be called by a Stripe webhook.
+    // For this portfolio project, we will mock the update directly.
+    const { email, newPlan } = req.body;
+    
+    if (!email || !newPlan) {
+        return apiError(res, 'Email and new plan are required', null, 400);
+    }
+    
+    if (!['free', 'student', 'pro'].includes(newPlan)) {
+        return apiError(res, 'Invalid plan type', null, 400);
+    }
+
+    db.run('UPDATE users SET plan = ? WHERE email = ?', [newPlan, email.toLowerCase()], function(err) {
+        if (err) {
+            logger.error('Error updating plan', { error: err.message });
+            return apiError(res, 'Failed to update subscription plan', null, 500);
+        }
+        
+        if (this.changes === 0) {
+            return apiError(res, 'User not found', null, 404);
+        }
+        
+        return success(res, { plan: newPlan }, `Successfully upgraded to ${newPlan} plan`);
+    });
+};
+
+module.exports = { register, login, refreshToken, logout, updatePlan };

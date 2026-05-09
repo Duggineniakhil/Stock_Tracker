@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { updatePlan } from '../services/api';
 import './Pricing.css';
 
 const Pricing = () => {
-    const { user } = useAuth();
+    const { user, updateUserPlan } = useAuth();
+    const [loading, setLoading] = useState(false);
 
     const plans = [
         {
             name: 'Free',
             price: '$0',
+            slug: 'free',
             features: [
                 '5 portfolio holdings',
                 '3 active alerts',
@@ -23,6 +26,7 @@ const Pricing = () => {
         {
             name: 'Student',
             price: '$4.99',
+            slug: 'student',
             period: '/mo',
             features: [
                 '20 portfolio holdings',
@@ -39,6 +43,7 @@ const Pricing = () => {
         {
             name: 'Pro',
             price: '$12.99',
+            slug: 'pro',
             period: '/mo',
             features: [
                 'Unlimited holdings',
@@ -54,8 +59,30 @@ const Pricing = () => {
         }
     ];
 
-    const handleUpgrade = (plan) => {
-        alert(`Upgrade to ${plan} will be available soon with Stripe integration.`);
+    const handleUpgrade = async (planSlug, planName) => {
+        if (!user) {
+            alert('Please login to upgrade your plan');
+            return;
+        }
+
+        const confirm = window.confirm(`Confirm upgrade to ${planName}? This is a mock payment simulation.`);
+        if (!confirm) return;
+
+        setLoading(true);
+        try {
+            // Mocking a 1.5s payment processing delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            await updatePlan(user.email, planSlug);
+            updateUserPlan(planSlug);
+            
+            alert(`Successfully upgraded to ${planName}!`);
+        } catch (err) {
+            console.error('Upgrade failed:', err);
+            alert('Failed to update plan. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -68,7 +95,7 @@ const Pricing = () => {
 
             <div className="plans-grid">
                 {plans.map((plan, idx) => (
-                    <div key={idx} className={`plan-card ${plan.featured ? 'featured' : ''} reveal`}>
+                    <div key={idx} className={`plan-card ${plan.featured ? 'featured' : ''} ${plan.current ? 'current' : ''} reveal`}>
                         {plan.badge && <div className="plan-badge">{plan.badge}</div>}
                         <div className="plan-header">
                             <h3 className="syne">{plan.name}</h3>
@@ -88,10 +115,10 @@ const Pricing = () => {
 
                         <button 
                             className={`btn ${plan.featured ? 'btn-primary' : 'btn-secondary'} full-width`}
-                            disabled={plan.current}
-                            onClick={() => handleUpgrade(plan.name)}
+                            disabled={plan.current || loading}
+                            onClick={() => handleUpgrade(plan.slug, plan.name)}
                         >
-                            {plan.current ? 'Your Current Plan' : plan.buttonText}
+                            {loading ? 'Processing...' : (plan.current ? 'Your Current Plan' : plan.buttonText)}
                         </button>
                     </div>
                 ))}

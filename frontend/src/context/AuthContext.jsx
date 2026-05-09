@@ -53,8 +53,14 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const updateUserPlan = (newPlan) => {
+        if (user) {
+            setUser({ ...user, plan: newPlan });
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, updateUserPlan, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

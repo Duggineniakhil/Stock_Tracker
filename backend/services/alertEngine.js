@@ -41,10 +41,15 @@ const runAlertEngine = async () => {
         for (const symbol in symbolGroups) {
             try {
                 const quote = await stockService.getStockQuote(symbol);
+                
+                // Fetch historical data for technical indicators (RSI)
+                const history = await stockService.getHistoricalData(symbol, '1mo');
+                const prices = history.map(h => h.price);
+                const rsi = stockService.calculateRSI(prices);
+                
                 const rulesForSymbol = symbolGroups[symbol];
-
                 for (const rule of rulesForSymbol) {
-                    await evaluateRule(rule, quote);
+                    await evaluateRule(rule, quote, rsi);
                 }
             } catch (error) {
                 logger.error(`Error processing symbol ${symbol}:`, { error: error.message });
@@ -53,7 +58,7 @@ const runAlertEngine = async () => {
     });
 };
 
-const evaluateRule = async (rule, quote) => {
+const evaluateRule = async (rule, quote, rsi) => {
     let triggered = false;
     let reason = '';
 
@@ -82,19 +87,35 @@ const evaluateRule = async (rule, quote) => {
             const absChange = Math.abs(quote.changePercent);
             if (absChange >= rule.condition_value) {
                 triggered = true;
-                reason = `Price moved ${quote.changePercent.toFixed(2)}% (Threshold: ${rule.condition_value}%)`;
+                const sign = quote.changePercent >= 0 ? '+' : '';
+                reason = `Price moved ${sign}${quote.changePercent.toFixed(2)}% (Threshold: ${rule.condition_value}%)`;
             }
             break;
 
         case 'VOLUME_SPIKE':
-            // Placeholder: Volume analysis would require historical avg volume
-            // For now, if we have volume in quote, we can do a simple check
-            if (quote.volume && quote.avgVolume && quote.volume > quote.avgVolume * 2) {
+            const threshold = rule.condition_value || 2; // Default 2x avg volume
+            if (quote.volume && quote.avgVolume && quote.volume > quote.avgVolume * threshold) {
                 triggered = true;
-                reason = `Unusual volume detected: ${quote.volume.toLocaleString()} shares`;
+                const multiplier = (quote.volume / quote.avgVolume).toFixed(1);
+                reason = `Unusual volume detected: ${multiplier}x above average (${quote.volume.toLocaleString()} shares)`;
+            }
+            break;
+
+        case 'RSI_OVERSOLD':
+            if (rsi !== null && rsi <= rule.condition_value) {
+                triggered = true;
+                reason = `RSI reached ${rsi.toFixed(2)} (Oversold threshold: ${rule.condition_value})`;
+            }
+            break;
+
+        case 'RSI_OVERBOUGHT':
+            if (rsi !== null && rsi >= rule.condition_value) {
+                triggered = true;
+                reason = `RSI reached ${rsi.toFixed(2)} (Overbought threshold: ${rule.condition_value})`;
             }
             break;
     }
+
 
     if (triggered) {
         await triggerAlert(rule, quote, reason);

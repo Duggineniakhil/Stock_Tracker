@@ -1,6 +1,7 @@
 /* Landing Page Specific Refinements */
 
 .landing-site {
+  background: var(--bg-site);
   color: var(--text-main);
 }
 

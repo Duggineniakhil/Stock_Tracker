@@ -6,7 +6,6 @@ import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import Landing from './pages/Landing';
 import MainLayout from './components/layout/MainLayout';
-import FloatingLines from './components/visuals/FloatingLines';
 import './App.css';
 
 // Lazy-loaded pages
@@ -68,17 +67,11 @@ function App() {
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/stock/:symbol" element={<ProtectedRoute><StockDetails /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-        <FloatingLines 
-          isGlobal={true} 
-          mixBlendMode="normal" 
-          linesGradient={["#00e887", "#2f4ba2", "#080c14"]} 
-          lineCount={12}
-          animationSpeed={1.5}
-        />
-      </Router>
+              
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </Router>
       </AuthProvider>
     </ThemeProvider>
   );

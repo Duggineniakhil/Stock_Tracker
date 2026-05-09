@@ -1,6 +1,7 @@
 /* Global Quotra App Styles */
 
 .site {
+  background: var(--bg-site);
   color: var(--text-main);
   min-height: 100vh;
 }

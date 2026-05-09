@@ -193,7 +193,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     }
   }
 
-  fragColor = vec4(col, clamp(max(col.r, max(col.g, col.b)) * 5.0, 0.0, 1.0));
+  fragColor = vec4(col, 1.0);
 }
 
 void main() {
@@ -244,9 +244,8 @@ export default function FloatingLines({
   bendStrength = -0.5,
   mouseDamping = 0.05,
   parallax = true,
-  parallaxStrength,
-  mixBlendMode = 'screen',
-  isGlobal = false
+  parallaxStrength = 0.2,
+  mixBlendMode = 'screen'
 }) {
   const containerRef = useRef(null);
   const targetMouseRef = useRef(new Vector2(-1000, -1000));
@@ -289,9 +288,8 @@ export default function FloatingLines({
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     camera.position.z = 1;
 
-    const renderer = new WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setClearColor(0x000000, 0); // Transparent background
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     container.appendChild(renderer.domElement);
@@ -360,8 +358,7 @@ export default function FloatingLines({
     const material = new ShaderMaterial({
       uniforms,
       vertexShader,
-      fragmentShader,
-      transparent: true
+      fragmentShader
     });
 
     const geometry = new PlaneGeometry(2, 2);
@@ -485,7 +482,7 @@ export default function FloatingLines({
   return (
     <div
       ref={containerRef}
-      className={`floating-lines-container ${isGlobal ? 'floating-lines-global' : ''}`}
+      className="floating-lines-container"
       style={{
         mixBlendMode: mixBlendMode
       }}

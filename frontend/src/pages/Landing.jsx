@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/layout/Navbar';
+import FloatingLines from '../components/visuals/FloatingLines';
 import './Landing.css';
 
 const Landing = () => {
@@ -42,6 +43,19 @@ const Landing = () => {
             </div>
 
             <div className="hero-wrapper">
+                <div className="hero-bg">
+                    <FloatingLines 
+                        enabledWaves={["top","middle","bottom"]}
+                        lineCount={8}
+                        lineDistance={8}
+                        bendRadius={8}
+                        bendStrength={-2}
+                        interactive
+                        parallax={true}
+                        animationSpeed={1}
+                        linesGradient={["#00e887", "#2f4ba2", "#080c14"]}
+                    />
+                </div>
                 <main className="container">
                     <section className="hero reveal">
                         <div className="hero-content">

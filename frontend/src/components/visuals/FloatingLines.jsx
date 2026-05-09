@@ -193,7 +193,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     }
   }
 
-  fragColor = vec4(col, 1.0);
+  fragColor = vec4(col, clamp(max(col.r, max(col.g, col.b)) * 2.0, 0.0, 1.0));
 }
 
 void main() {
@@ -289,8 +289,9 @@ export default function FloatingLines({
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     camera.position.z = 1;
 
-    const renderer = new WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0); // Transparent background
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     container.appendChild(renderer.domElement);
@@ -359,7 +360,8 @@ export default function FloatingLines({
     const material = new ShaderMaterial({
       uniforms,
       vertexShader,
-      fragmentShader
+      fragmentShader,
+      transparent: true
     });
 
     const geometry = new PlaneGeometry(2, 2);

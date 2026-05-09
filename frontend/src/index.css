@@ -48,7 +48,7 @@
 }
 
 body {
-  background: var(--bg-site);
+  background: transparent;
   color: var(--text-main);
   font-family: 'DM Sans', sans-serif;
   font-size: var(--fs-body);

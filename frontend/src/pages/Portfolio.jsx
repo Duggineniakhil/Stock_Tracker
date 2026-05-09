@@ -58,6 +58,12 @@ const Portfolio = () => {
 
     const COLORS = ['#00e887', '#3882dc', '#f0a500', 'rgba(226,232,244,0.2)'];
 
+    const handleExport = () => {
+        const token = localStorage.getItem('token');
+        const url = `${import.meta.env.VITE_API_URL}/api/v1/portfolio/export/csv?token=${token}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <div className="portfolio-page">
             <header className="portfolio-header reveal">
@@ -65,9 +71,14 @@ const Portfolio = () => {
                     <div className="hbadge"><span className="ldot"></span> Assets & Allocation</div>
                     <h1 className="h1" style={{ margin: 0 }}>Detailed<br /><span className="g-text">Portfolio.</span></h1>
                 </div>
-                <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
-                    {showAddForm ? 'Close' : '+ Add Asset'}
-                </button>
+                <div className="portfolio-actions">
+                    <button className="btn btn-outline" onClick={handleExport} style={{ marginRight: 'var(--sp-12)' }}>
+                        Export CSV
+                    </button>
+                    <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
+                        {showAddForm ? 'Close' : '+ Add Asset'}
+                    </button>
+                </div>
             </header>
 
             {showAddForm && (

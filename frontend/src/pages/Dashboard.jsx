@@ -1,14 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { fetchPortfolioSummary, fetchPortfolio } from '../services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { fetchPortfolioSummary, fetchPortfolio, fetchPortfolioHistory } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import InsightCard from '../components/ai/InsightCard';
+import { Chart, registerables } from 'chart.js';
 import './Dashboard.css';
+
+Chart.register(...registerables);
 
 const Dashboard = () => {
     const { user } = useAuth();
     const [summary, setSummary] = useState(null);
     const [holdings, setHoldings] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // Chart state
+    const [history, setHistory] = useState([]);
+    const [range, setRange] = useState('1mo');
+    const [chartLoading, setChartLoading] = useState(false);
+    const chartRef = useRef(null);
+    const chartInstance = useRef(null);
+
+    const loadHistory = async (newRange) => {
+        setChartLoading(true);
+        try {
+            const res = await fetchPortfolioHistory(newRange);
+            setHistory(res.data || []);
+        } catch (err) {
+            console.error('Error fetching history:', err);
+        } finally {
+            setChartLoading(false);
+        }
+    };
 
     useEffect(() => {
         const getDashboardData = async () => {
@@ -18,11 +40,11 @@ const Dashboard = () => {
                     fetchPortfolio()
                 ]);
                 setSummary(summaryRes.data);
-                // Sort by value and take top 6
                 const sortedHoldings = [...portfolioRes.data].sort((a, b) => 
                     (b.currentPrice * b.quantity) - (a.currentPrice * a.quantity)
                 ).slice(0, 6);
                 setHoldings(sortedHoldings);
+                loadHistory(range);
             } catch (err) {
                 console.error('Failed to fetch dashboard data', err);
             } finally {
@@ -32,6 +54,80 @@ const Dashboard = () => {
 
         getDashboardData();
     }, []);
+
+    // Render Chart
+    useEffect(() => {
+        if (!chartLoading && history.length > 0 && chartRef.current) {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+
+            const ctx = chartRef.current.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 120);
+            
+            // Determine if overall history trend is positive
+            const isTrendPositive = history.length > 1 ? history[history.length - 1].value >= history[0].value : true;
+            const color = isTrendPositive ? '0, 232, 135' : '240, 80, 80';
+            
+            gradient.addColorStop(0, `rgba(${color}, 0.2)`);
+            gradient.addColorStop(1, `rgba(${color}, 0)`);
+
+            chartInstance.current = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.map(h => {
+                        const d = new Date(h.date);
+                        return range === '1d' ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                    }),
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: history.map(h => h.value),
+                        borderColor: `rgb(${color})`,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: '#1a1a1a',
+                            titleColor: '#888',
+                            bodyColor: '#fff',
+                            borderColor: '#333',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: (context) => `$${context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false, min: Math.min(...history.map(h => h.value)) * 0.99 }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    }
+                }
+            });
+        }
+    }, [history, chartLoading, range]);
+
+    const handleRangeChange = (r) => {
+        setRange(r);
+        loadHistory(r);
+    };
 
     if (loading) return <div className="page-loader">Loading Dashboard...</div>;
 
@@ -72,24 +168,23 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <div className="tabs">
-                            <button className="tab">1D</button>
-                            <button className="tab">1W</button>
-                            <button className="tab a">1M</button>
-                            <button className="tab">1Y</button>
+                            {['1d', '1w', '1mo', '1y'].map(r => (
+                                <button 
+                                    key={r} 
+                                    className={`tab ${range === r ? 'a' : ''}`}
+                                    onClick={() => handleRangeChange(r)}
+                                    style={{ textTransform: 'uppercase' }}
+                                >
+                                    {r}
+                                </button>
+                            ))}
                         </div>
                     </div>
                     
-                    <div className="chart-box" style={{ height: '120px' }}>
-                        <svg viewBox="0 0 590 80" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#00e887" stopOpacity=".15" />
-                                    <stop offset="100%" stopColor="#00e887" stopOpacity="0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M0,70 C25,66 45,62 75,54 C105,46 120,50 150,42 C180,34 200,38 230,28 C260,18 280,24 310,16 C340,8 360,13 390,8 C420,3 450,6 480,4 C510,2 550,5 590,2 L590,80 L0,80Z" fill="url(#cg)" />
-                            <path d="M0,70 C25,66 45,62 75,54 C105,46 120,50 150,42 C180,34 200,38 230,28 C260,18 280,24 310,16 C340,8 360,13 390,8 C420,3 450,6 480,4 C510,2 550,5 590,2" fill="none" stroke="#00e887" strokeWidth="1.5" />
-                        </svg>
+                    <div className="chart-box" style={{ height: '120px', position: 'relative' }}>
+                        <canvas ref={chartRef}></canvas>
+                        {chartLoading && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--text-muted)' }}>Updating...</div>}
+                        {!chartLoading && history.length === 0 && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--text-muted)' }}>No history data</div>}
                     </div>
 
                     <div className="sec-label">Top Holdings</div>

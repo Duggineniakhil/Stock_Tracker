@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/layout/Navbar';
+import FloatingLines from '../components/visuals/FloatingLines';
 import './Landing.css';
 
 const Landing = () => {
@@ -41,30 +42,47 @@ const Landing = () => {
                 </div>
             </div>
 
-            <main className="container">
-                <section className="hero reveal">
-                    <div className="hero-content">
-                        <div className="hbadge"><span className="ldot"></span> Live quotes for 10,000+ stocks</div>
-                        <h1 className="h1">The Market,<br /><span className="g-text">Simplified.</span></h1>
-                        <p>Live quotes, portfolio tracking, and real-time insights — built for everyday investors who want clarity, not complexity.</p>
-                        
-                        <div className="hero-btns">
-                            {user ? (
-                                <Link to="/dashboard" className="btn btn-primary">Go to Portfolio</Link>
-                            ) : (
-                                <Link to="/register" className="btn btn-primary">Start tracking free</Link>
-                            )}
-                            <a href="#how-it-works" className="btn btn-secondary">See how it works</a>
+            <div className="hero-wrapper">
+                <div className="hero-bg">
+                    <FloatingLines 
+                        enabledWaves={["top","middle","bottom"]}
+                        lineCount={8}
+                        lineDistance={8}
+                        bendRadius={8}
+                        bendStrength={-2}
+                        interactive
+                        parallax={true}
+                        animationSpeed={1}
+                        linesGradient={["#00e887", "#2f4ba2", "#080c14"]}
+                    />
+                </div>
+                <main className="container">
+                    <section className="hero reveal">
+                        <div className="hero-content">
+                            <div className="hbadge"><span className="ldot"></span> Live quotes for 10,000+ stocks</div>
+                            <h1 className="h1">The Market,<br /><span className="g-text">Simplified.</span></h1>
+                            <p>Live quotes, portfolio tracking, and real-time insights — built for everyday investors who want clarity, not complexity.</p>
+                            
+                            <div className="hero-btns">
+                                {user ? (
+                                    <Link to="/dashboard" className="btn btn-primary">Go to Portfolio</Link>
+                                ) : (
+                                    <Link to="/register" className="btn btn-primary">Start tracking free</Link>
+                                )}
+                                <a href="#how-it-works" className="btn btn-secondary">See how it works</a>
+                            </div>
+                            
+                            <div className="hero-stats">
+                                <div><div className="hstat-val">50K+</div><div className="hstat-lbl">Active investors</div></div>
+                                <div><div className="hstat-val">10K+</div><div className="hstat-lbl">Stocks tracked</div></div>
+                                <div><div className="hstat-val">Real-time</div><div className="hstat-lbl">Market data</div></div>
+                            </div>
                         </div>
-                        
-                        <div className="hero-stats">
-                            <div><div className="hstat-val">50K+</div><div className="hstat-lbl">Active investors</div></div>
-                            <div><div className="hstat-val">10K+</div><div className="hstat-lbl">Stocks tracked</div></div>
-                            <div><div className="hstat-val">Real-time</div><div className="hstat-lbl">Market data</div></div>
-                        </div>
-                    </div>
-                </section>
+                    </section>
+                </main>
+            </div>
 
+            <main className="container">
                 <hr className="sep reveal" />
 
                 <section className="section reveal" id="how-it-works">

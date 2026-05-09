@@ -133,4 +133,13 @@
         display: block;
         padding: var(--sp-16) 0;
     }
+
+    .logout-mobile {
+        font-size: 18px;
+        color: var(--market-red);
+        font-weight: 600;
+        padding: var(--sp-16) 0;
+        width: 100%;
+        text-align: left;
+    }
 }

@@ -32,9 +32,28 @@ const Navbar = () => {
                     <li><Link to="/insights" onClick={() => setIsMenuOpen(false)}>Insights</Link></li>
                     <li><Link to="/alerts" onClick={() => setIsMenuOpen(false)}>Alerts</Link></li>
                     {user && (
-                        <li className="mobile-only">
-                            <Link to="/settings" onClick={() => setIsMenuOpen(false)}>Settings</Link>
-                        </li>
+                        <>
+                            <li className="mobile-only">
+                                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
+                            </li>
+                            <li className="mobile-only">
+                                <Link to="/settings" onClick={() => setIsMenuOpen(false)}>Settings</Link>
+                            </li>
+                            <li className="mobile-only">
+                                <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="logout-mobile">
+                                    Logout
+                                </button>
+                            </li>
+                        </>
+                    ) : (
+                        <>
+                            <li className="mobile-only">
+                                <Link to="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
+                            </li>
+                            <li className="mobile-only">
+                                <Link to="/register" onClick={() => setIsMenuOpen(false)} style={{ color: 'var(--accent-green)' }}>Join Quotra</Link>
+                            </li>
+                        </>
                     )}
                 </ul>
 

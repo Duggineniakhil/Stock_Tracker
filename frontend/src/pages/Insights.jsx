@@ -1,17 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { fetchAlerts } from '../services/api';
+import { fetchAlerts, fetchPortfolio, fetchStockSentiment } from '../services/api';
 import './Insights.css';
 
 const Insights = () => {
     const [alerts, setAlerts] = useState([]);
+    const [signals, setSignals] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const getInsights = async () => {
             try {
-                const res = await fetchAlerts(20);
-                // Standardized wrapper has actual payload in .data
-                setAlerts(res.data?.alerts || res.data || []);
+                // Fetch alerts
+                const alertsRes = await fetchAlerts(20);
+                setAlerts(alertsRes.data?.alerts || alertsRes.data || []);
+
+                // Fetch portfolio to get top symbols for sentiment analysis
+                const portfolioRes = await fetchPortfolio();
+                const holdings = portfolioRes.data || [];
+                
+                // Get top 2 holdings by value
+                const topSymbols = holdings
+                    .sort((a, b) => (b.currentPrice * b.quantity) - (a.currentPrice * a.quantity))
+                    .slice(0, 2)
+                    .map(h => h.symbol);
+
+                // If portfolio is empty, fallback to some popular symbols
+                const symbolsToAnalyze = topSymbols.length > 0 ? topSymbols : ['AAPL', 'MSFT'];
+
+                const sentiments = await Promise.all(symbolsToAnalyze.map(sym => fetchStockSentiment(sym).catch(() => null)));
+                
+                const generatedSignals = [];
+                sentiments.forEach(res => {
+                    if (res && res.success && res.details) {
+                        res.details.forEach(detail => {
+                            let tagClass = 'tag-info';
+                            if (detail.sentiment === 'bullish') tagClass = 'tag-bull';
+                            if (detail.sentiment === 'bearish') tagClass = 'tag-warn';
+
+                            generatedSignals.push({
+                                tag: `${detail.sentiment.charAt(0).toUpperCase() + detail.sentiment.slice(1)} Signal`,
+                                tagClass,
+                                title: detail.headline,
+                                body: `AI Analysis indicates a ${detail.sentiment} trend for ${res.symbol} based on recent market activity with a confidence score of ${(detail.score * 100).toFixed(0)}%.`,
+                                meta: 'Quotra AI · Real-time'
+                            });
+                        });
+                    }
+                });
+
+                setSignals(generatedSignals);
             } catch (err) {
                 console.error('Error fetching insights:', err);
             } finally {
@@ -23,23 +60,6 @@ const Insights = () => {
 
     if (loading) return <div className="page-loader">Gathering Market Intel...</div>;
 
-    const mockSignals = [
-        {
-            tag: 'Bullish signal',
-            tagClass: 'tag-bull',
-            title: 'NVDA breaks resistance at $860 — momentum building',
-            body: 'NVIDIA crossed its 50-day moving average on strong volume. Analysts see potential upside toward the $920 range over the next 2 weeks.',
-            meta: 'System · 2 min read'
-        },
-        {
-            tag: 'Watch closely',
-            tagClass: 'tag-warn',
-            title: 'TSLA dips ahead of earnings — volatility expected',
-            body: 'Tesla reports earnings next week. Historical data shows 8–12% swings post-announcement. Consider your position size carefully.',
-            meta: 'Quotra AI · 5 min read'
-        }
-    ];
-
     return (
         <div className="insights-page">
             <header className="reveal" style={{ paddingTop: 'var(--sp-48)', paddingBottom: 'var(--sp-32)' }}>
@@ -48,25 +68,30 @@ const Insights = () => {
             </header>
 
             <div className="ins-grid">
-                {mockSignals.map((s, i) => (
-                    <div className="ins-card" key={i}>
+                {signals.length > 0 ? signals.map((s, i) => (
+                    <div className="ins-card reveal" key={`sig-${i}`}>
                         <div className={`ins-tag ${s.tagClass}`}>{s.tag}</div>
                         <div className="ins-title">{s.title}</div>
                         <div className="ins-body">{s.body}</div>
                         <div className="ins-meta">{s.meta}</div>
                     </div>
-                ))}
+                )) : (
+                    <div className="ins-card" style={{ borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', opacity: 0.6 }}>
+                        <div className="muted" style={{ textAlign: 'center', padding: 'var(--sp-16)' }}>
+                            No AI signals available right now.
+                        </div>
+                    </div>
+                )}
 
                 {alerts.length > 0 ? alerts.map((a, i) => (
-                    <div className="ins-card" key={a._id || i}>
-                        <div className="ins-tag tag-info">Price Target</div>
-                        <div className="ins-title">{a.symbol} reached target of ${a.targetPrice?.toFixed(2)}</div>
-                        <div className="ins-body">
-                            The stock has crossed the alert threshold. Current recorded price at trigger was ${a.triggerPrice?.toFixed(2)}.
-                        </div>
-                        <div className="ins-meta">{new Date(a.createdAt).toLocaleDateString()} · System Alert</div>
+                    <div className="ins-card reveal" key={`alt-${a.id || i}`}>
+                        <div className="ins-tag tag-info">{a.alertType || 'System Alert'}</div>
+                        <div className="ins-title">{a.symbol} triggered an alert</div>
+                        <div className="ins-body">{a.message}</div>
+                        {a.reason && <div className="ins-body muted" style={{ marginTop: '8px', fontStyle: 'italic' }}>"{a.reason}"</div>}
+                        <div className="ins-meta">{new Date(a.timestamp || a.createdAt).toLocaleString()}</div>
                     </div>
-                )  ) : (
+                )) : (
                     <div className="ins-card" style={{ borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', opacity: 0.6 }}>
                         <div className="muted" style={{ textAlign: 'center', padding: 'var(--sp-16)' }}>
                             Your custom alerts will appear here once triggered.

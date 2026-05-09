@@ -5,6 +5,7 @@
 
 const request = require('supertest');
 const app = require('../../server');
+const db = require('../../db/database');
 
 // Mock auth middleware for integration tests
 jest.mock('../../middleware/auth', () => (req, res, next) => {
@@ -124,6 +125,12 @@ describe('API Integration Tests', () => {
             const res = await request(app).get('/api/v1/nonexistent');
             expect(res.status).toBe(404);
             expect(res.body).toHaveProperty('error');
+        });
+    });
+
+    afterAll((done) => {
+        db.close(() => {
+            done();
         });
     });
 });

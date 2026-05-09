@@ -118,15 +118,17 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // ── Scheduled Alert Engine ────────────────────────────────────────────────────
-cron.schedule('0 * * * *', () => {
-    logger.info('Running scheduled alert engine...');
-    alertEngine.runAlertEngine().catch(err => logger.error('Alert engine error', { error: err.message }));
-});
+if (process.env.NODE_ENV !== 'test') {
+    cron.schedule('0 * * * *', () => {
+        logger.info('Running scheduled alert engine...');
+        alertEngine.runAlertEngine().catch(err => logger.error('Alert engine error', { error: err.message }));
+    });
 
-setTimeout(() => {
-    logger.info('Running initial alert engine check...');
-    alertEngine.runAlertEngine().catch(err => logger.error('Alert engine startup error', { error: err.message }));
-}, 30000);
+    setTimeout(() => {
+        logger.info('Running initial alert engine check...');
+        alertEngine.runAlertEngine().catch(err => logger.error('Alert engine startup error', { error: err.message }));
+    }, 30000);
+}
 
 // ── Start Server ──────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'test') {

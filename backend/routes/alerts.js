@@ -62,6 +62,9 @@ router.delete('/:id', alertController.deleteAlert);
  *         description: History cleared
  */
 router.delete('/history/clear', alertController.clearHistory);
+router.put('/:id/read', alertController.markAsRead);
+router.put('/read-all', alertController.markAllAsRead);
+router.get('/unread-count', alertController.getUnreadCount);
 
 // ── Alert Rules ────────────────────────────────────────────────────────────────
 /**

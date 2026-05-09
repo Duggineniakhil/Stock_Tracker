@@ -50,6 +50,34 @@ const alertController = {
         }
     },
 
+    markAsRead: async (req, res, next) => {
+        try {
+            const result = await alertModel.markAlertAsRead(parseInt(req.params.id), req.user.id);
+            if (!result.updated) return apiError(res, 'Alert not found', null, 404);
+            return success(res, null, 'Alert marked as read');
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    markAllAsRead: async (req, res, next) => {
+        try {
+            const result = await alertModel.markAllAsRead(req.user.id);
+            return success(res, { updated: result.updated }, `Marked ${result.updated} alerts as read`);
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    getUnreadCount: async (req, res, next) => {
+        try {
+            const count = await alertModel.getUnreadAlertCount(req.user.id);
+            return success(res, { count }, 'Unread count fetched');
+        } catch (err) {
+            next(err);
+        }
+    },
+
     createManualAlert: async (req, res, next) => {
         try {
             const userId = req.user.id;

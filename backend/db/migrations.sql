@@ -119,3 +119,7 @@ CREATE INDEX IF NOT EXISTS idx_news_sentiment_symbol ON news_sentiment(symbol);
 -- Add plan column to users if not exists (SaaS prep)
 ALTER TABLE users ADD COLUMN plan TEXT NOT NULL DEFAULT 'free' CHECK(plan IN ('free', 'student', 'pro'));
 ALTER TABLE users ADD COLUMN stripe_customer_id TEXT;
+
+-- Migration: 007 - Alert Read Status
+-- Adds is_read column to user_alerts table
+ALTER TABLE user_alerts ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0;

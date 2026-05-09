@@ -86,6 +86,9 @@ const api = {
     },
     deleteAlert: (id) => axiosInstance.delete(`/v1/alerts/${id}`).then(r => r.data),
     clearAlertHistory: () => axiosInstance.delete('/v1/alerts/history/clear').then(r => r.data),
+    markAlertAsRead: (id) => axiosInstance.put(`/v1/alerts/${id}/read`).then(r => r.data),
+    markAllAlertsAsRead: () => axiosInstance.put('/v1/alerts/read-all').then(r => r.data),
+    fetchUnreadAlertCount: () => axiosInstance.get('/v1/alerts/unread-count').then(r => r.data),
     createManualAlert: (data) => axiosInstance.post('/v1/alerts', data).then(r => r.data),
 
     // Alerts - Rules
@@ -136,6 +139,9 @@ export const fetchStockHistory = api.fetchStockHistory;
 export const fetchAlerts = api.fetchAlerts;
 export const deleteAlert = api.deleteAlert;
 export const clearAlertHistory = api.clearAlertHistory;
+export const markAlertAsRead = api.markAlertAsRead;
+export const markAllAlertsAsRead = api.markAllAlertsAsRead;
+export const fetchUnreadAlertCount = api.fetchUnreadAlertCount;
 export const createManualAlert = api.createManualAlert;
 export const fetchAlertRules = api.fetchAlertRules;
 export const createAlertRule = api.createAlertRule;

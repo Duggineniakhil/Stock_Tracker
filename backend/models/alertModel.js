@@ -58,6 +58,33 @@ const alertModel = {
         });
     },
 
+    markAlertAsRead: (alertId, userId) => {
+        return new Promise((resolve, reject) => {
+            db.run('UPDATE user_alerts SET is_read = 1 WHERE id = ? AND user_id = ?', [alertId, userId], function (err) {
+                if (err) reject(err);
+                else resolve({ updated: this.changes > 0 });
+            });
+        });
+    },
+
+    markAllAsRead: (userId) => {
+        return new Promise((resolve, reject) => {
+            db.run('UPDATE user_alerts SET is_read = 1 WHERE user_id = ? AND is_read = 0', [userId], function (err) {
+                if (err) reject(err);
+                else resolve({ updated: this.changes });
+            });
+        });
+    },
+
+    getUnreadAlertCount: (userId) => {
+        return new Promise((resolve, reject) => {
+            db.get('SELECT COUNT(*) as count FROM user_alerts WHERE user_id = ? AND is_read = 0', [userId], (err, row) => {
+                if (err) reject(err);
+                else resolve(row?.count || 0);
+            });
+        });
+    },
+
     // ── Alert Rules ──────────────────────────────────────────────────────────
 
     createRule: (userId, symbol, templateType, operator, value, priority) => {

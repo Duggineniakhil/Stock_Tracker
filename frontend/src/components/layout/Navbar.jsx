@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -34,6 +35,7 @@ const Navbar = () => {
                 <div className="nav-actions">
                     {user ? (
                         <>
+                            <NotificationBell />
                             <span className="small-text">
                                 Hi, {user.name?.split(' ')[0] || user.email.split('@')[0]}
                             </span>

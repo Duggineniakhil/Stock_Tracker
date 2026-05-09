@@ -71,7 +71,13 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
-        <FloatingLines isGlobal={true} mixBlendMode="normal" linesGradient={["#00e887", "#2f4ba2", "#080c14"]} />
+        <FloatingLines 
+          isGlobal={true} 
+          mixBlendMode="normal" 
+          linesGradient={["#00e887", "#2f4ba2", "#080c14"]} 
+          lineCount={12}
+          animationSpeed={1.5}
+        />
       </Router>
       </AuthProvider>
     </ThemeProvider>

@@ -244,8 +244,9 @@ export default function FloatingLines({
   bendStrength = -0.5,
   mouseDamping = 0.05,
   parallax = true,
-  parallaxStrength = 0.2,
-  mixBlendMode = 'screen'
+  parallaxStrength,
+  mixBlendMode = 'screen',
+  isGlobal = false
 }) {
   const containerRef = useRef(null);
   const targetMouseRef = useRef(new Vector2(-1000, -1000));
@@ -482,7 +483,7 @@ export default function FloatingLines({
   return (
     <div
       ref={containerRef}
-      className="floating-lines-container"
+      className={`floating-lines-container ${isGlobal ? 'floating-lines-global' : ''}`}
       style={{
         mixBlendMode: mixBlendMode
       }}

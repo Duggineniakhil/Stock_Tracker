@@ -32,6 +32,18 @@ const stockController = {
             console.error('Error fetching historical data:', error);
             return apiError(res, 'Failed to fetch historical data', null, 500);
         }
+    },
+
+    // Get trending assets
+    getTrending: async (req, res) => {
+        try {
+            const region = req.query.region || 'US';
+            const trending = await stockService.getTrendingStocks(region);
+            return success(res, trending, 'Trending assets fetched successfully');
+        } catch (error) {
+            console.error('Error in trending endpoint:', error);
+            return apiError(res, 'Failed to fetch trending assets', null, 500);
+        }
     }
 };
 

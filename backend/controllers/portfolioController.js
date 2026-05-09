@@ -194,6 +194,36 @@ const portfolioController = {
 
             return error(res, 'Failed to delete holding', null, 500);
         }
+    },
+
+    /**
+     * Get portfolio health score
+     * GET /api/portfolio/health
+     */
+    getHealth: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const score = await portfolioService.getHealthScore(userId);
+            return success(res, { score }, 'Portfolio health score fetched successfully');
+        } catch (err) {
+            console.error('Error fetching health score:', err);
+            return error(res, 'Failed to fetch health score', null, 500);
+        }
+    },
+
+    /**
+     * Get portfolio sector breakdown
+     * GET /api/portfolio/sectors
+     */
+    getSectorBreakdown: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const breakdown = await portfolioService.getSectorBreakdown(userId);
+            return success(res, breakdown, 'Portfolio sector breakdown fetched successfully');
+        } catch (err) {
+            console.error('Error fetching sector breakdown:', err);
+            return error(res, 'Failed to fetch sector breakdown', null, 500);
+        }
     }
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { fetchPortfolioSummary, fetchPortfolio, fetchPortfolioHistory, fetchStockHistory } from '../services/api';
+import { fetchPortfolioSummary, fetchPortfolio, fetchPortfolioHistory, fetchStockHistory, fetchPortfolioHealth } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import InsightCard from '../components/ai/InsightCard';
 import { Chart, registerables } from 'chart.js';
@@ -10,13 +10,16 @@ Chart.register(...registerables);
 const Dashboard = () => {
     const { user } = useAuth();
     const [summary, setSummary] = useState(null);
+    const [healthScore, setHealthScore] = useState(null);
     const [holdings, setHoldings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [chartLoading, setChartLoading] = useState(false);
     
     // Chart state
     const [history, setHistory] = useState([]);
     const [range, setRange] = useState('1mo');
     const chartInstance = useRef(null);
+    const chartRef = useRef(null);
     const [benchmarkData, setBenchmarkData] = useState([]);
     const [showBenchmark, setShowBenchmark] = useState(false);
 
@@ -36,14 +39,24 @@ const Dashboard = () => {
         }
     };
 
+    const loadSummary = async () => {
+        try {
+            const [sRes, hRes] = await Promise.all([
+                fetchPortfolioSummary(),
+                fetchPortfolioHealth()
+            ]);
+            setSummary(sRes.data);
+            setHealthScore(hRes.data.score);
+        } catch (err) {
+            console.error('Error fetching dashboard summary:', err);
+        }
+    };
+
     useEffect(() => {
         const getDashboardData = async () => {
             try {
-                const [summaryRes, portfolioRes] = await Promise.all([
-                    fetchPortfolioSummary(),
-                    fetchPortfolio()
-                ]);
-                setSummary(summaryRes.data);
+                loadSummary();
+                const portfolioRes = await fetchPortfolio();
                 const sortedHoldings = [...portfolioRes.data].sort((a, b) => 
                     (b.currentPrice * b.quantity) - (a.currentPrice * a.quantity)
                 ).slice(0, 6);
@@ -232,6 +245,16 @@ const Dashboard = () => {
                         </div>
                     </div>
                     
+                    <div className="stat-card reveal" style={{ animationDelay: '0.3s' }}>
+                        <div className="stat-label">Health Score</div>
+                        <div className="stat-value">
+                            <span className={healthScore > 70 ? 'up' : healthScore > 40 ? 'warning' : 'dn'}>
+                                {healthScore !== null ? healthScore : '--'}
+                            </span>
+                            <span className="unit">/100</span>
+                        </div>
+                    </div>
+
                     <div className="chart-box" style={{ height: '120px', position: 'relative' }}>
                         <canvas ref={chartRef}></canvas>
                         {chartLoading && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--text-muted)' }}>Updating...</div>}

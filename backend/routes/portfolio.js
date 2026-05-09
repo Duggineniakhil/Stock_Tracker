@@ -56,6 +56,20 @@ router.get('/history', portfolioController.getHistory);
 router.get('/performance', portfolioController.getPerformance);
 
 /**
+ * @route   GET /api/portfolio/health
+ * @desc    Get portfolio health score
+ * @access  Private
+ */
+router.get('/health', portfolioController.getHealth);
+
+/**
+ * @route   GET /api/portfolio/sectors
+ * @desc    Get portfolio sector breakdown
+ * @access  Private
+ */
+router.get('/sectors', portfolioController.getSectorBreakdown);
+
+/**
  * @route   GET /api/portfolio/:id
  * @desc    Get a single holding by ID
  * @access  Private

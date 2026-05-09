@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const stockController = require('../controllers/stockController');
 
+// GET /api/stock/trending - Get trending assets
+router.get('/trending', stockController.getTrending);
+
 // GET /api/stock/:symbol - Get current stock data
 router.get('/:symbol', stockController.getStockData);
 

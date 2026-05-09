@@ -305,12 +305,75 @@ const portfolioService = {
      * @param {string} symbol - Stock symbol
      * @returns {Promise<boolean>} True if valid
      */
-    validateSymbol: async (symbol) => {
-        try {
-            const quote = await stockService.getStockQuote(symbol);
-            return quote && quote.currentPrice !== undefined;
         } catch (error) {
             return false;
+        }
+    },
+
+    /**
+     * Get portfolio breakdown by sector
+     * @param {number} userId - User ID
+     */
+    getSectorBreakdown: async (userId) => {
+        try {
+            const portfolio = await portfolioService.getPortfolio(userId);
+            if (portfolio.length === 0) return [];
+
+            const sectors = {};
+            let totalValue = 0;
+
+            for (const holding of portfolio) {
+                const quote = await stockService.getStockQuote(holding.symbol);
+                const sector = quote.sector || 'Others';
+                sectors[sector] = (sectors[sector] || 0) + holding.currentValue;
+                totalValue += holding.currentValue;
+            }
+
+            const breakdown = Object.entries(sectors).map(([name, value]) => ({
+                name,
+                value: parseFloat(value.toFixed(2)),
+                percentage: totalValue > 0 ? parseFloat(((value / totalValue) * 100).toFixed(2)) : 0
+            }));
+
+            return breakdown.sort((a, b) => b.value - a.value);
+        } catch (error) {
+            console.error('Error computing sector breakdown:', error.message);
+            return [];
+        }
+    },
+
+    /**
+     * Calculate a health score for the portfolio (0-100)
+     * Factors: Diversification (number of sectors), Profit/Loss, Number of assets
+     */
+    getHealthScore: async (userId) => {
+        try {
+            const summary = await portfolioService.getPortfolioSummary(userId);
+            const sectors = await portfolioService.getSectorBreakdown(userId);
+            
+            if (summary.totalHoldings === 0) return 0;
+
+            // 1. Diversification Score (max 40) - Based on number of sectors
+            // 1 sector = 10, 2 = 25, 3+ = 40
+            let divScore = Math.min(sectors.length * 15, 40);
+            if (sectors.length === 1) divScore = 10;
+
+            // 2. Performance Score (max 40) - Based on P/L %
+            // > 0% = 20, > 5% = 30, > 10% = 40, < 0% = 10
+            let perfScore = 20;
+            if (summary.totalProfitLossPercent > 10) perfScore = 40;
+            else if (summary.totalProfitLossPercent > 5) perfScore = 30;
+            else if (summary.totalProfitLossPercent < 0) perfScore = 10;
+
+            // 3. Asset Count Score (max 20)
+            // 1 asset = 5, 2-4 = 15, 5+ = 20
+            let assetScore = 5;
+            if (summary.totalHoldings >= 5) assetScore = 20;
+            else if (summary.totalHoldings >= 2) assetScore = 15;
+
+            return divScore + perfScore + assetScore;
+        } catch (error) {
+            return 50; // Fallback
         }
     }
 };

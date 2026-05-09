@@ -148,6 +148,9 @@ h2, .h2 {
 /* Global Utility Classes */
 .g-text { color: var(--accent-green); }
 .muted { color: var(--text-muted); }
+.up { color: var(--market-green); }
+.dn { color: var(--market-red); }
+.warning { color: var(--market-yellow); }
 .sep { border: none; border-top: 1px solid var(--border-subtle); margin: var(--sp-24) 0; }
 
 a {

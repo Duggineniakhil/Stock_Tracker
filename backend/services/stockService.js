@@ -42,7 +42,9 @@ const stockService = {
                 fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh,
                 fiftyTwoWeekLow: quote.fiftyTwoWeekLow,
                 exchange: quote.fullExchangeName || quote.exchange,
-                name: quote.longName || quote.shortName || stockSymbol
+                name: quote.longName || quote.shortName || stockSymbol,
+                sector: quote.sector || 'N/A',
+                industry: quote.industry || 'N/A'
             };
 
             // 2. Update Cache
@@ -160,6 +162,30 @@ const stockService = {
         const recentPrices = prices.slice(-period);
         const sum = recentPrices.reduce((acc, val) => acc + val, 0);
         return sum / period;
+    },
+
+    // Get trending symbols and their current data
+    getTrendingStocks: async (region = 'US') => {
+        try {
+            // Fetch trending symbols for region
+            const trending = await yahooFinance.trendingSymbols(region);
+            if (!trending || !trending.quotes || trending.quotes.length === 0) {
+                return [];
+            }
+
+            // Get full data for top 6 trending stocks
+            const topSymbols = trending.quotes.slice(0, 6).map(q => q.symbol);
+            const results = await Promise.allSettled(
+                topSymbols.map(symbol => stockService.getStockQuote(symbol))
+            );
+
+            return results
+                .filter(r => r.status === 'fulfilled')
+                .map(r => r.value);
+        } catch (error) {
+            console.error('❌ Error fetching trending stocks:', error.message);
+            return [];
+        }
     }
 };
 

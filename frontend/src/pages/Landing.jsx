@@ -115,16 +115,16 @@ const Landing = () => {
                             <p className="muted" style={{ fontSize: '14px' }}>Get notified when your stocks hit a price you care about.</p>
                         </div>
                         <div className="card">
-                            <h3 className="h2" style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--accent-green)' }}>◈ Market insights</h3>
-                            <p className="muted" style={{ fontSize: '14px' }}>Plain-language analysis on trends, signals, and movements.</p>
+                            <h3 className="h2" style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--accent-green)' }}>◈ AI Advisor</h3>
+                            <p className="muted" style={{ fontSize: '14px' }}>Chat with your personal market expert powered by GPT-4o for deep portfolio insights.</p>
                         </div>
                         <div className="card">
-                            <h3 className="h2" style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--accent-green)' }}>⊞ Watchlists</h3>
-                            <p className="muted" style={{ fontSize: '14px' }}>Organize stocks into groups — tech, dividend, growth — your way.</p>
+                            <h3 className="h2" style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--accent-green)' }}>⊠ Health Analysis</h3>
+                            <p className="muted" style={{ fontSize: '14px' }}>Get a real-time health score for your portfolio based on diversification and performance.</p>
                         </div>
                         <div className="card">
                             <h3 className="h2" style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--accent-green)' }}>◷ Historical data</h3>
-                            <p className="muted" style={{ fontSize: '14px' }}>View up to 10 years of price history with clean, readable charts.</p>
+                            <p className="muted" style={{ fontSize: '14px' }}>View up to 10 years of price history with clean, readable charts and TA indicators.</p>
                         </div>
                     </div>
                 </section>

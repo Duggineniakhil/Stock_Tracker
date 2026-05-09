@@ -77,6 +77,7 @@ const api = {
     // Stocks
     fetchStockData: (symbol) => axiosInstance.get(`/v1/stock/${symbol}`).then(r => r.data),
     fetchStockHistory: (symbol, range = '1mo') => axiosInstance.get(`/v1/stock/${symbol}/history`, { params: { range } }).then(r => r.data),
+    fetchTrending: () => axiosInstance.get('/v1/stock/trending').then(r => r.data),
 
     // Alerts - History
     fetchAlerts: (limit = 50, offset = 0, symbol = null) => {
@@ -105,7 +106,9 @@ const api = {
     fetchPortfolio: () => axiosInstance.get('/v1/portfolio').then(r => r.data),
     fetchPortfolioSummary: () => axiosInstance.get('/v1/portfolio/summary').then(r => r.data),
     fetchPortfolioAllocation: () => axiosInstance.get('/v1/portfolio/allocation').then(r => r.data),
-    fetchPortfolioHistory: (range = '1mo') => axiosInstance.get('/v1/portfolio/history', { params: { range } }).then(r => r.data),
+    fetchPortfolioHistory: (range) => axiosInstance.get('/v1/portfolio/history', { params: { range } }).then(r => r.data),
+    fetchPortfolioHealth: () => axiosInstance.get('/v1/portfolio/health').then(r => r.data),
+    fetchPortfolioSectors: () => axiosInstance.get('/v1/portfolio/sectors').then(r => r.data),
     fetchPortfolioPerformance: (range = '1mo') => axiosInstance.get('/v1/portfolio/performance', { params: { range } }).then(r => r.data),
     addHolding: (symbol, quantity, buyPrice, buyDate) =>
         axiosInstance.post('/v1/portfolio', { symbol, quantity, buyPrice, buyDate }).then(r => r.data),
@@ -136,6 +139,7 @@ export const addToWatchlist = api.addToWatchlist;
 export const removeFromWatchlist = api.removeFromWatchlist;
 export const fetchStockData = api.fetchStockData;
 export const fetchStockHistory = api.fetchStockHistory;
+export const fetchTrending = api.fetchTrending;
 export const fetchAlerts = api.fetchAlerts;
 export const deleteAlert = api.deleteAlert;
 export const clearAlertHistory = api.clearAlertHistory;
@@ -151,6 +155,8 @@ export const fetchPortfolio = api.fetchPortfolio;
 export const fetchPortfolioSummary = api.fetchPortfolioSummary;
 export const fetchPortfolioAllocation = api.fetchPortfolioAllocation;
 export const fetchPortfolioHistory = api.fetchPortfolioHistory;
+export const fetchPortfolioHealth = api.fetchPortfolioHealth;
+export const fetchPortfolioSectors = api.fetchPortfolioSectors;
 export const fetchPortfolioPerformance = api.fetchPortfolioPerformance;
 export const addHolding = api.addHolding;
 export const updateHolding = api.updateHolding;

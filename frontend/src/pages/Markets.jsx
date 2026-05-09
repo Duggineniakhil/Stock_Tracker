@@ -13,20 +13,25 @@ const Markets = () => {
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
     const [recentSearches, setRecentSearches] = useState([]);
+    const [trending, setTrending] = useState([]);
 
-    const loadWatchlist = async () => {
+    const loadData = async () => {
         try {
-            const res = await fetchWatchlist();
-            setWatchlist(res.data);
+            const [wRes, tRes] = await Promise.all([
+                fetchWatchlist(),
+                fetchTrending()
+            ]);
+            setWatchlist(wRes.data);
+            setTrending(tRes.data);
         } catch (err) {
-            console.error('Error fetching watchlist:', err);
+            console.error('Error fetching market data:', err);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadWatchlist();
+        loadData();
         const saved = JSON.parse(localStorage.getItem('recentSearches') || '[]');
         setRecentSearches(saved);
     }, []);
@@ -61,7 +66,7 @@ const Markets = () => {
             await addToWatchlist(symbol);
             setSearchResult(null);
             setSearchQuery('');
-            loadWatchlist();
+            loadData();
         } catch (err) {
             alert('Failed to add to watchlist');
         }
@@ -115,6 +120,22 @@ const Markets = () => {
                     </div>
                 )}
             </div>
+
+            {trending.length > 0 && !searchQuery && (
+                <div className="trending-section reveal">
+                    <div className="sec-label">Trending Assets</div>
+                    <div className="trending-list">
+                        {trending.map(s => (
+                            <div key={s.symbol} className="trending-pill" onClick={() => navigate(`/stock/${s.symbol}`)}>
+                                <span className="p-sym">{s.symbol}</span>
+                                <span className={`p-ch ${s.changePercent >= 0 ? 'up' : 'dn'}`}>
+                                    {s.changePercent >= 0 ? '+' : ''}{s.changePercent?.toFixed(1)}%
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {recentSearches.length > 0 && !searchQuery && (
                 <div className="recent-searches reveal">

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchPortfolio, fetchPortfolioAllocation, addHolding, deleteHolding } from '../services/api';
+import { Chart, registerables } from 'chart.js';
 import './Portfolio.css';
+
+Chart.register(...registerables);
 
 const Portfolio = () => {
     const navigate = useNavigate();
@@ -9,6 +12,8 @@ const Portfolio = () => {
     const [allocation, setAllocation] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
+    const chartRef = React.useRef(null);
+    const chartInstance = React.useRef(null);
     
     // Simple form state for adding
     const [newAsset, setNewAsset] = useState({ symbol: '', quantity: '', buyPrice: '' });
@@ -31,6 +36,36 @@ const Portfolio = () => {
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        if (allocation.length > 0 && chartRef.current) {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+
+            const ctx = chartRef.current.getContext('2d');
+            chartInstance.current = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: allocation.map(a => a.symbol),
+                    datasets: [{
+                        data: allocation.map(a => a.percentage),
+                        backgroundColor: COLORS,
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    }, [allocation]);
 
     const handleAdd = async (e) => {
         e.preventDefault();
@@ -159,6 +194,13 @@ const Portfolio = () => {
                     <div className="allocation-title h2">
                         Current Allocation
                         <span className="small-text accent">Real-time</span>
+                    </div>
+                    <div className="alloc-chart-box">
+                        <canvas ref={chartRef}></canvas>
+                        <div className="alloc-center-val">
+                            <span className="small-text muted">ASSETS</span>
+                            <span className="syne h3">{allocation.length}</span>
+                        </div>
                     </div>
                     <div className="alloc-list">
                         {allocation.length > 0 ? allocation.map((a, i) => (

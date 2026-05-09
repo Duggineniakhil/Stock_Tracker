@@ -12,6 +12,7 @@ const Markets = () => {
     const [searchResult, setSearchResult] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
+    const [recentSearches, setRecentSearches] = useState([]);
 
     const loadWatchlist = async () => {
         try {
@@ -26,7 +27,15 @@ const Markets = () => {
 
     useEffect(() => {
         loadWatchlist();
+        const saved = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+        setRecentSearches(saved);
     }, []);
+
+    const saveRecentSearch = (symbol) => {
+        const updated = [symbol, ...recentSearches.filter(s => s !== symbol)].slice(0, 5);
+        setRecentSearches(updated);
+        localStorage.setItem('recentSearches', JSON.stringify(updated));
+    };
 
     const handleSearch = async (e) => {
         const query = e.target.value.toUpperCase();
@@ -107,6 +116,22 @@ const Markets = () => {
                 )}
             </div>
 
+            {recentSearches.length > 0 && !searchQuery && (
+                <div className="recent-searches reveal">
+                    <span className="small-text muted">Recently viewed:</span>
+                    <div className="recent-tags">
+                        {recentSearches.map(s => (
+                            <button key={s} className="recent-tag" onClick={() => navigate(`/stock/${s}`)}>
+                                {s}
+                            </button>
+                        ))}
+                        <button className="clear-recent" onClick={() => { setRecentSearches([]); localStorage.removeItem('recentSearches'); }}>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="sec-label">Active Watchlist</div>
             <div className="mkt-grid">
                 {[...defaultStocks, ...watchlist.map(w => ({ ...w, trend: w.change >= 0 ? 'up' : 'dn' }))].map((s, i) => (
@@ -114,7 +139,10 @@ const Markets = () => {
                         className="card clickable" 
                         key={s.id || s.symbol || i} 
                         style={{ padding: 'var(--sp-24)' }}
-                        onClick={() => navigate(`/stock/${s.symbol}`)}
+                        onClick={() => {
+                            saveRecentSearch(s.symbol);
+                            navigate(`/stock/${s.symbol}`);
+                        }}
                     >
                         <div className="mk-header">
                             <div>

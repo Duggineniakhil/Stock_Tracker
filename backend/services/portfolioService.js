@@ -305,6 +305,10 @@ const portfolioService = {
      * @param {string} symbol - Stock symbol
      * @returns {Promise<boolean>} True if valid
      */
+    validateSymbol: async (symbol) => {
+        try {
+            const quote = await stockService.getStockQuote(symbol);
+            return quote && quote.currentPrice !== undefined;
         } catch (error) {
             return false;
         }

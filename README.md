@@ -2,7 +2,7 @@
 
 A comprehensive, full-stack stock portfolio and market tracking application — **Simplified and AI-Powered**. Built with Node.js, Express, React, SQLite, and OpenAI.
 
-![Status](https://img.shields.io/badge/Status-v1.1.0-blue)
+![Status](https://img.shields.io/badge/Status-v1.2.0-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-v24+-green)
 ![React](https://img.shields.io/badge/React-v19+-blue)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
@@ -22,8 +22,9 @@ A comprehensive, full-stack stock portfolio and market tracking application — 
 ### Interactive Dashboard & Portfolio Management
 - **Real-Time Data:** Live stock price tracking via Yahoo Finance integration with 30-second auto-refresh.
 - **Portfolio Tracking:** Manage holdings, track purchase prices, calculate real-time P/L, and visualize allocation with interactive chart overlays.
-- **Advanced Charting:** View historical price trends ranging from 1D, 5D, 1M, YTD up to Max using Chart.js.
-- **Dark Mode UI:** A professional and sleek dark-themed interface crafted for a modern user experience.
+- **Advanced Charting:** View historical price trends ranging from 1D, 5D, 1M, YTD up to Max using Chart.js with integrated Technical Analysis (RSI, SMA).
+- **Portfolio Benchmarking:** Compare your portfolio performance directly against the S&P 500 (^GSPC) to measure relative success.
+- **Dark Mode UI:** A professional and sleek dark-themed interface crafted for a modern user experience with PWA support for mobile installation.
 
 ###  AI-Powered Insights
 - **AI Advisor:** A GPT-4o powered chatbot that understands your portfolio and answers market questions.
@@ -33,6 +34,7 @@ A comprehensive, full-stack stock portfolio and market tracking application — 
 
 ### Intelligent Alerts Engine
 - **Automated Rules:** Configure alerts for percentage drops/gains, target prices, or volume spikes.
+- **Notification Center:** A real-time in-app notification inbox for tracking triggered alerts with read/unread status.
 - **Background Cron Jobs:** Reliable background engine runs every hour to evaluate rules and trigger notifications.
 - **Multi-channel Notifications:** Receive instant updates via in-app dashboard alerts and email notifications.
 
@@ -41,7 +43,9 @@ A comprehensive, full-stack stock portfolio and market tracking application — 
 - **Brute-Force Protection:** Account lockouts after 5 failed login attempts (15-minute cooldown).
 - **Hardened API:** Structured with Helmet.js for secure HTTP headers, automated rate limiters, and CORS protection.
 - **Admin Command Center:** Built-in administrative dashboard for managing platform health and user subscriptions.
+- **User Settings & Security:** Dedicated profile management to update account details and change passwords securely.
 - **Subscription Engine:** Functional pricing tier management (Free, Student, Pro) with integrated mock payment flows.
+- **Data Portability:** Export your entire portfolio and performance metrics to CSV for offline analysis.
 
 ---
 

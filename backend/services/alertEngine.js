@@ -2,137 +2,156 @@ const db = require('../db/database');
 const stockService = require('./stockService');
 const emailService = require('./emailService');
 const aiService = require('./aiService');
+const logger = require('../utils/logger');
+
+const ALERT_COOLDOWN_HOURS = 24;
 
 const runAlertEngine = async () => {
-    console.log('--- Starting User Alert Engine ---');
+    logger.info('--- Starting Advanced Alert Engine ---');
 
-    // 1. Get all users
-    db.all('SELECT id, email, plan FROM users', [], async (err, users) => {
+    // 1. Get all active rules with user info
+    const sql = `
+        SELECT ar.*, u.email, u.plan, u.name 
+        FROM alert_rules ar
+        JOIN users u ON ar.user_id = u.id
+        WHERE ar.is_active = 1
+    `;
+
+    db.all(sql, [], async (err, rules) => {
         if (err) {
-            console.error('Error fetching users:', err);
+            logger.error('Error fetching alert rules:', { error: err.message });
             return;
         }
 
-        for (const user of users) {
-            // 2. Get user's watchlist
-            db.all('SELECT symbol FROM user_watchlist WHERE user_id = ?', [user.id], async (wErr, watchlist) => {
-                if (wErr) {
-                    console.error(`Error fetching watchlist for user ${user.id}:`, wErr);
-                    return;
+        if (rules.length === 0) {
+            logger.info('No active alert rules found.');
+            return;
+        }
+
+        // 2. Group rules by symbol to minimize API calls
+        const symbolGroups = rules.reduce((acc, rule) => {
+            if (!acc[rule.symbol]) acc[rule.symbol] = [];
+            acc[rule.symbol].push(rule);
+            return acc;
+        }, {});
+
+        logger.info(`Processing ${rules.length} rules across ${Object.keys(symbolGroups).length} symbols.`);
+
+        // 3. Process each symbol
+        for (const symbol in symbolGroups) {
+            try {
+                const quote = await stockService.getStockQuote(symbol);
+                const rulesForSymbol = symbolGroups[symbol];
+
+                for (const rule of rulesForSymbol) {
+                    await evaluateRule(rule, quote);
                 }
-
-                if (watchlist.length === 0) return;
-
-                console.log(`Processing ${watchlist.length} stocks for user ${user.email}`);
-
-                for (const item of watchlist) {
-                    try {
-                        // 3. Fetch Stock Data
-                        const quote = await stockService.getStockQuote(item.symbol);
-
-                        // 4. Analyze for Alerts
-                        const analysis = await analyzeStock(quote);
-
-                        if (analysis.shouldAlert) {
-                            console.log(`Triggering alert for ${user.email}: ${item.symbol} - ${analysis.reason}`);
-
-                            // 5. AI Explanation (Pro/Student only)
-                            let aiExplanation = '';
-                            if (user.plan === 'pro' || user.plan === 'student') {
-                                aiExplanation = await aiService.explainAlert(
-                                    quote.symbol, 
-                                    'TREND', 
-                                    quote.currentPrice, 
-                                    quote.currentPrice, 
-                                    quote.changePercent
-                                );
-                            }
-
-                            // 6. Send Email
-                            await emailService.sendAlertEmail(user.email, {
-                                symbol: quote.symbol,
-                                price: quote.currentPrice,
-                                change: quote.change,
-                                changePercent: quote.changePercent,
-                                aiExplanation: aiExplanation
-                            }, analysis.reason);
-
-                            // 7. Save to User Alerts DB
-                            const sql = 'INSERT INTO user_alerts (user_id, symbol, message, reason) VALUES (?, ?, ?, ?)';
-                            const message = `${quote.symbol} moved ${quote.changePercent.toFixed(2)}%`;
-                            db.run(sql, [user.id, quote.symbol, message, aiExplanation || analysis.reason]);
-                        }
-
-                    } catch (sErr) {
-                        console.error(`Error processing ${item.symbol} for user ${user.id}:`, sErr.message);
-                    }
-                }
-            });
+            } catch (error) {
+                logger.error(`Error processing symbol ${symbol}:`, { error: error.message });
+            }
         }
     });
 };
 
-// Helper: Analyze Stock Logic
-const analyzeStock = async (quote) => {
-    // Simple logic for demonstration
-    // In production, we would fetch historical data to SMA, RSI, etc.
+const evaluateRule = async (rule, quote) => {
+    let triggered = false;
+    let reason = '';
 
-    // Condition 1: Significant Move (> 5% or < -5%)
-    if (Math.abs(quote.changePercent) >= 5) {
-        return {
-            shouldAlert: true,
-            reason: `Price moved significantly (${quote.changePercent.toFixed(2)}%) within the trading day.`
-        };
+    // Check Cooldown
+    if (rule.last_triggered_at) {
+        const lastTrigger = new Date(rule.last_triggered_at);
+        const hoursSince = (Date.now() - lastTrigger.getTime()) / (1000 * 60 * 60);
+        if (hoursSince < ALERT_COOLDOWN_HOURS) {
+            return; // Still in cooldown
+        }
     }
 
-    // Condition 2: High Volatility (Placeholder logic)
-    // If we had historical data here, we could check SMA.
-    // For now, let's just alert on 5% which is the user requirement.
+    // Evaluate Condition
+    switch (rule.template_type) {
+        case 'TARGET_PRICE':
+            if (rule.condition_operator === 'ABOVE' && quote.currentPrice >= rule.condition_value) {
+                triggered = true;
+                reason = `Price reached $${quote.currentPrice.toFixed(2)} (Target: >= $${rule.condition_value})`;
+            } else if (rule.condition_operator === 'BELOW' && quote.currentPrice <= rule.condition_value) {
+                triggered = true;
+                reason = `Price dropped to $${quote.currentPrice.toFixed(2)} (Target: <= $${rule.condition_value})`;
+            }
+            break;
 
-    // User Requirement: "crosses moving average"
-    // To do this, we need historical data.
+        case 'PERCENTAGE_CHANGE':
+            const absChange = Math.abs(quote.changePercent);
+            if (absChange >= rule.condition_value) {
+                triggered = true;
+                reason = `Price moved ${quote.changePercent.toFixed(2)}% (Threshold: ${rule.condition_value}%)`;
+            }
+            break;
+
+        case 'VOLUME_SPIKE':
+            // Placeholder: Volume analysis would require historical avg volume
+            // For now, if we have volume in quote, we can do a simple check
+            if (quote.volume && quote.avgVolume && quote.volume > quote.avgVolume * 2) {
+                triggered = true;
+                reason = `Unusual volume detected: ${quote.volume.toLocaleString()} shares`;
+            }
+            break;
+    }
+
+    if (triggered) {
+        await triggerAlert(rule, quote, reason);
+    }
+};
+
+const triggerAlert = async (rule, quote, reason) => {
+    logger.info(`🔔 Alert Triggered: ${rule.email} | ${rule.symbol} | ${reason}`);
+
     try {
-        // Fetch 30 days of history for SMA
-        const history = await stockService.getHistoricalData(quote.symbol, '1mo');
-        if (history && history.length >= 20) {
-            const prices = history.map(h => h.price);
-            const sma20 = stockService.calculateMovingAverage(prices, 20);
+        // 1. Update rule last_triggered_at
+        db.run('UPDATE alert_rules SET last_triggered_at = CURRENT_TIMESTAMP WHERE id = ?', [rule.id]);
 
-            // Check if current price crossed SMA
-            // We need previous price too to detect 'cross'.
-            // Assume previous price is yesterday's close (which is in history[-1] usually or history[-2] depending on live status)
-            // history ends with latest available close.
-
-            if (sma20) {
-                const currentPrice = quote.currentPrice;
-                // Heuristic: If price is close to SMA and moving away?
-                // Let's just say if Price < SMA (Bearish) or Price > SMA (Bullish) AND the move is fresh?
-                // Detecting "Cross" requires state (previous value). 
-                // We don't store previous state easily here without more DB queries.
-
-                // Simplified Logic: If price deviates > 10% from SMA?
-                // Or just: "Price is 5% above 20-day SMA"
-                const deviation = ((currentPrice - sma20) / sma20) * 100;
-
-                if (deviation > 5 && quote.changePercent > 0) {
-                    return {
-                        shouldAlert: true,
-                        reason: `Bullish Trend: Price is ${deviation.toFixed(1)}% above the 20-day Moving Average ($${sma20.toFixed(2)}).`
-                    };
-                }
-                if (deviation < -5 && quote.changePercent < 0) {
-                    return {
-                        shouldAlert: true,
-                        reason: `Bearish Trend: Price is ${Math.abs(deviation).toFixed(1)}% below the 20-day Moving Average ($${sma20.toFixed(2)}).`
-                    };
-                }
+        // 2. Generate AI Explanation
+        let aiExplanation = '';
+        if (rule.plan === 'pro' || rule.plan === 'student') {
+            try {
+                aiExplanation = await aiService.explainAlert(
+                    rule.symbol,
+                    rule.template_type,
+                    quote.currentPrice,
+                    rule.condition_value,
+                    quote.changePercent
+                );
+            } catch (e) {
+                logger.warn('AI Explanation failed', { error: e.message });
             }
         }
-    } catch (e) {
-        console.warn('SMA check failed:', e.message);
-    }
 
-    return { shouldAlert: false };
+        // 3. Save to History
+        const historySql = `
+            INSERT INTO user_alerts (user_id, symbol, message, reason, priority, alertType) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const message = `${rule.symbol} alert: ${reason}`;
+        db.run(historySql, [
+            rule.user_id, 
+            rule.symbol, 
+            message, 
+            aiExplanation || reason, 
+            rule.priority, 
+            rule.template_type
+        ]);
+
+        // 4. Send Email
+        await emailService.sendAlertEmail(rule.email, {
+            symbol: quote.symbol,
+            price: quote.currentPrice,
+            change: quote.change,
+            changePercent: quote.changePercent,
+            aiExplanation: aiExplanation
+        }, reason);
+
+    } catch (error) {
+        logger.error(`Error triggering alert for ${rule.id}:`, { error: error.message });
+    }
 };
 
 module.exports = { runAlertEngine };
+

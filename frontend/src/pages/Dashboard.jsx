@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { fetchPortfolioSummary, fetchPortfolio, fetchPortfolioHistory } from '../services/api';
+import { fetchPortfolioSummary, fetchPortfolio, fetchPortfolioHistory, fetchStockHistory } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import InsightCard from '../components/ai/InsightCard';
 import { Chart, registerables } from 'chart.js';
@@ -16,15 +16,19 @@ const Dashboard = () => {
     // Chart state
     const [history, setHistory] = useState([]);
     const [range, setRange] = useState('1mo');
-    const [chartLoading, setChartLoading] = useState(false);
-    const chartRef = useRef(null);
     const chartInstance = useRef(null);
+    const [benchmarkData, setBenchmarkData] = useState([]);
+    const [showBenchmark, setShowBenchmark] = useState(false);
 
     const loadHistory = async (newRange) => {
         setChartLoading(true);
         try {
-            const res = await fetchPortfolioHistory(newRange);
-            setHistory(res.data || []);
+            const [pRes, bRes] = await Promise.all([
+                fetchPortfolioHistory(newRange),
+                fetchStockHistory('^GSPC', newRange === '1w' ? '5d' : newRange === '1d' ? '1d' : newRange)
+            ]);
+            setHistory(pRes.data || []);
+            setBenchmarkData(bRes.data || []);
         } catch (err) {
             console.error('Error fetching history:', err);
         } finally {
@@ -88,7 +92,8 @@ const Dashboard = () => {
                         tension: 0.4,
                         pointRadius: 0,
                         pointHoverRadius: 6,
-                        borderWidth: 2
+                        borderWidth: 2,
+                        yAxisID: 'y'
                     }]
                 },
                 options: {
@@ -105,15 +110,19 @@ const Dashboard = () => {
                             borderColor: '#333',
                             borderWidth: 1,
                             padding: 12,
-                            displayColors: false,
+                            displayColors: true,
                             callbacks: {
-                                label: (context) => `$${context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+                                label: (context) => {
+                                    const val = context.parsed.y;
+                                    return `${context.dataset.label}: ${context.dataset.label.includes('Benchmark') ? val.toFixed(2) + '%' : '$' + val.toLocaleString()}`;
+                                }
                             }
                         }
                     },
                     scales: {
                         x: { display: false },
-                        y: { display: false, min: Math.min(...history.map(h => h.value)) * 0.99 }
+                        y: { display: false, position: 'left' },
+                        yBenchmark: { display: false, position: 'right' }
                     },
                     interaction: {
                         intersect: false,
@@ -121,8 +130,43 @@ const Dashboard = () => {
                     }
                 }
             });
+
+            if (showBenchmark && benchmarkData.length > 0) {
+                // Normalize both to percentage change from start
+                const pStart = history[0].value;
+                const bStart = benchmarkData[0].price;
+
+                const pNorm = history.map(h => ((h.value - pStart) / pStart) * 100);
+                const bNorm = benchmarkData.map(b => ((b.price - bStart) / bStart) * 100);
+
+                // Update datasets to normalized percentage
+                chartInstance.current.data.datasets = [
+                    {
+                        label: 'Portfolio Perf.',
+                        data: pNorm,
+                        borderColor: `rgb(${color})`,
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'S&P 500 Benchmark',
+                        data: bNorm,
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderDash: [5, 5],
+                        borderWidth: 1.5,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }
+                ];
+                chartInstance.current.options.scales.y.display = true;
+                chartInstance.current.options.scales.y.ticks = { callback: (v) => v + '%' };
+            }
+
+            chartInstance.current.update();
         }
-    }, [history, chartLoading, range]);
+    }, [history, chartLoading, range, showBenchmark, benchmarkData]);
 
     const handleRangeChange = (r) => {
         setRange(r);
@@ -168,6 +212,13 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <div className="tabs">
+                            <button 
+                                className={`tab benchmark-toggle ${showBenchmark ? 'a' : ''}`}
+                                onClick={() => setShowBenchmark(!showBenchmark)}
+                                style={{ marginRight: 'var(--sp-12)', fontSize: '10px' }}
+                            >
+                                VS S&P 500
+                            </button>
                             {['1d', '1w', '1mo', '1y'].map(r => (
                                 <button 
                                     key={r} 

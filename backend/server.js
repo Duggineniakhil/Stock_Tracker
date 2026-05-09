@@ -20,6 +20,7 @@ const alertRoutes = require('./routes/alerts');
 const authRoutes = require('./routes/auth');
 const portfolioRoutes = require('./routes/portfolio');
 const aiRoutes = require('./routes/ai');
+const adminRoutes = require('./routes/admin');
 const alertEngine = require('./services/alertEngine');
 
 const app = express();
@@ -103,6 +104,7 @@ app.use('/api/v1/stock', stockRoutes);
 app.use('/api/v1/alerts', alertRoutes);
 app.use('/api/v1/portfolio', portfolioRoutes);
 app.use('/api/v1/ai', aiRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // ── Legacy Routes (backward compatibility) ────────────────────────────────────
 app.use('/api/auth', authRoutes);

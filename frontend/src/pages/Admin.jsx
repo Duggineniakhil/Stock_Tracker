@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../services/api';
+import { fetchAdminStats, fetchRecentUsers } from '../services/api';
 import './Admin.css';
 
 const Admin = () => {
@@ -13,24 +13,27 @@ const Admin = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Mocking admin stats for now
-        setTimeout(() => {
-            setStats({
-                totalUsers: 124,
-                activeAlerts: 450,
-                totalHoldings: 1205,
-                planDistribution: { free: 85, student: 25, pro: 14 }
-            });
-            setUsers([
-                { id: 1, name: 'John Doe', email: 'john@example.com', plan: 'pro', joined: '2026-01-15' },
-                { id: 2, name: 'Jane Smith', email: 'jane@example.com', plan: 'student', joined: '2026-02-10' },
-                { id: 3, name: 'Bob Wilson', email: 'bob@example.com', plan: 'free', joined: '2026-03-05' },
-            ]);
-            setLoading(false);
-        }, 1000);
+        const getAdminData = async () => {
+            try {
+                const [statsRes, usersRes] = await Promise.all([
+                    fetchAdminStats(),
+                    fetchRecentUsers()
+                ]);
+                setStats(statsRes.data || statsRes);
+                setUsers(usersRes.data || usersRes);
+            } catch (err) {
+                console.error('Error fetching admin data:', err);
+                alert('Failed to load admin data. Are you an admin?');
+            } finally {
+                setLoading(false);
+            }
+        };
+        getAdminData();
     }, []);
 
     if (loading) return <div className="page-loader">Loading Admin Portal...</div>;
+
+    const paidCount = (stats.planDistribution?.pro || 0) + (stats.planDistribution?.student || 0);
 
     return (
         <div className="admin-page">
@@ -53,7 +56,7 @@ const Admin = () => {
                     <div className="stat-label">Total Holdings</div>
                 </div>
                 <div className="stat-card reveal highlight">
-                    <div className="stat-val">{stats.planDistribution.pro + stats.planDistribution.student}</div>
+                    <div className="stat-val">{paidCount}</div>
                     <div className="stat-label">Paid Subscribers</div>
                 </div>
             </div>
@@ -74,9 +77,9 @@ const Admin = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map(u => (
-                                <tr key={u.id}>
-                                    <td>{u.name}</td>
+                            {users.length > 0 ? users.map((u, i) => (
+                                <tr key={u.id || i}>
+                                    <td>{u.name || 'N/A'}</td>
                                     <td>{u.email}</td>
                                     <td><span className={`p-badge ${u.plan}`}>{u.plan}</span></td>
                                     <td>{u.joined}</td>
@@ -84,7 +87,11 @@ const Admin = () => {
                                         <button className="small-link">Manage</button>
                                     </td>
                                 </tr>
-                            ))}
+                            )) : (
+                                <tr>
+                                    <td colSpan="5" className="muted" style={{ textAlign: 'center', padding: 'var(--sp-24)' }}>No recent users</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

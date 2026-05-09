@@ -112,6 +112,10 @@ const api = {
     fetchStockSentiment: (symbol) => axiosInstance.get(`/v1/ai/sentiment/${symbol}`).then(r => r.data),
     generateAIReport: () => axiosInstance.post('/v1/ai/report/generate').then(r => r.data),
     fetchLatestAIReport: () => axiosInstance.get('/v1/ai/report/latest').then(r => r.data),
+
+    // Admin
+    fetchAdminStats: () => axiosInstance.get('/v1/admin/stats').then(r => r.data),
+    fetchRecentUsers: () => axiosInstance.get('/v1/admin/users/recent').then(r => r.data),
 };
 
 // Named exports
@@ -146,6 +150,8 @@ export const fetchChatHistory = api.fetchChatHistory;
 export const fetchStockSentiment = api.fetchStockSentiment;
 export const generateAIReport = api.generateAIReport;
 export const fetchLatestAIReport = api.fetchLatestAIReport;
+export const fetchAdminStats = api.fetchAdminStats;
+export const fetchRecentUsers = api.fetchRecentUsers;
 
 // Attach methods to axiosInstance for easier access in AuthContext
 axiosInstance.login = api.login;

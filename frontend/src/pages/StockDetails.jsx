@@ -17,6 +17,47 @@ const StockDetails = () => {
     const [chartLoading, setChartLoading] = useState(false);
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
+    const [indicators, setIndicators] = useState({ sma: false, rsi: false });
+
+    // Technical Analysis Helpers
+    const calculateSMA = (data, period) => {
+        let result = [];
+        for (let i = 0; i < data.length; i++) {
+            if (i < period - 1) {
+                result.push(null);
+                continue;
+            }
+            const sum = data.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
+            result.push(sum / period);
+        }
+        return result;
+    };
+
+    const calculateRSI = (data, period = 14) => {
+        let result = [];
+        let gains = [];
+        let losses = [];
+        for (let i = 1; i < data.length; i++) {
+            const diff = data[i] - data[i - 1];
+            gains.push(diff > 0 ? diff : 0);
+            losses.push(diff < 0 ? Math.abs(diff) : 0);
+        }
+        
+        for (let i = 0; i < data.length; i++) {
+            if (i < period) {
+                result.push(null);
+                continue;
+            }
+            const avgGain = gains.slice(i - period, i).reduce((a, b) => a + b, 0) / period;
+            const avgLoss = losses.slice(i - period, i).reduce((a, b) => a + b, 0) / period;
+            if (avgLoss === 0) result.push(100);
+            else {
+                const rs = avgGain / avgLoss;
+                result.push(100 - (100 / (1 + rs)));
+            }
+        }
+        return result;
+    };
 
     const loadStockData = async () => {
         try {
@@ -69,7 +110,8 @@ const StockDetails = () => {
                         tension: 0.4,
                         pointRadius: 0,
                         pointHoverRadius: 6,
-                        borderWidth: 2
+                        borderWidth: 2,
+                        yAxisID: 'y'
                     }]
                 },
                 options: {
@@ -86,9 +128,12 @@ const StockDetails = () => {
                             borderColor: '#333',
                             borderWidth: 1,
                             padding: 12,
-                            displayColors: false,
+                            displayColors: true,
                             callbacks: {
-                                label: (context) => `$${context.parsed.y.toFixed(2)}`
+                                label: (context) => {
+                                    const val = context.parsed.y.toFixed(2);
+                                    return `${context.dataset.label}: ${context.dataset.label === 'RSI' ? val : '$' + val}`;
+                                }
                             }
                         }
                     },
@@ -100,8 +145,18 @@ const StockDetails = () => {
                         },
                         y: {
                             display: true,
+                            position: 'left',
                             grid: { color: 'rgba(255,255,255,0.03)' },
                             ticks: { color: '#555', callback: (val) => `$${val}` }
+                        },
+                        yRSI: {
+                            display: indicators.rsi,
+                            position: 'right',
+                            min: 0,
+                            max: 100,
+                            grid: { display: false },
+                            ticks: { color: '#555' },
+                            title: { display: true, text: 'RSI', color: '#555' }
                         }
                     },
                     interaction: {
@@ -110,8 +165,37 @@ const StockDetails = () => {
                     }
                 }
             });
+
+            if (indicators.sma) {
+                const smaData = calculateSMA(history.map(h => h.price), 20);
+                chartInstance.current.data.datasets.push({
+                    label: 'SMA (20)',
+                    data: smaData,
+                    borderColor: 'rgba(56, 130, 220, 0.8)',
+                    borderWidth: 1.5,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'y'
+                });
+            }
+
+            if (indicators.rsi) {
+                const rsiData = calculateRSI(history.map(h => h.price));
+                chartInstance.current.data.datasets.push({
+                    label: 'RSI',
+                    data: rsiData,
+                    borderColor: '#f0a500',
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    fill: false,
+                    yAxisID: 'yRSI'
+                });
+            }
+
+            chartInstance.current.update();
         }
-    }, [history, chartLoading, stock]);
+    }, [history, chartLoading, stock, indicators]);
 
     const handleRangeChange = (r) => {
         setRange(r);
@@ -153,16 +237,28 @@ const StockDetails = () => {
             </div>
 
             <div className="sd-chart-container">
-                <div className="sd-range-selector">
-                    {['1d', '5d', '1mo', '6mo', 'YTD', '1y', 'max'].map(r => (
-                        <button 
-                            key={r} 
-                            className={`range-btn ${range === r ? 'active' : ''}`}
-                            onClick={() => handleRangeChange(r)}
-                        >
-                            {r.toUpperCase()}
-                        </button>
-                    ))}
+                <div className="sd-chart-controls">
+                    <div className="sd-range-selector">
+                        {['1d', '5d', '1mo', '6mo', 'YTD', '1y', 'max'].map(r => (
+                            <button 
+                                key={r} 
+                                className={`range-btn ${range === r ? 'active' : ''}`}
+                                onClick={() => handleRangeChange(r)}
+                            >
+                                {r.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="sd-indicators">
+                        <label className="indicator-toggle">
+                            <input type="checkbox" checked={indicators.sma} onChange={e => setIndicators({...indicators, sma: e.target.checked})} />
+                            <span>SMA 20</span>
+                        </label>
+                        <label className="indicator-toggle">
+                            <input type="checkbox" checked={indicators.rsi} onChange={e => setIndicators({...indicators, rsi: e.target.checked})} />
+                            <span>RSI</span>
+                        </label>
+                    </div>
                 </div>
                 <div className="sd-chart-box">
                     <canvas ref={chartRef}></canvas>

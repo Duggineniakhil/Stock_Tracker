@@ -87,12 +87,43 @@
     margin-bottom: 3rem;
 }
 
-.sd-range-selector {
+.sd-chart-controls {
     display: flex;
-    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 2rem;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.sd-range-selector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sd-indicators {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.indicator-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #888;
+}
+
+.indicator-toggle input {
+    accent-color: var(--accent-green);
+}
+
+.indicator-toggle:hover {
+    color: #fff;
 }
 
 .range-btn {

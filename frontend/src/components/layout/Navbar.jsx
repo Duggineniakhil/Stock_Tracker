@@ -28,6 +28,7 @@ const Navbar = () => {
                     <li><Link to="/portfolio">Portfolio</Link></li>
                     <li><Link to="/advisor">AI Advisor</Link></li>
                     <li><Link to="/insights">Insights</Link></li>
+                    <li><Link to="/alerts">Alerts</Link></li>
                 </ul>
 
                 <div className="nav-actions">

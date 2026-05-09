@@ -1,0 +1,127 @@
+.alerts-page {
+    padding: var(--sp-32) var(--sp-24);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.alerts-header {
+    margin-bottom: var(--sp-48);
+}
+
+.rules-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-24);
+    margin-bottom: var(--sp-48);
+}
+
+@media (min-width: 768px) {
+    .rules-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.rule-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: var(--sp-24);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-16);
+    position: relative;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.rule-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.rule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rule-symbol {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--text-main);
+}
+
+.rule-type {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.rule-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text-main);
+    font-size: 1.1rem;
+}
+
+.rule-condition {
+    font-weight: 600;
+}
+
+.rule-value {
+    color: var(--accent-green);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+}
+
+.rule-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+    padding-top: var(--sp-16);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.rule-delete {
+    background: none;
+    border: none;
+    color: var(--market-red);
+    cursor: pointer;
+    font-size: 0.875rem;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.rule-delete:hover {
+    opacity: 1;
+}
+
+.add-rule-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-16);
+    margin-bottom: var(--sp-32);
+}
+
+@media (min-width: 768px) {
+    .add-rule-form {
+        grid-template-columns: 1fr 1fr 1fr 1fr auto;
+        align-items: flex-end;
+    }
+}
+
+.add-rule-form select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-main);
+    border-radius: 8px;
+    font-size: 1rem;
+}

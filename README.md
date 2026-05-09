@@ -2,8 +2,8 @@
 
 A comprehensive, full-stack stock portfolio and market tracking application — **Simplified and AI-Powered**. Built with Node.js, Express, React, SQLite, and OpenAI.
 
-![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
-![Node.js](https://img.shields.io/badge/Node.js-v20+-green)
+![Status](https://img.shields.io/badge/Status-v1.1.0-blue)
+![Node.js](https://img.shields.io/badge/Node.js-v24+-green)
 ![React](https://img.shields.io/badge/React-v19+-blue)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
@@ -40,6 +40,8 @@ A comprehensive, full-stack stock portfolio and market tracking application — 
 - **JWT Authentication:** Secure login flow with short-lived access tokens and 7-day refresh tokens.
 - **Brute-Force Protection:** Account lockouts after 5 failed login attempts (15-minute cooldown).
 - **Hardened API:** Structured with Helmet.js for secure HTTP headers, automated rate limiters, and CORS protection.
+- **Admin Command Center:** Built-in administrative dashboard for managing platform health and user subscriptions.
+- **Subscription Engine:** Functional pricing tier management (Free, Student, Pro) with integrated mock payment flows.
 
 ---
 

@@ -30,7 +30,7 @@ const Navbar = () => {
                     <li><Link to="/portfolio" onClick={() => setIsMenuOpen(false)}>Portfolio</Link></li>
                     <li><Link to="/insights" onClick={() => setIsMenuOpen(false)}>Insights</Link></li>
                     <li><Link to="/alerts" onClick={() => setIsMenuOpen(false)}>Alerts</Link></li>
-                    {user && (
+                    {user ? (
                         <>
                             <li className="mobile-only">
                                 <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>

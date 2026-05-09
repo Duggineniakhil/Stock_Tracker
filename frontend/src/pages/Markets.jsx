@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchWatchlist, fetchStockData, addToWatchlist } from '../services/api';
 import SentimentBadge from '../components/ai/SentimentBadge';
+import Sparkline from '../components/Sparkline';
 import './Markets.css';
 
 const Markets = () => {
@@ -127,17 +128,7 @@ const Markets = () => {
                         </div>
                         <div className="mk-price">${(s.currentPrice || s.price)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                         <div className="sparkline-box">
-                            <svg viewBox="0 0 200 40" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-                                <path 
-                                    d={s.trend === 'up' 
-                                        ? "M0,30 C20,28 40,22 60,18 C80,14 100,16 120,10 C140,4 160,6 180,3 L200,2" 
-                                        : "M0,5 C20,7 40,10 60,14 C80,18 100,15 120,20 C140,25 160,22 180,28 L200,32"
-                                    }
-                                    fill="none" 
-                                    stroke={s.trend === 'up' ? "#00e887" : "#f05050"} 
-                                    strokeWidth="1.5" 
-                                />
-                            </svg>
+                            <Sparkline symbol={s.symbol} trend={s.trend} />
                         </div>
                     </div>
                 ))}

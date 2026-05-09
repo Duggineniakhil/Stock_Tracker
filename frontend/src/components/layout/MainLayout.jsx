@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from './Navbar';
+import AIChatBot from '../ai/AIChatBot';
 
 const MainLayout = ({ children }) => {
     return (
@@ -10,6 +11,7 @@ const MainLayout = ({ children }) => {
                     {children}
                 </div>
             </main>
+            <AIChatBot />
             <footer className="container" style={{ 
                 padding: 'var(--sp-64) var(--sp-24)', 
                 borderTop: '1px solid var(--border-subtle)',

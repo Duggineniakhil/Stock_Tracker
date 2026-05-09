@@ -28,7 +28,6 @@ const Navbar = () => {
                 <ul className={`nl ${isMenuOpen ? 'active' : ''}`}>
                     <li><Link to="/markets" onClick={() => setIsMenuOpen(false)}>Markets</Link></li>
                     <li><Link to="/portfolio" onClick={() => setIsMenuOpen(false)}>Portfolio</Link></li>
-                    <li><Link to="/advisor" onClick={() => setIsMenuOpen(false)}>AI Advisor</Link></li>
                     <li><Link to="/insights" onClick={() => setIsMenuOpen(false)}>Insights</Link></li>
                     <li><Link to="/alerts" onClick={() => setIsMenuOpen(false)}>Alerts</Link></li>
                     {user && (

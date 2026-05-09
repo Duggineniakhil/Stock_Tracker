@@ -38,6 +38,7 @@ const Navbar = () => {
                                 Hi, {user.name?.split(' ')[0] || user.email.split('@')[0]}
                             </span>
                             <Link to="/dashboard" className="small-text" style={{ textDecoration: 'underline' }}>Dashboard</Link>
+                            <Link to="/settings" className="small-text" style={{ textDecoration: 'underline' }}>Settings</Link>
                             <button onClick={handleLogout} className="ncta">
                                 Logout
                             </button>

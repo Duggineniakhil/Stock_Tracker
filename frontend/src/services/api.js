@@ -66,6 +66,8 @@ const api = {
     refreshToken: (refreshToken) => axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, { refreshToken }).then(r => r.data),
     logout: (refreshToken) => axios.post(`${API_BASE_URL}/api/v1/auth/logout`, { refreshToken }).then(r => r.data),
     updatePlan: (email, newPlan) => axiosInstance.post('/v1/auth/plan', { email, newPlan }).then(r => r.data),
+    updateProfile: (data) => axiosInstance.put('/v1/auth/profile', data).then(r => r.data),
+    changePassword: (data) => axiosInstance.put('/v1/auth/password', data).then(r => r.data),
 
     // Watchlist
     fetchWatchlist: () => axiosInstance.get('/v1/watchlist').then(r => r.data),
@@ -124,6 +126,8 @@ export const apiLogin = api.login;
 export const apiRegister = api.register;
 export const apiLogout = api.logout;
 export const updatePlan = api.updatePlan;
+export const updateProfile = api.updateProfile;
+export const changePassword = api.changePassword;
 export const fetchWatchlist = api.fetchWatchlist;
 export const addToWatchlist = api.addToWatchlist;
 export const removeFromWatchlist = api.removeFromWatchlist;

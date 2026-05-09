@@ -19,6 +19,7 @@ const Pricing = lazy(() => import('./pages/Pricing'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const StockDetails = lazy(() => import('./pages/StockDetails'));
+const Settings = lazy(() => import('./pages/Settings'));
 
 const PageLoader = () => (
   <div style={{
@@ -65,6 +66,7 @@ function App() {
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/stock/:symbol" element={<ProtectedRoute><StockDetails /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

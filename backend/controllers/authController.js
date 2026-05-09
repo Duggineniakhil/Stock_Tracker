@@ -214,9 +214,6 @@ const logout = (req, res) => {
 
 // ── Update Plan (Mock Stripe Integration) ──────────────────────────────────
 const updatePlan = (req, res) => {
-    // In a real app, this route would be protected by verifyToken, 
-    // and would either initiate a Stripe checkout session or be called by a Stripe webhook.
-    // For this portfolio project, we will mock the update directly.
     const { email, newPlan } = req.body;
     
     if (!email || !newPlan) {
@@ -241,4 +238,56 @@ const updatePlan = (req, res) => {
     });
 };
 
-module.exports = { register, login, refreshToken, logout, updatePlan };
+// ── Update Profile ───────────────────────────────────────────────────────────
+const updateProfile = (req, res) => {
+    const { name, email } = req.body;
+    const userId = req.user.id;
+
+    if (!name || !email) {
+        return apiError(res, 'Name and email are required', null, 400);
+    }
+
+    db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email.toLowerCase(), userId], function(err) {
+        if (err) {
+            if (err.message.includes('UNIQUE constraint failed')) {
+                return apiError(res, 'Email already in use', null, 409);
+            }
+            logger.error('Error updating profile', { error: err.message });
+            return apiError(res, 'Failed to update profile', null, 500);
+        }
+        return success(res, { name, email }, 'Profile updated successfully');
+    });
+};
+
+// ── Change Password ─────────────────────────────────────────────────────────
+const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!currentPassword || !newPassword) {
+        return apiError(res, 'Current and new passwords are required', null, 400);
+    }
+
+    // Password strength check
+    const strength = isStrongPassword(newPassword);
+    if (!strength.valid) {
+        return apiError(res, strength.reason, null, 400);
+    }
+
+    db.get('SELECT password_hash FROM users WHERE id = ?', [userId], async (err, user) => {
+        if (err || !user) return apiError(res, 'User not found', null, 404);
+
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!passwordMatch) {
+            return apiError(res, 'Incorrect current password', null, 401);
+        }
+
+        const newHashedPassword = await bcrypt.hash(newPassword, 12);
+        db.run('UPDATE users SET password_hash = ? WHERE id = ?', [newHashedPassword, userId], (updErr) => {
+            if (updErr) return apiError(res, 'Failed to change password', null, 500);
+            return success(res, null, 'Password changed successfully');
+        });
+    });
+};
+
+module.exports = { register, login, refreshToken, logout, updatePlan, updateProfile, changePassword };

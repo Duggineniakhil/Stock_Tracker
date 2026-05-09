@@ -185,3 +185,16 @@
 .clear-recent:hover {
     opacity: 1;
 }
+@media (max-width: 768px) {
+    .search-bar { max-width: 100%; }
+    .mkt-grid { grid-template-columns: 1fr; }
+    .mk-price { font-size: 20px; }
+    .trending-list { gap: var(--sp-8); }
+    .trending-pill { padding: var(--sp-10) var(--sp-16); }
+}
+
+@media (max-width: 480px) {
+    .search-bar input { padding: var(--sp-12) var(--sp-16); font-size: 14px; }
+    .p-sym { font-size: 11px; }
+    .p-ch { font-size: 10px; }
+}

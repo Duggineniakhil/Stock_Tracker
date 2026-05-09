@@ -190,3 +190,29 @@
     font-weight: 700;
     font-size: 0.9rem;
 }
+
+@media (max-width: 768px) {
+    .sd-header {
+        flex-direction: column;
+        gap: var(--sp-24);
+        margin-bottom: var(--sp-32);
+    }
+    
+    .sd-brand { gap: var(--sp-12); }
+    .sd-logo { width: 48px; height: 48px; font-size: 1.1rem; }
+    .sd-header h1 { font-size: 1.8rem; }
+    
+    .sd-current-price { font-size: 2.5rem; }
+    
+    .sd-chart-container { padding: 1rem; border-radius: 12px; }
+    .sd-chart-controls { flex-direction: column; align-items: flex-start; }
+    .sd-indicators { width: 100%; justify-content: space-between; }
+    
+    .sd-chart-box { height: 300px; }
+}
+
+@media (max-width: 480px) {
+    .sd-current-price { font-size: 2rem; }
+    .sd-stats-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .sd-indicators { flex-direction: column; gap: 0.75rem; }
+}

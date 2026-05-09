@@ -125,3 +125,9 @@
     border-radius: 8px;
     font-size: 1rem;
 }
+
+@media (max-width: 480px) {
+    .rule-symbol { font-size: 1.1rem; }
+    .rule-details { font-size: 0.95rem; }
+    .add-rule-form .btn { width: 100%; }
+}

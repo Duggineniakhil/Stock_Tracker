@@ -235,7 +235,44 @@
         align-items: flex-start;
         gap: var(--sp-16);
     }
-    .add-asset-btn {
+    
+    .portfolio-actions {
+        width: 100%;
+        display: flex;
+        gap: var(--sp-8);
+    }
+    
+    .portfolio-actions button {
+        flex: 1;
+        padding: 0 var(--sp-12);
+        font-size: 12px;
+    }
+
+    .holding-item {
+        padding: var(--sp-16);
+    }
+
+    .h-meta-name { font-size: 14px; }
+    .h-price { font-size: 15px; }
+    
+    .add-asset-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .add-asset-form .input-group {
         width: 100%;
     }
+    
+    .add-asset-form .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .h-brand { gap: var(--sp-8); }
+    .h-icon-box { display: none; }
+    .holding-item { flex-direction: column; align-items: flex-start; gap: var(--sp-12); }
+    .h-data { text-align: left; width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); pt: var(--sp-8); }
+    .h-del { margin-top: 0; }
 }

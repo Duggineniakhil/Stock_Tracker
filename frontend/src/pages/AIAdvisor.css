@@ -214,3 +214,17 @@
         box-shadow: 9984px 0 0 0 var(--accent-green), 9999px 0 0 0 var(--accent-green), 10014px 0 0 0 var(--accent-green);
     }
 }
+@media (max-width: 768px) {
+    .advisor-page { height: auto; min-height: calc(100vh - 80px); padding: 1rem; }
+    .advisor-title-box h1 { font-size: 1.8rem; }
+    .chat-container { height: 600px; border-radius: 16px; }
+    .messages-list { padding: 1rem; }
+    .message-bubble { max-width: 90%; font-size: 0.9rem; }
+    .starter-grid { grid-template-columns: 1fr; }
+    .input-area { padding: 1rem; }
+}
+
+@media (max-width: 480px) {
+    .chat-container { height: 500px; }
+    .input-area button { padding: 0 1rem; font-size: 0.9rem; }
+}

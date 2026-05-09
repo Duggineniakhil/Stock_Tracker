@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import NotificationBell from './NotificationBell';
@@ -7,6 +7,7 @@ import './Navbar.css';
 const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -24,32 +25,44 @@ const Navbar = () => {
                     <span className="ldot"></span>Quotra
                 </Link>
                 
-                <ul className="nl">
-                    <li><Link to="/markets">Markets</Link></li>
-                    <li><Link to="/portfolio">Portfolio</Link></li>
-                    <li><Link to="/advisor">AI Advisor</Link></li>
-                    <li><Link to="/insights">Insights</Link></li>
-                    <li><Link to="/alerts">Alerts</Link></li>
+                <ul className={`nl ${isMenuOpen ? 'active' : ''}`}>
+                    <li><Link to="/markets" onClick={() => setIsMenuOpen(false)}>Markets</Link></li>
+                    <li><Link to="/portfolio" onClick={() => setIsMenuOpen(false)}>Portfolio</Link></li>
+                    <li><Link to="/advisor" onClick={() => setIsMenuOpen(false)}>AI Advisor</Link></li>
+                    <li><Link to="/insights" onClick={() => setIsMenuOpen(false)}>Insights</Link></li>
+                    <li><Link to="/alerts" onClick={() => setIsMenuOpen(false)}>Alerts</Link></li>
+                    {user && (
+                        <li className="mobile-only">
+                            <Link to="/settings" onClick={() => setIsMenuOpen(false)}>Settings</Link>
+                        </li>
+                    )}
                 </ul>
 
                 <div className="nav-actions">
                     {user ? (
                         <>
                             <NotificationBell />
-                            <span className="small-text">
-                                Hi, {user.name?.split(' ')[0] || user.email.split('@')[0]}
-                            </span>
-                            <Link to="/dashboard" className="small-text" style={{ textDecoration: 'underline' }}>Dashboard</Link>
-                            <Link to="/settings" className="small-text" style={{ textDecoration: 'underline' }}>Settings</Link>
-                            <button onClick={handleLogout} className="ncta">
+                            <div className="user-meta desktop-only">
+                                <span className="small-text">
+                                    Hi, {user.name?.split(' ')[0] || user.email.split('@')[0]}
+                                </span>
+                                <Link to="/dashboard" className="small-text" style={{ textDecoration: 'underline' }}>Dashboard</Link>
+                            </div>
+                            <button onClick={handleLogout} className="ncta desktop-only">
                                 Logout
                             </button>
                         </>
                     ) : (
-                        <Link to="/register">
+                        <Link to="/register" className="desktop-only">
                             <button className="ncta">Get started free</button>
                         </Link>
                     )}
+                    
+                    <button className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
                 </div>
             </div>
         </nav>

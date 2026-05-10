@@ -108,7 +108,7 @@ const alertController = {
             const { symbol, template_type, condition_operator, condition_value, priority } = req.body;
 
             // Validation
-            const validTemplates = ['PERCENTAGE_CHANGE', 'TARGET_PRICE', 'VOLUME_SPIKE'];
+            const validTemplates = ['PERCENTAGE_CHANGE', 'TARGET_PRICE', 'VOLUME_SPIKE', 'RSI_OVERSOLD', 'RSI_OVERBOUGHT'];
             const validOps = ['ABOVE', 'BELOW'];
             const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 

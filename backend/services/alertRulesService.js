@@ -10,7 +10,9 @@ const logger = require('../utils/logger');
 const TEMPLATE_LABELS = {
     PERCENTAGE_CHANGE: 'Price % Change',
     TARGET_PRICE: 'Target Price',
-    VOLUME_SPIKE: 'Volume Spike'
+    VOLUME_SPIKE: 'Volume Spike',
+    RSI_OVERSOLD: 'RSI Oversold',
+    RSI_OVERBOUGHT: 'RSI Overbought'
 };
 
 const PRIORITY_EMOJI = {

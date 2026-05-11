@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { chatWithAI, fetchChatHistory } from '../../services/api';
+import { chatWithAI, fetchChatHistory, fetchPortfolio } from '../../services/api';
 import './AIChatBot.css';
 
 const AIChatBot = () => {
@@ -7,6 +7,7 @@ const AIChatBot = () => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [holdings, setHoldings] = useState([]);
     const [error, setError] = useState(null);
     const messagesEndRef = useRef(null);
 
@@ -15,18 +16,25 @@ const AIChatBot = () => {
     };
 
     useEffect(() => {
-        if (isOpen && messages.length === 0) {
-            const loadHistory = async () => {
+        if (isOpen) {
+            const loadData = async () => {
                 try {
-                    const data = await fetchChatHistory();
-                    if (data.success && data.history.length > 0) {
-                        setMessages(data.history);
+                    // Load History if empty
+                    if (messages.length === 0) {
+                        const historyData = await fetchChatHistory();
+                        if (historyData.success && historyData.history.length > 0) {
+                            setMessages(historyData.history);
+                        }
                     }
+                    
+                    // Load Portfolio for context
+                    const portData = await fetchPortfolio();
+                    setHoldings(portData.data || portData || []);
                 } catch (err) {
-                    console.error('Failed to load chat history', err);
+                    console.error('Failed to load chat data', err);
                 }
             };
-            loadHistory();
+            loadData();
         }
     }, [isOpen]);
 
@@ -36,18 +44,19 @@ const AIChatBot = () => {
         }
     }, [messages, isOpen]);
 
-    const handleSend = async (e) => {
-        e.preventDefault();
-        if (!input.trim() || isLoading) return;
+    const handleSend = async (e, customText = null) => {
+        if (e) e.preventDefault();
+        const textToSend = customText || input;
+        if (!textToSend.trim() || isLoading) return;
 
-        const userMsg = { role: 'user', content: input };
+        const userMsg = { role: 'user', content: textToSend };
         setMessages(prev => [...prev, userMsg]);
-        setInput('');
+        if (!customText) setInput('');
         setIsLoading(true);
         setError(null);
 
         try {
-            const data = await chatWithAI(input);
+            const data = await chatWithAI(textToSend);
             if (data.success) {
                 setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
             } else {
@@ -60,11 +69,29 @@ const AIChatBot = () => {
         }
     };
 
-    const starterPrompts = [
-        "Analyze my portfolio",
-        "Market trends?",
-        "Risk assessment"
-    ];
+    const handleClear = () => {
+        if (window.confirm('Clear all chat history?')) {
+            setMessages([]);
+            // Note: We could add a backend endpoint for this if needed, 
+            // for now we just clear the local session.
+        }
+    };
+
+    const getDynamicPrompts = () => {
+        const base = ["Analyze my portfolio", "Market trends?"];
+        if (holdings.length > 0) {
+            const topHolding = holdings[0].symbol;
+            base.push(`Tell me about ${topHolding}`);
+            if (holdings.length > 1) {
+                base.push(`Compare ${holdings[0].symbol} vs ${holdings[1].symbol}`);
+            }
+        } else {
+            base.push("Risk assessment");
+        }
+        return base;
+    };
+
+    const starterPrompts = getDynamicPrompts();
 
     return (
         <div className={`ai-bot-wrapper ${isOpen ? 'open' : ''}`}>
@@ -75,7 +102,10 @@ const AIChatBot = () => {
                             <span className="ldot"></span>
                             AI Advisor
                         </div>
-                        <button className="ai-close-btn" onClick={() => setIsOpen(false)}>×</button>
+                        <div className="ai-header-actions">
+                            <button className="ai-clear-btn" title="Clear Chat" onClick={handleClear}>🗑️</button>
+                            <button className="ai-close-btn" onClick={() => setIsOpen(false)}>×</button>
+                        </div>
                     </div>
 
                     <div className="ai-chat-messages">
@@ -85,7 +115,7 @@ const AIChatBot = () => {
                                 <h4>How can I help you?</h4>
                                 <div className="ai-starters">
                                     {starterPrompts.map((p, i) => (
-                                        <button key={i} onClick={() => setInput(p)}>{p}</button>
+                                        <button key={i} onClick={() => handleSend(null, p)}>{p}</button>
                                     ))}
                                 </div>
                             </div>
@@ -133,3 +163,5 @@ const AIChatBot = () => {
 };
 
 export default AIChatBot;
+
+

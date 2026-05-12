@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS alert_rules (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
   symbol TEXT NOT NULL,
-  template_type TEXT NOT NULL CHECK(template_type IN ('PERCENTAGE_CHANGE', 'TARGET_PRICE', 'VOLUME_SPIKE')),
+  template_type TEXT NOT NULL CHECK(template_type IN ('PERCENTAGE_CHANGE', 'TARGET_PRICE', 'VOLUME_SPIKE', 'RSI_OVERSOLD', 'RSI_OVERBOUGHT')),
   condition_operator TEXT NOT NULL CHECK(condition_operator IN ('ABOVE', 'BELOW')),
   condition_value REAL NOT NULL,
   priority TEXT NOT NULL DEFAULT 'MEDIUM' CHECK(priority IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')),

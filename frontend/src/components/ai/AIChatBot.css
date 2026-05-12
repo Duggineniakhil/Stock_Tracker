@@ -58,10 +58,37 @@
     gap: var(--sp-8);
 }
 
+.ai-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-12);
+}
+
+.ai-clear-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.6;
+    transition: var(--transition-base);
+}
+
+.ai-clear-btn:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
 .ai-close-btn {
     font-size: 24px;
     color: var(--text-muted);
     line-height: 1;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.ai-close-btn:hover {
+    color: var(--text-main);
+    transform: rotate(90deg);
 }
 
 .ai-chat-messages {

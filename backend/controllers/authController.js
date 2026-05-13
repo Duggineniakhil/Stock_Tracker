@@ -174,6 +174,81 @@ const login = async (req, res) => {
     }
 };
 
+// ── Google Login ──────────────────────────────────────────────────────────────
+const googleLogin = async (req, res) => {
+    const { email, name, photoURL, uid } = req.body;
+    const ip = req.ip || req.connection?.remoteAddress;
+
+    if (!email) {
+        return apiError(res, 'Email is required', null, 400);
+    }
+
+    try {
+        db.get('SELECT * FROM users WHERE email = ?', [email.toLowerCase()], async (err, user) => {
+            if (err) return apiError(res, 'Database error', null, 500);
+
+            let userId;
+            let userPlan = 'free';
+
+            if (!user) {
+                // Create new user for Google login
+                // We generate a random password hash since they'll use Google to log in
+                const randomPassword = crypto.randomBytes(16).toString('hex');
+                const hashedPassword = await bcrypt.hash(randomPassword, 12);
+                
+                await new Promise((resolve, reject) => {
+                    db.run('INSERT INTO users (name, email, password_hash, plan) VALUES (?, ?, ?, ?)', 
+                        [name || email.split('@')[0], email.toLowerCase(), hashedPassword, 'free'], 
+                        function(err) {
+                            if (err) reject(err);
+                            else {
+                                userId = this.lastID;
+                                resolve();
+                            }
+                        }
+                    );
+                });
+                logger.info(`New user registered via Google: ${email}`);
+            } else {
+                userId = user.id;
+                userPlan = user.plan || 'free';
+                // Optionally update name/photo if needed
+                db.run('UPDATE users SET name = ? WHERE id = ? AND (name IS NULL OR name = "")', [name, userId]);
+            }
+
+            // Issue tokens
+            const accessToken = jwt.sign(
+                { id: userId, email: email.toLowerCase(), plan: userPlan },
+                JWT_SECRET,
+                { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+            );
+
+            const refreshToken = jwt.sign(
+                { id: userId, type: 'refresh' },
+                JWT_REFRESH_SECRET,
+                { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+            );
+
+            // Store refresh token hash
+            const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            db.run('INSERT OR REPLACE INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
+                [userId, tokenHash, expiresAt]);
+
+            logger.info(`User logged in via Google: ${email}`);
+            return success(res, {
+                token: accessToken,
+                refreshToken,
+                expiresIn: 3600,
+                user: { id: userId, email: email.toLowerCase(), name: name || user?.name, plan: userPlan, photoURL }
+            }, 'Google login successful');
+        });
+    } catch (err) {
+        logger.error('Google login error', { error: err.message });
+        return apiError(res, 'Server error during Google login', null, 500);
+    }
+};
+
 // ── Refresh Token ─────────────────────────────────────────────────────────────
 const refreshToken = async (req, res) => {
     const { refreshToken: token } = req.body;
@@ -290,4 +365,4 @@ const changePassword = async (req, res) => {
     });
 };
 
-module.exports = { register, login, refreshToken, logout, updatePlan, updateProfile, changePassword };
+module.exports = { register, login, googleLogin, refreshToken, logout, updatePlan, updateProfile, changePassword };

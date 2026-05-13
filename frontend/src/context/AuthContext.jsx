@@ -82,23 +82,19 @@ export const AuthProvider = ({ children }) => {
             const result = await signInWithPopup(auth, googleProvider);
             const firebaseUser = result.user;
 
-            // Store/Update user info in Firestore
-            const userRef = doc(db, 'users', firebaseUser.uid);
-            const userSnap = await getDoc(userRef);
-
-            const userData = {
+            // Sync with backend
+            const res = await api.googleLogin({
                 uid: firebaseUser.uid,
-                displayName: firebaseUser.displayName,
                 email: firebaseUser.email,
-                photoURL: firebaseUser.photoURL,
-                updatedAt: serverTimestamp()
-            };
+                name: firebaseUser.displayName,
+                photoURL: firebaseUser.photoURL
+            });
 
-            if (!userSnap.exists()) {
-                userData.createdAt = serverTimestamp();
-                await setDoc(userRef, userData);
-            } else {
-                await setDoc(userRef, userData, { merge: true });
+            const { token, refreshToken, user: userData } = res.data;
+            
+            if (token) {
+                localStorage.setItem('token', token);
+                if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
             }
 
             setUser({ ...firebaseUser, ...userData });

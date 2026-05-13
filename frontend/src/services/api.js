@@ -63,6 +63,7 @@ const api = {
     // Auth
     login: (email, password) => axios.post(`${API_BASE_URL}/api/v1/auth/login`, { email, password }).then(r => r.data),
     register: (name, email, password) => axios.post(`${API_BASE_URL}/api/v1/auth/register`, { name, email, password }).then(r => r.data),
+    googleLogin: (data) => axios.post(`${API_BASE_URL}/api/v1/auth/google`, data).then(r => r.data),
     refreshToken: (refreshToken) => axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, { refreshToken }).then(r => r.data),
     logout: (refreshToken) => axios.post(`${API_BASE_URL}/api/v1/auth/logout`, { refreshToken }).then(r => r.data),
     updatePlan: (email, newPlan) => axiosInstance.post('/v1/auth/plan', { email, newPlan }).then(r => r.data),
@@ -130,6 +131,7 @@ const api = {
 // Named exports
 export const apiLogin = api.login;
 export const apiRegister = api.register;
+export const googleLogin = api.googleLogin;
 export const apiLogout = api.logout;
 export const updatePlan = api.updatePlan;
 export const updateProfile = api.updateProfile;
@@ -174,6 +176,7 @@ export const fetchRecentUsers = api.fetchRecentUsers;
 // Attach methods to axiosInstance for easier access in AuthContext
 axiosInstance.login = api.login;
 axiosInstance.register = api.register;
+axiosInstance.googleLogin = api.googleLogin;
 axiosInstance.refreshToken = api.refreshToken;
 axiosInstance.logout = api.logout;
 

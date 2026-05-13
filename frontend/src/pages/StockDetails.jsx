@@ -15,6 +15,7 @@ const StockDetails = () => {
     const [range, setRange] = useState('1mo');
     const [loading, setLoading] = useState(true);
     const [chartLoading, setChartLoading] = useState(false);
+    const [error, setError] = useState(null);
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     const [indicators, setIndicators] = useState({ sma: false, rsi: false });
@@ -203,6 +204,17 @@ const StockDetails = () => {
     };
 
     if (loading) return <div className="page-loader">Fetching {symbol} Data...</div>;
+    
+    if (error) return (
+        <div className="error-page" style={{ textAlign: 'center', marginTop: '4rem' }}>
+            <h2 className="syne" style={{ marginBottom: '1rem' }}>Data Unavailable</h2>
+            <p className="muted" style={{ marginBottom: '2rem' }}>{error}</p>
+            <button className="btn btn-secondary" onClick={() => window.location.reload()}>
+                Try Again
+            </button>
+        </div>
+    );
+
     if (!stock) return <div className="error-page">Stock not found</div>;
 
     const isPositive = stock.change >= 0;

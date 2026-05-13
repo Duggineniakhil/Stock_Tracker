@@ -59,11 +59,12 @@ const stockService = {
                 return quoteCache.get(stockSymbol).data;
             }
 
-            // Enhanced logging with stack for "fetch failed" issues
-            if (error.message.includes('fetch failed')) {
-                console.error(`❌ NETWORK ERROR fetching ${stockSymbol}:`, error.message);
-            } else {
-                console.error(`❌ Error fetching ${stockSymbol}:`, error.message);
+            // Enhanced logging for "fetch failed" issues (common with Yahoo Finance on cloud IPs)
+            if (error.message.includes('fetch failed') || error.message.includes('403')) {
+                console.error(`❌ YAHOO FINANCE BLOCK on ${stockSymbol}:`, error.message);
+                const blockError = new Error('Market data currently unavailable from our provider. Please try again later.');
+                blockError.statusCode = 503;
+                throw blockError;
             }
 
             if (error.message.includes('No data found') || error.message.includes('Not Found')) {
@@ -72,9 +73,9 @@ const stockService = {
                 throw invalidError;
             }
 
-            const networkError = new Error(`Failed to fetch stock data: ${error.message}`);
-            networkError.statusCode = error.message.includes('fetch failed') ? 502 : 500;
-            throw networkError;
+            const generalError = new Error(`Failed to fetch stock data: ${error.message}`);
+            generalError.statusCode = 500;
+            throw generalError;
         }
     },
 

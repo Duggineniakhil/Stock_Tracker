@@ -12,7 +12,7 @@ A comprehensive, full-stack stock portfolio and market tracking application - **
 
 ## Live Demo & Deployment
 
-- **Live Application:** [Quotra Web App](https://stock-tracker-1-sj4n.onrender.com)
+- **Live Application:** [Quotra Web App](https://stock-tracker-lime-nu.vercel.app)
 - **Backend API Base URL:** [Quotra API](https://stock-tracker-dsut.onrender.com)
 
 ---

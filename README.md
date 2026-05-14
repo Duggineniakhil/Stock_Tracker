@@ -1,12 +1,13 @@
-# Quotra
+<div align="center">
+  <h1>Quotra</h1>
+  <p>A comprehensive, full-stack stock portfolio and market tracking application - <b>Simplified and AI-Powered</b>. Built with Node.js, Express, React, SQLite, and OpenAI.</p>
 
-A comprehensive, full-stack stock portfolio and market tracking application - **Simplified and AI-Powered**. Built with Node.js, Express, React, SQLite, and OpenAI.
-
-![Status](https://img.shields.io/badge/Status-v1.2.0-blue)
-![Node.js](https://img.shields.io/badge/Node.js-v24+-green)
-![React](https://img.shields.io/badge/React-v19+-blue)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+  ![Status](https://img.shields.io/badge/Status-v1.2.0-blue)
+  ![Node.js](https://img.shields.io/badge/Node.js-v24+-green)
+  ![React](https://img.shields.io/badge/React-v19+-blue)
+  ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
+  ![License](https://img.shields.io/badge/License-MIT-yellow)
+</div>
 
 ---
 
@@ -85,7 +86,7 @@ stock-tracker-agent-main/
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/en/) (v20+)
-- [Docker](https://www.docker.com/) & Docker Compose (optional but recommended)
+- [Docker](https://www.docker.com/)
 - Git
 
 ### Installation (Docker - Recommended)

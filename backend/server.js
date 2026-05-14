@@ -43,7 +43,8 @@ app.use(helmet({
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://stock-tracker-1-sj4n.onrender.com"
+        "https://stock-tracker-1-sj4n.onrender.com",
+        "https://stock-tracker-lime-nu.vercel.app"
     ],
     credentials: true
 }));

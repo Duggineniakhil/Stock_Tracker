@@ -40,12 +40,18 @@ export const AuthProvider = ({ children }) => {
         // 2. Listen to Firebase Auth State
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                // User is signed in via Firebase
-                const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                if (userDoc.exists()) {
-                    setUser({ ...firebaseUser, ...userDoc.data() });
-                } else {
-                    // This case is handled in signInWithGoogle, but as a fallback:
+                try {
+                    // User is signed in via Firebase
+                    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                    if (userDoc.exists()) {
+                        setUser({ ...firebaseUser, ...userDoc.data() });
+                    } else {
+                        // This case is handled in signInWithGoogle, but as a fallback:
+                        setUser(firebaseUser);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data from Firestore:", error);
+                    // If offline, still set the basic firebase user so they can see cached data if available
                     setUser(firebaseUser);
                 }
             }

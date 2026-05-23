@@ -1,6 +1,8 @@
-const portfolioModel = require('../models/portfolioModel');
-const portfolioService = require('../services/portfolioService');
-const { success, error } = require('../utils/responseWrapper');
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/auth';
+import portfolioModel from '../models/portfolioModel';
+import portfolioService from '../services/portfolioService';
+import { success, error } from '../utils/responseWrapper';
 
 /**
  * Portfolio Controller - Request Handlers
@@ -12,9 +14,9 @@ const portfolioController = {
      * Add a new holding to user's portfolio
      * POST /api/portfolio
      */
-    addHolding: async (req, res) => {
+    addHolding: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id; // From auth middleware
+            const userId = req.user?.id; // From auth middleware
             const { symbol, quantity, buyPrice, buyDate } = req.body;
 
             // Validate symbol exists
@@ -33,7 +35,7 @@ const portfolioController = {
             );
 
             return success(res, holding, 'Holding added successfully', 201);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error adding holding:', err);
             return error(res, 'Failed to add holding', null, 500);
         }
@@ -43,13 +45,13 @@ const portfolioController = {
      * Get user's complete portfolio with calculations
      * GET /api/portfolio
      */
-    getPortfolio: async (req, res) => {
+    getPortfolio: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const portfolio = await portfolioService.getPortfolio(userId);
 
             return success(res, portfolio, 'Portfolio fetched successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching portfolio:', err);
             return error(res, 'Failed to fetch portfolio', null, 500);
         }
@@ -59,13 +61,13 @@ const portfolioController = {
      * Get portfolio summary with aggregated metrics
      * GET /api/portfolio/summary
      */
-    getSummary: async (req, res) => {
+    getSummary: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const summary = await portfolioService.getPortfolioSummary(userId);
 
             return success(res, summary, 'Portfolio summary fetched successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching summary:', err);
             return error(res, 'Failed to fetch portfolio summary', null, 500);
         }
@@ -75,13 +77,13 @@ const portfolioController = {
      * Get portfolio allocation breakdown
      * GET /api/portfolio/allocation
      */
-    getAllocation: async (req, res) => {
+    getAllocation: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const allocation = await portfolioService.getPortfolioAllocation(userId);
 
             return success(res, allocation, 'Portfolio allocation fetched successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching allocation:', err);
             return error(res, 'Failed to fetch portfolio allocation', null, 500);
         }
@@ -91,9 +93,9 @@ const portfolioController = {
      * Get a single holding by ID
      * GET /api/portfolio/:id
      */
-    getHoldingById: async (req, res) => {
+    getHoldingById: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const { id } = req.params;
 
             const holding = await portfolioModel.getHoldingById(id, userId);
@@ -103,7 +105,7 @@ const portfolioController = {
             }
 
             return success(res, holding, 'Holding fetched successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching holding:', err);
             return error(res, 'Failed to fetch holding', null, 500);
         }
@@ -113,9 +115,9 @@ const portfolioController = {
      * Update a holding
      * PUT /api/portfolio/:id
      */
-    updateHolding: async (req, res) => {
+    updateHolding: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const { id } = req.params;
             const updates = req.body;
 
@@ -130,7 +132,7 @@ const portfolioController = {
             const updatedHolding = await portfolioModel.updateHolding(id, userId, updates);
 
             return success(res, updatedHolding, 'Holding updated successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error updating holding:', err);
 
             if (err.message.includes('not found') || err.message.includes('unauthorized')) {
@@ -145,13 +147,13 @@ const portfolioController = {
      * Get portfolio value history over time
      * GET /api/portfolio/history?range=1mo
      */
-    getHistory: async (req, res) => {
+    getHistory: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
-            const range = req.query.range || '1mo';
+            const userId = req.user?.id;
+            const range = (req.query.range as string) || '1mo';
             const history = await portfolioService.getPortfolioHistory(userId, range);
             return success(res, history, 'Portfolio history fetched successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching portfolio history:', err);
             return error(res, 'Failed to fetch portfolio history', null, 500);
         }
@@ -161,13 +163,13 @@ const portfolioController = {
      * Get performance comparison data for holdings
      * GET /api/portfolio/performance?range=1mo
      */
-    getPerformance: async (req, res) => {
+    getPerformance: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
-            const range = req.query.range || '1mo';
+            const userId = req.user?.id;
+            const range = (req.query.range as string) || '1mo';
             const performance = await portfolioService.getPortfolioPerformance(userId, range);
             return success(res, performance, 'Portfolio performance fetched successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching portfolio performance:', err);
             return error(res, 'Failed to fetch portfolio performance', null, 500);
         }
@@ -177,15 +179,15 @@ const portfolioController = {
      * Delete a holding
      * DELETE /api/portfolio/:id
      */
-    deleteHolding: async (req, res) => {
+    deleteHolding: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const { id } = req.params;
 
             await portfolioModel.deleteHolding(id, userId);
 
             return success(res, null, 'Holding deleted successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error deleting holding:', err);
 
             if (err.message.includes('not found') || err.message.includes('unauthorized')) {
@@ -200,12 +202,12 @@ const portfolioController = {
      * Get portfolio health score
      * GET /api/portfolio/health
      */
-    getHealth: async (req, res) => {
+    getHealth: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const score = await portfolioService.getHealthScore(userId);
             return success(res, { score }, 'Portfolio health score fetched successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching health score:', err);
             return error(res, 'Failed to fetch health score', null, 500);
         }
@@ -215,16 +217,16 @@ const portfolioController = {
      * Get portfolio sector breakdown
      * GET /api/portfolio/sectors
      */
-    getSectorBreakdown: async (req, res) => {
+    getSectorBreakdown: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const breakdown = await portfolioService.getSectorBreakdown(userId);
             return success(res, breakdown, 'Portfolio sector breakdown fetched successfully');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching sector breakdown:', err);
             return error(res, 'Failed to fetch sector breakdown', null, 500);
         }
     }
 };
 
-module.exports = portfolioController;
+export = portfolioController;

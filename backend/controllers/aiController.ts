@@ -1,8 +1,10 @@
-const aiService = require('../services/aiService');
-const sentimentService = require('../services/sentimentService');
-const portfolioService = require('../services/portfolioService');
-const stockService = require('../services/stockService');
-const db = require('../db/database');
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/auth';
+import aiService from '../services/aiService';
+import sentimentService from '../services/sentimentService';
+import portfolioService from '../services/portfolioService';
+import stockService from '../services/stockService';
+import db from '../db/database';
 
 /**
  * AI Controller - Handles API requests for AI features
@@ -12,10 +14,10 @@ const aiController = {
      * POST /api/v1/ai/chat
      * Interaction with Quotra AI advisor
      */
-    chat: async (req, res) => {
+    chat: async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { message } = req.body;
-            const userId = req.user.id;
+            const userId = req.user?.id;
 
             if (!message) {
                 return res.status(400).json({ success: false, message: 'Message is required' });
@@ -27,7 +29,7 @@ const aiController = {
 
             const context = {
                 summary: portfolio,
-                holdings: holdings.map(h => ({ symbol: h.symbol, quantity: h.quantity, pnl: h.profitLossPercent }))
+                holdings: holdings.map((h: any) => ({ symbol: h.symbol, quantity: h.quantity, pnl: h.profitLossPercent }))
             };
 
             const reply = await aiService.chat(userId, message, context);
@@ -36,7 +38,7 @@ const aiController = {
                 success: true,
                 reply
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error('AI Chat Controller Error:', error);
             res.status(500).json({ success: false, message: 'AI advisor is currently unavailable' });
         }
@@ -45,18 +47,18 @@ const aiController = {
     /**
      * GET /api/v1/ai/chat/history
      */
-    getChatHistory: async (req, res) => {
+    getChatHistory: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             db.all(
                 'SELECT role, content, created_at FROM ai_chats WHERE user_id = ? ORDER BY created_at ASC LIMIT 50',
                 [userId],
-                (err, rows) => {
+                (err: Error | null, rows: any[]) => {
                     if (err) return res.status(500).json({ success: false, message: err.message });
                     res.json({ success: true, history: rows });
                 }
             );
-        } catch (error) {
+        } catch (error: any) {
             res.status(500).json({ success: false, message: error.message });
         }
     },
@@ -64,7 +66,7 @@ const aiController = {
     /**
      * GET /api/v1/ai/sentiment/:symbol
      */
-    getSentiment: async (req, res) => {
+    getSentiment: async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { symbol } = req.params;
             
@@ -91,7 +93,7 @@ const aiController = {
                 overall,
                 details: results
             });
-        } catch (error) {
+        } catch (error: any) {
             res.status(500).json({ success: false, message: error.message });
         }
     },
@@ -99,9 +101,9 @@ const aiController = {
     /**
      * POST /api/v1/ai/report/generate
      */
-    generateReport: async (req, res) => {
+    generateReport: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const portfolio = await portfolioService.getPortfolio(userId);
 
             if (!portfolio || portfolio.length === 0) {
@@ -114,7 +116,7 @@ const aiController = {
                 success: true,
                 report
             });
-        } catch (error) {
+        } catch (error: any) {
             res.status(500).json({ success: false, message: error.message });
         }
     },
@@ -122,12 +124,12 @@ const aiController = {
     /**
      * GET /api/v1/ai/report/latest
      */
-    getLatestReport: (req, res) => {
-        const userId = req.user.id;
+    getLatestReport: (req: AuthenticatedRequest, res: Response) => {
+        const userId = req.user?.id;
         db.get(
             'SELECT * FROM ai_reports WHERE user_id = ? ORDER BY generated_at DESC LIMIT 1',
             [userId],
-            (err, row) => {
+            (err: Error | null, row: any) => {
                 if (err) return res.status(500).json({ success: false, message: err.message });
                 if (!row) return res.status(404).json({ success: false, message: 'No reports found' });
                 res.json({ success: true, report: row });
@@ -136,4 +138,4 @@ const aiController = {
     }
 };
 
-module.exports = aiController;
+export = aiController;

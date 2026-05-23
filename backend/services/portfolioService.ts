@@ -1,11 +1,30 @@
-const portfolioModel = require('../models/portfolioModel');
-const stockService = require('./stockService');
+import portfolioModel from '../models/portfolioModel';
+import stockService from './stockService';
+
+type Holding = {
+    id?: number;
+    symbol: string;
+    quantity: number;
+    buy_price: number;
+    buy_date?: string;
+    [key: string]: any;
+};
+
+type EnrichedHolding = Holding & {
+    currentPrice: number;
+    totalInvestment: number;
+    currentValue: number;
+    profitLoss: number;
+    profitLossPercent: number;
+};
+
+type PriceCacheEntry = { price: number; timestamp: number };
 
 /**
  * In-memory cache for stock prices
  * Simple caching to reduce API calls
  */
-const priceCache = new Map();
+const priceCache = new Map<string, PriceCacheEntry>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -19,7 +38,7 @@ const portfolioService = {
      * @param {string} symbol - Stock symbol
      * @returns {Promise<number>} Current price
      */
-    getCachedStockPrice: async (symbol) => {
+    getCachedStockPrice: async (symbol: string): Promise<number> => {
         const cached = priceCache.get(symbol);
         const now = Date.now();
 
@@ -40,7 +59,7 @@ const portfolioService = {
             });
 
             return price;
-        } catch (error) {
+        } catch (error: any) {
             console.error(`Error fetching price for ${symbol}:`, error.message);
             // Return cached price even if expired, or 0
             return cached ? cached.price : 0;
@@ -53,7 +72,7 @@ const portfolioService = {
      * @param {number} currentPrice - Current stock price
      * @returns {Object} Holding with calculated metrics
      */
-    calculateHoldingMetrics: (holding, currentPrice) => {
+    calculateHoldingMetrics: (holding: Holding, currentPrice: number): EnrichedHolding => {
         const totalInvestment = holding.quantity * holding.buy_price;
         const currentValue = holding.quantity * currentPrice;
         const profitLoss = currentValue - totalInvestment;
@@ -76,7 +95,7 @@ const portfolioService = {
      * @param {number} userId - User ID
      * @returns {Promise<Array>} Portfolio holdings with metrics
      */
-    getPortfolio: async (userId) => {
+    getPortfolio: async (userId: number): Promise<EnrichedHolding[]> => {
         try {
             const holdings = await portfolioModel.getHoldingsByUserId(userId);
 
@@ -86,7 +105,7 @@ const portfolioService = {
 
             // Fetch current prices for all holdings
             const enrichedHoldings = await Promise.all(
-                holdings.map(async (holding) => {
+                holdings.map(async (holding: Holding) => {
                     const currentPrice = await portfolioService.getCachedStockPrice(holding.symbol);
                     return portfolioService.calculateHoldingMetrics(holding, currentPrice);
                 })
@@ -103,7 +122,7 @@ const portfolioService = {
      * @param {number} userId - User ID
      * @returns {Promise<Object>} Summary metrics
      */
-    getPortfolioSummary: async (userId) => {
+    getPortfolioSummary: async (userId: number) => {
         try {
             const portfolio = await portfolioService.getPortfolio(userId);
 
@@ -141,7 +160,7 @@ const portfolioService = {
      * @param {number} userId - User ID
      * @returns {Promise<Array>} Allocation breakdown
      */
-    getPortfolioAllocation: async (userId) => {
+    getPortfolioAllocation: async (userId: number) => {
         try {
             const portfolio = await portfolioService.getPortfolio(userId);
 
@@ -151,7 +170,7 @@ const portfolioService = {
 
             const totalValue = portfolio.reduce((sum, h) => sum + h.currentValue, 0);
 
-            const allocation = portfolio.map(holding => ({
+            const allocation = portfolio.map((holding: EnrichedHolding) => ({
                 symbol: holding.symbol,
                 currentValue: holding.currentValue,
                 percentage: totalValue > 0
@@ -173,15 +192,15 @@ const portfolioService = {
      * @param {string} range - Time range ('1mo', '3mo', '1y')
      * @returns {Promise<Array>} Array of { date, value } points
      */
-    getPortfolioHistory: async (userId, range = '1mo') => {
+    getPortfolioHistory: async (userId: number, range = '1mo') => {
         try {
             const holdings = await portfolioModel.getHoldingsByUserId(userId);
             if (holdings.length === 0) return [];
 
             // Fetch historical data for all holdings in parallel
-            const historicalDataMap = {};
+            const historicalDataMap: Record<string, any[]> = {};
             await Promise.all(
-                holdings.map(async (holding) => {
+                holdings.map(async (holding: Holding) => {
                     try {
                         const history = await stockService.getHistoricalData(holding.symbol, range);
                         historicalDataMap[holding.symbol] = history || [];
@@ -192,9 +211,9 @@ const portfolioService = {
             );
 
             // Build a set of all dates across all holdings
-            const allDatesSet = new Set();
-            Object.values(historicalDataMap).forEach(history => {
-                history.forEach(point => {
+            const allDatesSet = new Set<string>();
+            Object.values(historicalDataMap).forEach((history) => {
+                history.forEach((point: any) => {
                     const dateKey = point.date.split('T')[0];
                     allDatesSet.add(dateKey);
                 });
@@ -204,18 +223,18 @@ const portfolioService = {
             if (sortedDates.length === 0) return [];
 
             // Build price lookup maps: symbol -> { dateKey -> price }
-            const priceMaps = {};
+            const priceMaps: Record<string, Record<string, number>> = {};
             for (const [symbol, history] of Object.entries(historicalDataMap)) {
                 priceMaps[symbol] = {};
-                history.forEach(point => {
+                history.forEach((point: any) => {
                     const dateKey = point.date.split('T')[0];
                     priceMaps[symbol][dateKey] = point.price;
                 });
             }
 
             // Compute total portfolio value for each date
-            const portfolioHistory = [];
-            const lastKnownPrice = {};
+            const portfolioHistory: Array<{ date: string; value: number }> = [];
+            const lastKnownPrice: Record<string, number> = {};
 
             for (const dateKey of sortedDates) {
                 let totalValue = 0;
@@ -246,7 +265,7 @@ const portfolioService = {
             }
 
             return portfolioHistory;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error computing portfolio history:', error.message);
             return [];
         }
@@ -258,14 +277,14 @@ const portfolioService = {
      * @param {string} range - Time range ('1mo', '3mo', '1y')
      * @returns {Promise<Array>} Array of { symbol, data: [{ date, returnPct }] }
      */
-    getPortfolioPerformance: async (userId, range = '1mo') => {
+    getPortfolioPerformance: async (userId: number, range = '1mo') => {
         try {
             const holdings = await portfolioModel.getHoldingsByUserId(userId);
             if (holdings.length === 0) return [];
 
             // Sort by current value (estimated), take top 5
             const priced = await Promise.all(
-                holdings.map(async (h) => {
+                holdings.map(async (h: Holding) => {
                     const price = await portfolioService.getCachedStockPrice(h.symbol);
                     return { ...h, currentValue: h.quantity * price };
                 })
@@ -273,7 +292,7 @@ const portfolioService = {
             const top = priced.sort((a, b) => b.currentValue - a.currentValue).slice(0, 5);
 
             const results = await Promise.all(
-                top.map(async (holding) => {
+                top.map(async (holding: Holding) => {
                     try {
                         const history = await stockService.getHistoricalData(holding.symbol, range);
                         if (!history || history.length === 0) return null;
@@ -281,7 +300,7 @@ const portfolioService = {
                         const basePrice = history[0].price;
                         if (!basePrice || basePrice === 0) return null;
 
-                        const data = history.map(point => ({
+                        const data = history.map((point: any) => ({
                             date: point.date.split('T')[0],
                             returnPct: parseFloat((((point.price - basePrice) / basePrice) * 100).toFixed(2))
                         }));
@@ -305,7 +324,7 @@ const portfolioService = {
      * @param {string} symbol - Stock symbol
      * @returns {Promise<boolean>} True if valid
      */
-    validateSymbol: async (symbol) => {
+    validateSymbol: async (symbol: string) => {
         try {
             const quote = await stockService.getStockQuote(symbol);
             return quote && quote.currentPrice !== undefined;
@@ -318,12 +337,12 @@ const portfolioService = {
      * Get portfolio breakdown by sector
      * @param {number} userId - User ID
      */
-    getSectorBreakdown: async (userId) => {
+    getSectorBreakdown: async (userId: number) => {
         try {
             const portfolio = await portfolioService.getPortfolio(userId);
             if (portfolio.length === 0) return [];
 
-            const sectors = {};
+            const sectors: Record<string, number> = {};
             let totalValue = 0;
 
             for (const holding of portfolio) {
@@ -350,7 +369,7 @@ const portfolioService = {
      * Calculate a health score for the portfolio (0-100)
      * Factors: Diversification (number of sectors), Profit/Loss, Number of assets
      */
-    getHealthScore: async (userId) => {
+    getHealthScore: async (userId: number) => {
         try {
             const summary = await portfolioService.getPortfolioSummary(userId);
             const sectors = await portfolioService.getSectorBreakdown(userId);
@@ -382,4 +401,4 @@ const portfolioService = {
     }
 };
 
-module.exports = portfolioService;
+export = portfolioService;

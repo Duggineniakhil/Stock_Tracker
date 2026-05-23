@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+logs
+*.log
+.env
+db/*.sqlite
+db/*.sqlite-*
+db/stocks.db
+db/stocks.db-*
+tests
+Dockerfile
+.dockerignore

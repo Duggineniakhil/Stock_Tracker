@@ -1,5 +1,5 @@
-const OpenAI = require('openai');
-const db = require('../db/database');
+import OpenAI from 'openai';
+import db from '../db/database';
 
 // Initialize OpenAI client only if key is present
 const aiEnabled = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here';
@@ -12,17 +12,17 @@ const aiService = {
     /**
      * AI Chat Advisor
      */
-    chat: async (userId, userMessage, portfolioContext) => {
+    chat: async (userId: number, userMessage: string, portfolioContext: unknown) => {
         if (!openai) {
             return "Quotra AI is currently in 'Limited Mode' because no OpenAI API key was found. Please add a valid key to your .env file to enable the full advisor experience.";
         }
 
         try {
-            const history = await new Promise((resolve, reject) => {
+            const history = await new Promise<any[]>((resolve, reject) => {
                 db.all(
                     'SELECT role, content FROM ai_chats WHERE user_id = ? ORDER BY created_at DESC LIMIT 10',
                     [userId],
-                    (err, rows) => {
+                    (err: Error | null, rows: any[]) => {
                         if (err) reject(err);
                         else resolve(rows.reverse());
                     }
@@ -53,7 +53,7 @@ const aiService = {
                 temperature: 0.7
             });
 
-            const reply = completion.choices[0].message.content;
+            const reply = completion.choices[0].message.content || '';
 
             db.serialize(() => {
                 db.run('INSERT INTO ai_chats (user_id, role, content) VALUES (?, ?, ?)', [userId, 'user', userMessage]);
@@ -61,7 +61,7 @@ const aiService = {
             });
 
             return reply;
-        } catch (error) {
+        } catch (error: any) {
             console.error('AI Chat Error:', error);
             // Re-throw or return a structured error if preferred, but for now we return a string
             return `AI Service Error: ${error.message}. Please check your API key and balance.`;
@@ -71,7 +71,7 @@ const aiService = {
     /**
      * Generate Portfolio Health Report
      */
-    generatePortfolioReport: async (userId, enrichedHoldings) => {
+    generatePortfolioReport: async (userId: number, enrichedHoldings: any[]) => {
         if (!openai) {
             return { 
                 content: "<h3>AI Analysis Unavailable</h3><p>Please configure your OpenAI API key to generate detailed portfolio health reports.</p>", 
@@ -103,7 +103,7 @@ const aiService = {
                 max_tokens: 1000
             });
 
-            const content = res.choices[0].message.content;
+            const content = res.choices[0].message.content || '';
             const summary = content.replace(/<[^>]*>/g, '').slice(0, 200) + '...';
 
             db.run(
@@ -112,7 +112,7 @@ const aiService = {
             );
 
             return { content, summary };
-        } catch (error) {
+        } catch (error: any) {
             console.error('AI Report Error:', error);
             throw error;
         }
@@ -121,7 +121,7 @@ const aiService = {
     /**
      * Explain triggered alert
      */
-    explainAlert: async (symbol, alertType, targetValue, currentPrice, changePercent) => {
+    explainAlert: async (symbol: string, alertType: string, targetValue: number, currentPrice: number, changePercent: number) => {
         if (!openai) return "No AI explanation available (API key missing).";
 
         try {
@@ -136,11 +136,11 @@ const aiService = {
                 max_tokens: 150
             });
 
-            return res.choices[0].message.content;
+            return res.choices[0].message.content || '';
         } catch (error) {
             return "Unable to generate AI explanation at this time.";
         }
     }
 };
 
-module.exports = aiService;
+export = aiService;

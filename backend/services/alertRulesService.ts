@@ -1,13 +1,13 @@
-const alertModel = require('../models/alertModel');
-const stockService = require('./stockService');
-const logger = require('../utils/logger');
+import alertModel from '../models/alertModel';
+import stockService from './stockService';
+import logger from '../utils/logger';
 
 /**
  * Alert Rules Service
  * Evaluates alert rules against live stock data and fires alerts when conditions are met
  */
 
-const TEMPLATE_LABELS = {
+const TEMPLATE_LABELS: Record<string, string> = {
     PERCENTAGE_CHANGE: 'Price % Change',
     TARGET_PRICE: 'Target Price',
     VOLUME_SPIKE: 'Volume Spike',
@@ -15,7 +15,7 @@ const TEMPLATE_LABELS = {
     RSI_OVERBOUGHT: 'RSI Overbought'
 };
 
-const PRIORITY_EMOJI = {
+const PRIORITY_EMOJI: Record<string, string> = {
     LOW: '🟢',
     MEDIUM: '🟡',
     HIGH: '🟠',
@@ -26,7 +26,7 @@ const alertRulesService = {
     /**
      * Evaluate a single rule against current stock data
      */
-    evaluateRule: async (rule, quote) => {
+    evaluateRule: async (rule: any, quote: any) => {
         const { template_type, condition_operator, condition_value } = rule;
         let triggered = false;
         let message = '';
@@ -62,7 +62,7 @@ const alertRulesService = {
                     message = `${rule.symbol} volume spike: ${spike.toFixed(0)}% of average (threshold: ${condition_value}%)`;
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             logger.warn(`Rule evaluation error for rule ${rule.id}:`, { error: err.message });
         }
 
@@ -80,8 +80,8 @@ const alertRulesService = {
             logger.info(`Running alert rules engine - evaluating ${rules.length} rules`);
 
             // Group rules by symbol for batch fetching
-            const symbolMap = {};
-            rules.forEach(rule => {
+            const symbolMap: Record<string, any[]> = {};
+            rules.forEach((rule: any) => {
                 if (!symbolMap[rule.symbol]) symbolMap[rule.symbol] = [];
                 symbolMap[rule.symbol].push(rule);
             });
@@ -92,7 +92,7 @@ const alertRulesService = {
                     const quote = await stockService.getStockQuote(symbol);
                     if (!quote) continue;
 
-                    for (const rule of symbolRules) {
+                    for (const rule of symbolRules as any[]) {
                         const { triggered, message } = await alertRulesService.evaluateRule(rule, quote);
                         if (triggered) {
                             const emoji = PRIORITY_EMOJI[rule.priority] || '🔔';
@@ -108,14 +108,14 @@ const alertRulesService = {
                             logger.info(`Alert rule triggered: ${message} for user ${rule.user_id}`);
                         }
                     }
-                } catch (err) {
+                } catch (err: any) {
                     logger.warn(`Failed to evaluate rules for ${symbol}:`, { error: err.message });
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             logger.error('Alert rules engine error:', { error: err.message });
         }
     }
 };
 
-module.exports = alertRulesService;
+export = alertRulesService;

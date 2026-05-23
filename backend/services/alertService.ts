@@ -1,10 +1,10 @@
-const stockService = require('./stockService');
-const alertModel = require('../models/alertModel');
-const watchlistModel = require('../models/watchlistModel');
+import stockService from './stockService';
+import alertModel from '../models/alertModel';
+import watchlistModel from '../models/watchlistModel';
 
 const alertService = {
     // Check for price drop alert (>5% drop)
-    checkPriceDropAlert: async (symbol, currentPrice, previousClose) => {
+    checkPriceDropAlert: async (symbol: string, currentPrice: number, previousClose: number) => {
         const changePercent = ((currentPrice - previousClose) / previousClose) * 100;
 
         if (changePercent <= -5) {
@@ -18,12 +18,12 @@ const alertService = {
     },
 
     // Check for moving average crossover
-    checkMovingAverageCrossover: async (symbol, currentPrice, historicalPrices) => {
+    checkMovingAverageCrossover: async (symbol: string, currentPrice: number, historicalPrices: any[]) => {
         if (historicalPrices.length < 20) {
             return false;
         }
 
-        const prices = historicalPrices.map(item => item.price);
+        const prices = historicalPrices.map((item) => item.price);
         const ma20 = stockService.calculateMovingAverage(prices, 20);
 
         if (!ma20) {
@@ -62,7 +62,7 @@ const alertService = {
                 return;
             }
 
-            for (const stock of watchlist) {
+            for (const stock of watchlist as any[]) {
                 try {
                     const quote = await stockService.getStockQuote(stock.symbol);
                     const historicalData = await stockService.getHistoricalData(stock.symbol, 30);
@@ -83,16 +83,16 @@ const alertService = {
 
                     // Add delay to avoid rate limiting
                     await new Promise(resolve => setTimeout(resolve, 500));
-                } catch (error) {
+                } catch (error: any) {
                     console.error(`Error checking ${stock.symbol}:`, error.message);
                 }
             }
 
             console.log('Alert engine completed');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Alert engine error:', error.message);
         }
     }
 };
 
-module.exports = alertService;
+export = alertService;

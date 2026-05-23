@@ -1,8 +1,8 @@
-const db = require('../db/database');
-const stockService = require('./stockService');
-const emailService = require('./emailService');
-const aiService = require('./aiService');
-const logger = require('../utils/logger');
+import db from '../db/database';
+import stockService from './stockService';
+import emailService from './emailService';
+import aiService from './aiService';
+import logger from '../utils/logger';
 
 const ALERT_COOLDOWN_HOURS = 24;
 
@@ -17,7 +17,7 @@ const runAlertEngine = async () => {
         WHERE ar.is_active = 1
     `;
 
-    db.all(sql, [], async (err, rules) => {
+    db.all(sql, [], async (err: Error | null, rules: any[]) => {
         if (err) {
             logger.error('Error fetching alert rules:', { error: err.message });
             return;
@@ -29,7 +29,7 @@ const runAlertEngine = async () => {
         }
 
         // 2. Group rules by symbol to minimize API calls
-        const symbolGroups = rules.reduce((acc, rule) => {
+        const symbolGroups = rules.reduce<Record<string, any[]>>((acc, rule) => {
             if (!acc[rule.symbol]) acc[rule.symbol] = [];
             acc[rule.symbol].push(rule);
             return acc;
@@ -44,21 +44,21 @@ const runAlertEngine = async () => {
                 
                 // Fetch historical data for technical indicators (RSI)
                 const history = await stockService.getHistoricalData(symbol, '1mo');
-                const prices = history.map(h => h.price);
+                const prices = history.map((h: any) => h.price);
                 const rsi = stockService.calculateRSI(prices);
                 
                 const rulesForSymbol = symbolGroups[symbol];
                 for (const rule of rulesForSymbol) {
                     await evaluateRule(rule, quote, rsi);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 logger.error(`Error processing symbol ${symbol}:`, { error: error.message });
             }
         }
     });
 };
 
-const evaluateRule = async (rule, quote, rsi) => {
+const evaluateRule = async (rule: any, quote: any, rsi: number | null) => {
     let triggered = false;
     let reason = '';
 
@@ -122,7 +122,7 @@ const evaluateRule = async (rule, quote, rsi) => {
     }
 };
 
-const triggerAlert = async (rule, quote, reason) => {
+const triggerAlert = async (rule: any, quote: any, reason: string) => {
     logger.info(`🔔 Alert Triggered: ${rule.email} | ${rule.symbol} | ${reason}`);
 
     try {
@@ -140,7 +140,7 @@ const triggerAlert = async (rule, quote, reason) => {
                     rule.condition_value,
                     quote.changePercent
                 );
-            } catch (e) {
+            } catch (e: any) {
                 logger.warn('AI Explanation failed', { error: e.message });
             }
         }
@@ -169,10 +169,10 @@ const triggerAlert = async (rule, quote, reason) => {
             aiExplanation: aiExplanation
         }, reason);
 
-    } catch (error) {
+    } catch (error: any) {
         logger.error(`Error triggering alert for ${rule.id}:`, { error: error.message });
     }
 };
 
-module.exports = { runAlertEngine };
+export = { runAlertEngine };
 

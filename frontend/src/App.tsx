@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, type ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -31,14 +31,18 @@ const PageLoader = () => (
   </div>
 );
 
-const ProtectedRoute = ({ children }) => {
+type RouteProps = {
+  children: ReactNode;
+};
+
+const ProtectedRoute = ({ children }: RouteProps) => {
   const { user, loading } = useAuth();
   if (loading) return <PageLoader />;
   if (!user) return <Navigate to="/login" replace />;
   return <MainLayout>{children}</MainLayout>;
 };
 
-const PublicRoute = ({ children }) => {
+const PublicRoute = ({ children }: RouteProps) => {
   const { user, loading } = useAuth();
   if (loading) return <PageLoader />;
   if (user) return <Navigate to="/dashboard" replace />;

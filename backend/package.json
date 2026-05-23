@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-static.js",
     "dev": "nodemon --exec tsx server.ts",
     "test": "jest --coverage",
     "test:unit": "jest tests/unit --coverage",
@@ -15,11 +15,11 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
-      "models/**/*.js",
-      "services/**/*.js",
-      "controllers/**/*.js",
-      "middleware/**/*.js",
-      "utils/**/*.js",
+      "models/**/*.{js,ts}",
+      "services/**/*.{js,ts}",
+      "controllers/**/*.{js,ts}",
+      "middleware/**/*.{js,ts}",
+      "utils/**/*.{js,ts}",
       "!**/node_modules/**"
     ],
     "coverageReporters": [

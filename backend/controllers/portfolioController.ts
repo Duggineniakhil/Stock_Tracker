@@ -1,8 +1,10 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
-import portfolioModel from '../models/portfolioModel';
+import portfolioModelModule from '../models/portfolioModel';
 import portfolioService from '../services/portfolioService';
 import { success, error } from '../utils/responseWrapper';
+
+const portfolioModel: any = portfolioModelModule;
 
 /**
  * Portfolio Controller - Request Handlers

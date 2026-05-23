@@ -1,8 +1,10 @@
 import { NextFunction, Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
-import alertModel from '../models/alertModel';
+import alertModelModule from '../models/alertModel';
 import logger from '../utils/logger';
 import { success, error as apiError } from '../utils/responseWrapper';
+
+const alertModel: any = alertModelModule;
 
 /**
  * @openapi

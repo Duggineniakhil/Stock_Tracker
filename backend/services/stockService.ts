@@ -3,7 +3,7 @@ import YahooFinance from 'yahoo-finance2';
 // Create a configured instance of YahooFinance
 const yahooFinance = new YahooFinance();
 // Set options directly via the global settings or use as a singleton
-yahooFinance.setGlobalConfig({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
+(yahooFinance as any).setGlobalConfig?.({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
 
 export interface StockQuoteData {
     symbol: string;

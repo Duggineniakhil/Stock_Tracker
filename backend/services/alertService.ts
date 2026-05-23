@@ -1,6 +1,9 @@
 import stockService from './stockService';
-import alertModel from '../models/alertModel';
-import watchlistModel from '../models/watchlistModel';
+import alertModelModule from '../models/alertModel';
+import watchlistModelModule from '../models/watchlistModel';
+
+const alertModel: any = alertModelModule;
+const watchlistModel: any = watchlistModelModule;
 
 const alertService = {
     // Check for price drop alert (>5% drop)
@@ -65,7 +68,7 @@ const alertService = {
             for (const stock of watchlist as any[]) {
                 try {
                     const quote = await stockService.getStockQuote(stock.symbol);
-                    const historicalData = await stockService.getHistoricalData(stock.symbol, 30);
+                    const historicalData = await stockService.getHistoricalData(stock.symbol, '1mo');
 
                     // Check for price drop
                     await alertService.checkPriceDropAlert(

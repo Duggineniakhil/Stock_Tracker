@@ -7,10 +7,12 @@ import logger from '../utils/logger';
 import { success, error as apiError } from '../utils/responseWrapper';
 import { AuthenticatedRequest } from '../middleware/auth';
 
-const MAX_LOGIN_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS) || 5;
-const LOCKOUT_DURATION_MS = (parseInt(process.env.LOCKOUT_DURATION_MINUTES) || 15) * 60 * 1000;
-const JWT_SECRET = process.env.JWT_SECRET as string;
-const JWT_REFRESH_SECRET = (process.env.JWT_REFRESH_SECRET || `${process.env.JWT_SECRET}_refresh`) as string;
+const MAX_LOGIN_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5', 10);
+const LOCKOUT_DURATION_MS = (parseInt(process.env.LOCKOUT_DURATION_MINUTES || '15', 10)) * 60 * 1000;
+const JWT_SECRET = process.env.JWT_SECRET || 'development_jwt_secret_change_me';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || `${JWT_SECRET}_refresh`;
+const accessTokenOptions = (): jwt.SignOptions => ({ expiresIn: (process.env.JWT_EXPIRES_IN || '1h') as any });
+const refreshTokenOptions = (): jwt.SignOptions => ({ expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any });
 
 // Password strength: ≥8 chars, 1 uppercase, 1 number
 const isStrongPassword = (password: string) => {
@@ -79,13 +81,13 @@ const register = async (req: Request, res: Response) => {
             const accessToken = jwt.sign(
                 { id: this.lastID, email: email.toLowerCase(), name: name, plan: 'free' },
                 JWT_SECRET,
-                { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+                accessTokenOptions()
             );
 
             const refreshToken = jwt.sign(
                 { id: this.lastID, type: 'refresh' },
                 JWT_REFRESH_SECRET,
-                { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+                refreshTokenOptions()
             );
 
             // Store refresh token hash
@@ -147,13 +149,13 @@ const login = async (req: Request, res: Response) => {
             const accessToken = jwt.sign(
                 { id: user.id, email: user.email, plan: user.plan || 'free' },
                 JWT_SECRET,
-                { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+                accessTokenOptions()
             );
 
             const refreshToken = jwt.sign(
                 { id: user.id, type: 'refresh' },
                 JWT_REFRESH_SECRET,
-                { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+                refreshTokenOptions()
             );
 
             // Store refresh token hash
@@ -198,7 +200,7 @@ const googleLogin = async (req: Request, res: Response) => {
                 const randomPassword = crypto.randomBytes(16).toString('hex');
                 const hashedPassword = await bcrypt.hash(randomPassword, 12);
                 
-                await new Promise((resolve, reject) => {
+                await new Promise<void>((resolve, reject) => {
                     db.run('INSERT INTO users (name, email, password_hash, plan) VALUES (?, ?, ?, ?)', 
                         [name || email.split('@')[0], email.toLowerCase(), hashedPassword, 'free'], 
                         function(this: any, err: Error | null) {
@@ -222,13 +224,13 @@ const googleLogin = async (req: Request, res: Response) => {
             const accessToken = jwt.sign(
                 { id: userId, email: email.toLowerCase(), plan: userPlan },
                 JWT_SECRET,
-                { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+                accessTokenOptions()
             );
 
             const refreshToken = jwt.sign(
                 { id: userId, type: 'refresh' },
                 JWT_REFRESH_SECRET,
-                { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+                refreshTokenOptions()
             );
 
             // Store refresh token hash
@@ -269,7 +271,7 @@ const refreshToken = async (req: Request, res: Response) => {
                 const newAccessToken = jwt.sign(
                     { id: decoded.id, email: decoded.email },
                     JWT_SECRET,
-                    { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+                    accessTokenOptions()
                 );
 
                 return success(res, { token: newAccessToken, expiresIn: 3600 }, 'Token refreshed successfully');

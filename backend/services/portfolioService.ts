@@ -112,7 +112,7 @@ const portfolioService = {
             );
 
             return enrichedHoldings;
-        } catch (error) {
+        } catch (error: any) {
             throw error;
         }
     },
@@ -150,7 +150,7 @@ const portfolioService = {
                 totalProfitLoss: parseFloat(totalProfitLoss.toFixed(2)),
                 totalProfitLossPercent: parseFloat(totalProfitLossPercent.toFixed(2))
             };
-        } catch (error) {
+        } catch (error: any) {
             throw error;
         }
     },
@@ -180,7 +180,7 @@ const portfolioService = {
 
             // Sort by percentage descending
             return allocation.sort((a, b) => b.percentage - a.percentage);
-        } catch (error) {
+        } catch (error: any) {
             throw error;
         }
     },
@@ -313,7 +313,7 @@ const portfolioService = {
             );
 
             return results.filter(r => r !== null);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error computing portfolio performance:', error.message);
             return [];
         }
@@ -328,7 +328,7 @@ const portfolioService = {
         try {
             const quote = await stockService.getStockQuote(symbol);
             return quote && quote.currentPrice !== undefined;
-        } catch (error) {
+        } catch (error: any) {
             return false;
         }
     },
@@ -359,7 +359,7 @@ const portfolioService = {
             }));
 
             return breakdown.sort((a, b) => b.value - a.value);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error computing sector breakdown:', error.message);
             return [];
         }
@@ -395,7 +395,7 @@ const portfolioService = {
             else if (summary.totalHoldings >= 2) assetScore = 15;
 
             return divScore + perfScore + assetScore;
-        } catch (error) {
+        } catch (error: any) {
             return 50; // Fallback
         }
     }

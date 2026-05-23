@@ -1,4 +1,16 @@
-const db = require('../db/database');
+import db from '../db/database';
+
+type PortfolioHolding = {
+    id: number;
+    user_id: number;
+    symbol: string;
+    quantity: number;
+    buy_price: number;
+    buy_date?: string;
+    created_at?: string;
+    updated_at?: string;
+    [key: string]: any;
+};
 
 /**
  * Portfolio Holdings Model - Repository Layer
@@ -15,14 +27,14 @@ const portfolioModel = {
      * @param {string} buyDate - Purchase date (YYYY-MM-DD)
      * @returns {Promise<Object>} Created holding
      */
-    createHolding: (userId, symbol, quantity, buyPrice, buyDate) => {
+    createHolding: (userId: number, symbol: string, quantity: number, buyPrice: number, buyDate: string): Promise<PortfolioHolding | null> => {
         return new Promise((resolve, reject) => {
             const sql = `
         INSERT INTO portfolio_holdings (user_id, symbol, quantity, buy_price, buy_date)
         VALUES (?, ?, ?, ?, ?)
       `;
 
-            db.run(sql, [userId, symbol.toUpperCase(), quantity, buyPrice, buyDate], function (err) {
+            db.run(sql, [userId, symbol.toUpperCase(), quantity, buyPrice, buyDate], function (this: any, err: Error | null) {
                 if (err) {
                     return reject(err);
                 }
@@ -40,7 +52,7 @@ const portfolioModel = {
      * @param {number} userId - User ID
      * @returns {Promise<Array>} Array of holdings
      */
-    getHoldingsByUserId: (userId) => {
+    getHoldingsByUserId: (userId: number): Promise<PortfolioHolding[]> => {
         return new Promise((resolve, reject) => {
             const sql = `
         SELECT * FROM portfolio_holdings
@@ -48,7 +60,7 @@ const portfolioModel = {
         ORDER BY created_at DESC
       `;
 
-            db.all(sql, [userId], (err, rows) => {
+            db.all(sql, [userId], (err: Error | null, rows: PortfolioHolding[]) => {
                 if (err) {
                     return reject(err);
                 }
@@ -63,14 +75,14 @@ const portfolioModel = {
      * @param {number} userId - User ID
      * @returns {Promise<Object|null>} Holding or null
      */
-    getHoldingById: (id, userId) => {
+    getHoldingById: (id: number, userId: number): Promise<PortfolioHolding | null> => {
         return new Promise((resolve, reject) => {
             const sql = `
         SELECT * FROM portfolio_holdings
         WHERE id = ? AND user_id = ?
       `;
 
-            db.get(sql, [id, userId], (err, row) => {
+            db.get(sql, [id, userId], (err: Error | null, row: PortfolioHolding) => {
                 if (err) {
                     return reject(err);
                 }
@@ -86,12 +98,12 @@ const portfolioModel = {
      * @param {Object} updates - Fields to update
      * @returns {Promise<Object>} Updated holding
      */
-    updateHolding: (id, userId, updates) => {
+    updateHolding: (id: number, userId: number, updates: Record<string, any>): Promise<PortfolioHolding | null> => {
         return new Promise((resolve, reject) => {
             // Build dynamic UPDATE query based on provided fields
             const allowedFields = ['symbol', 'quantity', 'buy_price', 'buy_date'];
-            const setClause = [];
-            const values = [];
+            const setClause: string[] = [];
+            const values: any[] = [];
 
             Object.keys(updates).forEach(key => {
                 const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
@@ -116,7 +128,7 @@ const portfolioModel = {
 
             values.push(id, userId);
 
-            db.run(sql, values, function (err) {
+            db.run(sql, values, function (this: any, err: Error | null) {
                 if (err) {
                     return reject(err);
                 }
@@ -139,14 +151,14 @@ const portfolioModel = {
      * @param {number} userId - User ID
      * @returns {Promise<boolean>} Success status
      */
-    deleteHolding: (id, userId) => {
+    deleteHolding: (id: number, userId: number): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             const sql = `
         DELETE FROM portfolio_holdings
         WHERE id = ? AND user_id = ?
       `;
 
-            db.run(sql, [id, userId], function (err) {
+            db.run(sql, [id, userId], function (this: any, err: Error | null) {
                 if (err) {
                     return reject(err);
                 }
@@ -161,4 +173,4 @@ const portfolioModel = {
     }
 };
 
-module.exports = portfolioModel;
+export = portfolioModel;

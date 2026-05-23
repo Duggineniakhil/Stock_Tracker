@@ -1,9 +1,10 @@
-const express = require('express');
-const router = express.Router();
-const portfolioController = require('../controllers/portfolioController');
+import express, { Response } from 'express';
+import portfolioController from '../controllers/portfolioController';
+import authMiddleware, { AuthenticatedRequest } from '../middleware/auth';
+import exportService from '../services/exportService';
+
 const { validate } = require('../middleware/validation/portfolioValidation');
-const authMiddleware = require('../middleware/auth');
-const exportService = require('../services/exportService');
+const router = express.Router();
 
 /**
  * Portfolio Routes
@@ -95,9 +96,9 @@ router.delete('/:id', portfolioController.deleteHolding);
  * @desc    Export portfolio data as CSV file
  * @access  Private
  */
-router.get('/export/csv', async (req, res) => {
+router.get('/export/csv', async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const csv = await exportService.generatePortfolioCSV(req.user.id);
+        const csv = await exportService.generatePortfolioCSV(req.user?.id);
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', 'attachment; filename=portfolio-export.csv');
         res.send(csv);
@@ -106,4 +107,4 @@ router.get('/export/csv', async (req, res) => {
     }
 });
 
-module.exports = router;
+export = router;

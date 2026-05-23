@@ -1,6 +1,5 @@
-const portfolioModel = require('../models/portfolioModel');
-const portfolioService = require('./portfolioService');
-const logger = require('../utils/logger');
+import portfolioService from './portfolioService';
+import logger from '../utils/logger';
 
 /**
  * Export Service
@@ -13,7 +12,7 @@ const exportService = {
      * @param {number} userId - User ID
      * @returns {Promise<string>} CSV content string
      */
-    generatePortfolioCSV: async (userId) => {
+    generatePortfolioCSV: async (userId: number): Promise<string> => {
         try {
             const portfolio = await portfolioService.getPortfolio(userId);
 
@@ -33,7 +32,7 @@ const exportService = {
                 'Profit/Loss %'
             ];
 
-            const rows = portfolio.map(h => [
+            const rows: Array<Array<string | number>> = portfolio.map((h: any) => [
                 h.symbol,
                 h.quantity,
                 h.buy_price,
@@ -56,11 +55,11 @@ const exportService = {
             ].join('\n');
 
             return csv;
-        } catch (error) {
+        } catch (error: any) {
             logger.error('CSV export failed', { error: error.message, userId });
             throw error;
         }
     }
 };
 
-module.exports = exportService;
+export = exportService;

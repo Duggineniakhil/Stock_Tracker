@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import alertController from '../controllers/alertController';
+import authenticateToken from '../middleware/auth';
+
 const router = express.Router();
-const alertController = require('../controllers/alertController');
-const authenticateToken = require('../middleware/auth');
 
 /**
  * @openapi
@@ -110,4 +111,4 @@ router.delete('/rules/:id', alertController.deleteRule);
 // Manual alert (backward compat)
 router.post('/', alertController.createManualAlert);
 
-module.exports = router;
+export = router;

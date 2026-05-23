@@ -1,9 +1,17 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
+
+type AlertEmailStockData = {
+    symbol: string;
+    price: number;
+    change: number;
+    changePercent: number;
+    aiExplanation?: string;
+};
 
 // Create transporter using Resend SMTP
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
+    port: Number(process.env.EMAIL_PORT || 587),
     secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for 587
     auth: {
         user: process.env.EMAIL_USER,
@@ -11,7 +19,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const sendAlertEmail = async (toEmail, stockData, reason) => {
+const sendAlertEmail = async (toEmail: string, stockData: AlertEmailStockData, reason: string): Promise<boolean> => {
     const { symbol, price, change, changePercent } = stockData;
     const direction = change >= 0 ? 'rose' : 'fell';
     const color = change >= 0 ? 'green' : 'red';
@@ -58,10 +66,10 @@ const sendAlertEmail = async (toEmail, stockData, reason) => {
         });
         console.log(`Email sent to ${toEmail} for ${symbol}: ${info.messageId}`);
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.error(`Error sending email to ${toEmail}:`, error);
         return false;
     }
 };
 
-module.exports = { sendAlertEmail };
+export = { sendAlertEmail };

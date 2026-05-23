@@ -1,5 +1,11 @@
-const OpenAI = require('openai');
-const db = require('../db/database');
+import OpenAI from 'openai';
+import db from '../db/database';
+
+type SentimentResult = {
+    headline: string;
+    sentiment: 'bullish' | 'bearish' | 'neutral';
+    score: number;
+};
 
 const aiEnabled = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here';
 const openai = aiEnabled ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
@@ -11,15 +17,15 @@ const sentimentService = {
     /**
      * Analyze Sentiment for a stock based on news headlines
      */
-    analyzeSentiment: async (symbol, headlines) => {
+    analyzeSentiment: async (symbol: string, headlines: string[]): Promise<SentimentResult[]> => {
         try {
             // 1. Check cache (2 hour TTL)
-            const cached = await new Promise((resolve, reject) => {
+            const cached = await new Promise<any[]>((resolve, reject) => {
                 db.all(
                     `SELECT * FROM news_sentiment 
                      WHERE symbol = ? AND cached_at > datetime('now', '-2 hours')`,
                     [symbol.toUpperCase()],
-                    (err, rows) => {
+                    (err: Error | null, rows: any[]) => {
                         if (err) reject(err);
                         else resolve(rows);
                     }
@@ -27,7 +33,7 @@ const sentimentService = {
             });
 
             if (cached && cached.length > 0) {
-                return cached.map(r => ({
+                return cached.map((r) => ({
                     headline: r.headline,
                     sentiment: r.sentiment,
                     score: r.score
@@ -53,7 +59,7 @@ const sentimentService = {
                 response_format: { type: 'json_object' }
             });
 
-            const content = JSON.parse(res.choices[0].message.content);
+            const content = JSON.parse(res.choices[0].message.content || '{}');
             const results = content.results || content.sentiments || Object.values(content)[0];
 
             if (!Array.isArray(results)) return [];
@@ -64,14 +70,14 @@ const sentimentService = {
                     INSERT INTO news_sentiment (symbol, headline, sentiment, score) 
                     VALUES (?, ?, ?, ?)
                 `);
-                results.forEach(r => {
+                results.forEach((r: SentimentResult) => {
                     stmt.run(symbol.toUpperCase(), r.headline, r.sentiment, r.score);
                 });
                 stmt.finalize();
             });
 
             return results;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Sentiment Analysis Error:', error);
             return [];
         }
@@ -80,7 +86,7 @@ const sentimentService = {
     /**
      * Get aggregate sentiment label
      */
-    getOverallSentiment: (results) => {
+    getOverallSentiment: (results: SentimentResult[]) => {
         if (!results || results.length === 0) return { label: 'neutral', score: 0.5 };
 
         const avgScore = results.reduce((sum, r) => sum + r.score, 0) / results.length;
@@ -92,4 +98,4 @@ const sentimentService = {
     }
 };
 
-module.exports = sentimentService;
+export = sentimentService;

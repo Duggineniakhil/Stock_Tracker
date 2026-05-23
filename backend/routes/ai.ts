@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import aiController from '../controllers/aiController';
+import authMiddleware from '../middleware/auth';
+
 const router = express.Router();
-const aiController = require('../controllers/aiController');
-const authMiddleware = require('../middleware/auth');
 
 /**
  * AI Routes
@@ -20,4 +21,4 @@ router.get('/sentiment/:symbol', aiController.getSentiment);
 router.post('/report/generate', aiController.generateReport);
 router.get('/report/latest', aiController.getLatestReport);
 
-module.exports = router;
+export = router;

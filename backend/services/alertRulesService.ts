@@ -74,7 +74,7 @@ const alertRulesService = {
      */
     runRulesEngine: async () => {
         try {
-            const rules = await alertModel.getAllActiveRules();
+            const rules = await alertModel.getAllActiveRules() as any[];
             if (rules.length === 0) return;
 
             logger.info(`Running alert rules engine - evaluating ${rules.length} rules`);

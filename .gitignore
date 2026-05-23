@@ -9,6 +9,7 @@ build/
 .env
 .env.local
 .emv
+settings.json
 
 # Database
 *.db

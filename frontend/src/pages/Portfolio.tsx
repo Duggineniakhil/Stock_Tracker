@@ -70,12 +70,16 @@ const Portfolio = () => {
     const handleAdd = async (e) => {
         e.preventDefault();
         try {
-            await addHolding(newAsset.symbol, parseFloat(newAsset.quantity), parseFloat(newAsset.buyPrice), new Date().toISOString());
+            const today = new Date().toISOString().slice(0, 10);
+            await addHolding(newAsset.symbol, parseFloat(newAsset.quantity), parseFloat(newAsset.buyPrice), today);
             setNewAsset({ symbol: '', quantity: '', buyPrice: '' });
             setShowAddForm(false);
             loadData();
         } catch (err) {
-            alert('Failed to add asset');
+            const message = err?.response?.data?.message
+                || err?.response?.data?.errors?.[0]?.message
+                || 'Failed to add asset';
+            alert(message);
         }
     };
 
@@ -159,17 +163,21 @@ const Portfolio = () => {
             <div className="portfolio-grid">
                 <div className="holdings-section">
                     <div className="sec-label">My Holdings</div>
-                    {holdings.length > 0 ? holdings.map((h, i) => (
+                    {holdings.length > 0 ? holdings.map((h, i) => {
+                        const holdingId = h.id || h._id;
+                        const buyPrice = h.buyPrice ?? h.buy_price;
+
+                        return (
                         <div 
                             className="holding-item clickable" 
-                            key={h._id || i}
+                            key={holdingId || i}
                             onClick={() => navigate(`/stock/${h.symbol}`)}
                         >
                             <div className="h-brand">
                                 <div className="h-icon-box">{h.symbol.substring(0, 2)}</div>
                                 <div>
                                     <div className="h-meta-name">{h.symbol}</div>
-                                    <div className="h-meta-qty">{h.quantity} shares @ ${h.buyPrice?.toFixed(2)}</div>
+                                    <div className="h-meta-qty">{h.quantity} shares @ ${buyPrice?.toFixed(2)}</div>
                                 </div>
                             </div>
                             <div className="h-data">
@@ -179,11 +187,11 @@ const Portfolio = () => {
                                 </div>
                                 <button className="h-del" onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDelete(h._id);
+                                    handleDelete(holdingId);
                                 }}>Remove</button>
                             </div>
                         </div>
-                    )) : (
+                    )}) : (
                         <div className="card muted" style={{ textAlign: 'center', padding: 'var(--sp-48)' }}>
                             Your portfolio is currently empty.
                         </div>

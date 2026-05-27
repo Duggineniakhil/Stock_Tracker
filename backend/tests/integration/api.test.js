@@ -4,8 +4,6 @@
  */
 
 const request = require('supertest');
-const app = require('../../server');
-const db = require('../../db/database');
 
 // Mock auth middleware for integration tests
 jest.mock('../../middleware/auth', () => (req, res, next) => {
@@ -25,6 +23,9 @@ jest.mock('../../models/alertModel', () => ({
     updateRule: jest.fn().mockResolvedValue({ updated: true }),
     deleteRule: jest.fn().mockResolvedValue({ deleted: true }),
 }));
+
+const app = require('../../server');
+const db = require('../../db/database');
 
 describe('API Integration Tests', () => {
 

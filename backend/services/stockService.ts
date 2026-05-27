@@ -5,7 +5,7 @@ const yahooFinance = new YahooFinance();
 // Set options directly via the global settings or use as a singleton
 (yahooFinance as any).setGlobalConfig?.({ suppressNotices: ['yahooSurvey', 'ripHistorical'] });
 
-export interface StockQuoteData {
+interface StockQuoteData {
     symbol: string;
     currentPrice: number;
     previousClose: number;
@@ -26,7 +26,7 @@ export interface StockQuoteData {
     industry: string;
 }
 
-export interface HistoricalPricePoint {
+interface HistoricalPricePoint {
     date: string;
     price: number;
 }
@@ -254,4 +254,4 @@ const stockService = {
     }
 };
 
-export default stockService;
+export = stockService;

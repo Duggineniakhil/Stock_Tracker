@@ -43,9 +43,39 @@ const Login = () => {
 
     return (
         <div className="auth-page">
-            <div className="auth-card">
+            <div className="auth-shell">
+                <section className="auth-visual" aria-hidden="true">
+                    <Link to="/" className="auth-brand">
+                        <span className="ldot"></span>Quotra
+                    </Link>
+                    <div className="auth-visual-copy">
+                        <span className="auth-kicker">Daily signal</span>
+                        <h1>Step back into your market cockpit.</h1>
+                        <p>Your portfolio, alerts, sentiment, and watchlist are tuned for faster decisions.</p>
+                    </div>
+                    <div className="market-preview">
+                        <div className="market-preview__top">
+                            <span>Portfolio pulse</span>
+                            <strong>+8.4%</strong>
+                        </div>
+                        <div className="sparkline">
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div className="ticker-row">
+                            <span>MSFT</span><strong className="up">+0.92%</strong>
+                        </div>
+                        <div className="ticker-row">
+                            <span>AMZN</span><strong className="up">+2.31%</strong>
+                        </div>
+                        <div className="ticker-row">
+                            <span>META</span><strong className="dn">-0.18%</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <div className="auth-card">
                 <div className="auth-header">
-                    <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '1.5rem', fontSize: '24px' }}>
+                    <Link to="/" className="logo auth-card-logo">
                         <span className="ldot"></span>Quotra
                     </Link>
                     <h2>Welcome back</h2>
@@ -104,6 +134,7 @@ const Login = () => {
                 <div className="auth-footer">
                     Don't have an account? <Link to="/register">Create account</Link>
                 </div>
+            </div>
             </div>
         </div>
     );

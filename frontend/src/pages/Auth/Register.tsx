@@ -53,9 +53,39 @@ const Register = () => {
 
     return (
         <div className="auth-page">
-            <div className="auth-card">
+            <div className="auth-shell">
+                <section className="auth-visual" aria-hidden="true">
+                    <Link to="/" className="auth-brand">
+                        <span className="ldot"></span>Quotra
+                    </Link>
+                    <div className="auth-visual-copy">
+                        <span className="auth-kicker">Market clarity</span>
+                        <h1>Build your portfolio command center.</h1>
+                        <p>Track holdings, watch alerts, and read the market with a dashboard made for daily investors.</p>
+                    </div>
+                    <div className="market-preview">
+                        <div className="market-preview__top">
+                            <span>Live watchlist</span>
+                            <strong>+12.8%</strong>
+                        </div>
+                        <div className="sparkline">
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div className="ticker-row">
+                            <span>AAPL</span><strong className="up">+1.42%</strong>
+                        </div>
+                        <div className="ticker-row">
+                            <span>NVDA</span><strong className="up">+3.08%</strong>
+                        </div>
+                        <div className="ticker-row">
+                            <span>TSLA</span><strong className="dn">-0.64%</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <div className="auth-card">
                 <div className="auth-header">
-                    <Link to="/" className="logo" style={{ justifyContent: 'center', marginBottom: '1.5rem', fontSize: '24px' }}>
+                    <Link to="/" className="logo auth-card-logo">
                         <span className="ldot"></span>Quotra
                     </Link>
                     <h2>Create account</h2>
@@ -130,6 +160,7 @@ const Register = () => {
                 <div className="auth-footer">
                     Already have an account? <Link to="/login">Sign in</Link>
                 </div>
+            </div>
             </div>
         </div>
     );

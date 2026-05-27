@@ -41,7 +41,10 @@ axiosInstance.interceptors.response.use((response) => response, async (error) =>
         isRefreshing = true;
         try {
             const res = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, { refreshToken });
-            const { token } = res.data;
+            const token = res.data?.data?.token || res.data?.token;
+            if (!token) {
+                throw new Error('Refresh response did not include a token');
+            }
             localStorage.setItem('token', token);
             axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
             processQueue(null, token);
@@ -82,6 +85,12 @@ const api = {
 
     // Alerts - History
     fetchAlerts: (limit = 50, offset = 0, symbol = null) => {
+        if (typeof limit === 'object' && limit !== null) {
+            const options = limit;
+            limit = options.limit ?? 50;
+            offset = options.offset ?? 0;
+            symbol = options.symbol ?? null;
+        }
         const params = { limit, offset };
         if (symbol) params.symbol = symbol;
         return axiosInstance.get('/v1/alerts', { params }).then(r => r.data);

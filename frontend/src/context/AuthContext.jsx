@@ -9,53 +9,105 @@ import {
 } from 'firebase/auth';
 import { 
     doc, 
-    getDoc, 
-    setDoc, 
-    serverTimestamp 
+    getDoc
 } from 'firebase/firestore';
 
 const AuthContext = createContext(null);
+
+const clearStoredAuth = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+};
+
+const getStoredBackendUser = () => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp && decoded.exp * 1000 <= Date.now()) {
+            clearStoredAuth();
+            return null;
+        }
+        return decoded;
+    } catch (e) {
+        console.error("Invalid token", e);
+        clearStoredAuth();
+        return null;
+    }
+};
+
+const unwrapAuthPayload = (res) => {
+    if (res?.data?.token) return res.data;
+    if (res?.token) return res;
+    return null;
+};
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // 1. Check LocalStorage for legacy JWT
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                if (decoded.exp * 1000 > Date.now()) {
-                    setUser(decoded);
-                } else {
-                    localStorage.removeItem('token');
-                }
-            } catch (e) {
-                console.error("Invalid token", e);
-                localStorage.removeItem('token');
-            }
+    const persistBackendAuth = (res) => {
+        const authPayload = unwrapAuthPayload(res);
+        if (!authPayload?.token) {
+            throw new Error('Backend did not return an auth token');
         }
 
-        // 2. Listen to Firebase Auth State
+        localStorage.setItem('token', authPayload.token);
+        if (authPayload.refreshToken) {
+            localStorage.setItem('refreshToken', authPayload.refreshToken);
+        }
+
+        const decoded = jwtDecode(authPayload.token);
+        return { ...decoded, ...authPayload.user };
+    };
+
+    const syncFirebaseUserWithBackend = async (firebaseUser) => {
+        const res = await api.googleLogin({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL
+        });
+        const backendUser = persistBackendAuth(res);
+        return { ...firebaseUser, ...backendUser };
+    };
+
+    useEffect(() => {
+        const storedUser = getStoredBackendUser();
+        if (storedUser) {
+            setUser(storedUser);
+        }
+
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                try {
-                    // User is signed in via Firebase
-                    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                    if (userDoc.exists()) {
-                        setUser({ ...firebaseUser, ...userDoc.data() });
-                    } else {
-                        // This case is handled in signInWithGoogle, but as a fallback:
-                        setUser(firebaseUser);
+            try {
+                if (!firebaseUser) {
+                    if (!getStoredBackendUser()) {
+                        setUser(null);
                     }
-                } catch (error) {
-                    console.error("Error fetching user data from Firestore:", error);
-                    // If offline, still set the basic firebase user so they can see cached data if available
-                    setUser(firebaseUser);
+                    return;
                 }
+
+                let nextUser = getStoredBackendUser();
+                if (!nextUser) {
+                    nextUser = await syncFirebaseUserWithBackend(firebaseUser);
+                } else {
+                    nextUser = { ...firebaseUser, ...nextUser };
+                }
+
+                const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                if (userDoc.exists()) {
+                    nextUser = { ...nextUser, ...userDoc.data() };
+                }
+                setUser(nextUser);
+            } catch (error) {
+                console.error("Error syncing authenticated user:", error);
+                clearStoredAuth();
+                await signOut(auth).catch(() => {});
+                setUser(null);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();
@@ -63,24 +115,16 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         const res = await api.login(email, password);
-        const { token, user: userData } = res.data;
-        
-        localStorage.setItem('token', token);
-        const decoded = jwtDecode(token);
-        setUser({ ...decoded, ...userData });
-        return res.data;
+        const authUser = persistBackendAuth(res);
+        setUser(authUser);
+        return unwrapAuthPayload(res);
     };
 
     const register = async (name, email, password) => {
         const res = await api.register(name, email, password);
-        const { token, user: userData } = res.data;
-        
-        if (token) {
-            localStorage.setItem('token', token);
-            const decoded = jwtDecode(token);
-            setUser({ ...decoded, ...userData });
-        }
-        return res.data;
+        const authUser = persistBackendAuth(res);
+        setUser(authUser);
+        return unwrapAuthPayload(res);
     };
 
     const signInWithGoogle = async () => {
@@ -88,23 +132,9 @@ export const AuthProvider = ({ children }) => {
             const result = await signInWithPopup(auth, googleProvider);
             const firebaseUser = result.user;
 
-            // Sync with backend
-            const res = await api.googleLogin({
-                uid: firebaseUser.uid,
-                email: firebaseUser.email,
-                name: firebaseUser.displayName,
-                photoURL: firebaseUser.photoURL
-            });
-
-            const { token, refreshToken, user: userData } = res.data;
-            
-            if (token) {
-                localStorage.setItem('token', token);
-                if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-            }
-
-            setUser({ ...firebaseUser, ...userData });
-            return firebaseUser;
+            const authUser = await syncFirebaseUserWithBackend(firebaseUser);
+            setUser(authUser);
+            return authUser;
         } catch (error) {
             console.error("Google Sign-In Error:", error);
             throw error;
@@ -114,7 +144,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             await signOut(auth);
-            localStorage.removeItem('token');
+            clearStoredAuth();
             setUser(null);
         } catch (error) {
             console.error("Logout Error:", error);

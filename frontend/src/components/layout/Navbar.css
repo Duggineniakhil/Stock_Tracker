@@ -60,18 +60,37 @@
     list-style: none;
 }
 
+.nl li {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
 .nl a {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-muted);
     transition: var(--transition-smooth);
     letter-spacing: 0.01em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
 }
 
 .nl a:hover {
     color: var(--accent-green);
     transform: translateY(-1px);
 }
+
+.nl li:hover {
+    border-color: rgba(0, 232, 135, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 35px rgba(0, 232, 135, 0.12);
+}
+
 
 .nav-actions {
     display: flex;
@@ -163,8 +182,24 @@
     
     .nl a {
         font-size: 16px;
-        display: inline-block;
-        padding: 10px 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px;
+    }
+
+    .nl li {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+
+    .nl li:hover {
+        border-color: rgba(0, 232, 135, 0.35);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 35px rgba(0, 232, 135, 0.12);
     }
 
     .logout-mobile {

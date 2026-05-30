@@ -132,41 +132,47 @@
     .menu-toggle { display: flex; }
     
     .nl {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 280px;
-        height: 100vh;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
         background: var(--bg-surface-alt);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
-        flex-direction: column;
-        padding: 100px var(--sp-32);
-        transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: -10px 0 40px rgba(0,0,0,0.6);
-        border-left: 1px solid var(--border-glass);
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--sp-16);
+        padding: var(--sp-16) var(--sp-24);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+        transform: translateY(-15px);
+        opacity: 0;
+        visibility: hidden;
+        border-bottom: 1px solid var(--border-glass);
     }
     
     .nl.active {
-        right: 0;
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
     }
     
     .nl li {
-        width: 100%;
+        width: auto;
     }
     
     .nl a {
-        font-size: 18px;
-        display: block;
-        padding: var(--sp-16) 0;
+        font-size: 16px;
+        display: inline-block;
+        padding: 10px 0;
     }
 
     .logout-mobile {
-        font-size: 18px;
+        font-size: 16px;
         color: var(--market-red);
         font-weight: 600;
-        padding: var(--sp-16) 0;
-        width: 100%;
-        text-align: left;
+        padding: 10px 0;
+        width: auto;
+        text-align: center;
     }
 }

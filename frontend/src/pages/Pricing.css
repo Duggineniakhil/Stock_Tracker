@@ -70,7 +70,7 @@
 }
 
 .price-val {
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-size: 3rem;
     font-weight: 800;
     color: #fff;

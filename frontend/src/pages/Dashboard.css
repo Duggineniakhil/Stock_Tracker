@@ -6,7 +6,7 @@
     justify-content: center;
     min-height: 400px;
     color: var(--accent-green);
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-weight: 700;
 }
 
@@ -91,7 +91,7 @@
 }
 
 .bal-val {
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-size: 36px;
     font-weight: 800;
     color: var(--text-main);
@@ -103,7 +103,7 @@
 
 .bal-ch {
     font-size: 16px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-site);
     font-weight: 700;
 }
 
@@ -165,7 +165,7 @@
 }
 
 .sec-label {
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-size: 18px;
     font-weight: 700;
     margin-bottom: var(--sp-16);
@@ -197,7 +197,7 @@
 }
 
 .sc-sym {
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-size: 16px;
     font-weight: 800;
     color: var(--text-main);
@@ -255,7 +255,7 @@
 }
 
 .stat-value {
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-size: 24px;
     font-weight: 800;
 }

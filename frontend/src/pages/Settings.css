@@ -53,7 +53,7 @@
 }
 
 .current-plan-label {
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-weight: 800;
     font-size: 18px;
 }

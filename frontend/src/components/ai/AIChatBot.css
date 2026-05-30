@@ -50,7 +50,7 @@
 }
 
 .ai-chat-title {
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-weight: 700;
     font-size: 15px;
     display: flex;

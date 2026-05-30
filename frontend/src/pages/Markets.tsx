@@ -104,11 +104,11 @@ const Markets = () => {
                         ) : searchResult ? (
                             <>
                                 <div>
-                                    <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800 }}>{searchResult.symbol}</div>
+                                    <div style={{ fontFamily: "var(--font-site)", fontWeight: 800 }}>{searchResult.symbol}</div>
                                     <div className="small-text">{searchResult.name || searchResult.companyName}</div>
                                 </div>
                                 <div style={{ display: 'flex', gap: 'var(--sp-16)', alignItems: 'center' }}>
-                                    <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>${(searchResult.currentPrice || searchResult.price)?.toFixed(2)}</div>
+                                    <div style={{ fontFamily: "var(--font-site)", fontWeight: 700 }}>${(searchResult.currentPrice || searchResult.price)?.toFixed(2)}</div>
                                     <button className="btn btn-primary" style={{ height: '36px', padding: '0 var(--sp-16)', fontSize: '12px' }} onClick={() => handleAddToWatchlist(searchResult.symbol)}>
                                         + Watchlist
                                     </button>

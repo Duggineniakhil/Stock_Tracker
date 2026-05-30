@@ -44,7 +44,7 @@
 .tag-info { background: rgba(56, 130, 220, 0.1); color: var(--market-blue); }
 
 .ins-title {
-    font-family: 'Syne', sans-serif;
+    font-family: var(--font-site);
     font-size: 17px;
     font-weight: 800;
     color: var(--text-main);

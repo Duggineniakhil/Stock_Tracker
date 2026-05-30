@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;0,600;0,700&display=swap');
 
 :root {
+  --font-site: 'Movatif Light', 'Movatif', 'DM Sans', 'Syne', Arial, sans-serif;
+
   /* Colors */
   --bg-site: #05070c;
   --bg-surface: #0a0d16;
@@ -65,7 +67,7 @@
 body {
   background: var(--bg-site);
   color: var(--text-main);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-site);
   font-size: var(--fs-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -110,16 +112,16 @@ body {
 
 /* Typography Hierarchy */
 h1, .h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: var(--font-site);
   font-size: var(--fs-h1);
   font-weight: 800;
   line-height: 1.1;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   margin-bottom: var(--sp-24);
 }
 
 h2, .h2 {
-  font-family: 'Syne', sans-serif;
+  font-family: var(--font-site);
   font-size: var(--fs-h2);
   font-weight: 700;
   line-height: 1.2;

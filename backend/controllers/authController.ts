@@ -6,13 +6,45 @@ import db from '../db/database';
 import logger from '../utils/logger';
 import { success, error as apiError } from '../utils/responseWrapper';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { config } from '../config';
 
-const MAX_LOGIN_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5', 10);
-const LOCKOUT_DURATION_MS = (parseInt(process.env.LOCKOUT_DURATION_MINUTES || '15', 10)) * 60 * 1000;
-const JWT_SECRET = process.env.JWT_SECRET || 'development_jwt_secret_change_me';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || `${JWT_SECRET}_refresh`;
-const accessTokenOptions = (): jwt.SignOptions => ({ expiresIn: (process.env.JWT_EXPIRES_IN || '1h') as any });
-const refreshTokenOptions = (): jwt.SignOptions => ({ expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any });
+const MAX_LOGIN_ATTEMPTS = config.MAX_LOGIN_ATTEMPTS;
+const LOCKOUT_DURATION_MS = config.LOCKOUT_DURATION_MINUTES * 60 * 1000;
+const accessTokenOptions = (): jwt.SignOptions => ({ expiresIn: config.JWT_EXPIRES_IN as any });
+const refreshTokenOptions = (): jwt.SignOptions => ({ expiresIn: config.JWT_REFRESH_EXPIRES_IN as any });
+
+const parseExpiryMs = (value: string): number => {
+    const match = value.match(/^(\d+)([smhd])$/i);
+    if (!match) return 7 * 24 * 60 * 60 * 1000;
+    const amount = Number(match[1]);
+    const unit = match[2].toLowerCase();
+
+    switch (unit) {
+        case 's': return amount * 1000;
+        case 'm': return amount * 60 * 1000;
+        case 'h': return amount * 60 * 60 * 1000;
+        case 'd': return amount * 24 * 60 * 60 * 1000;
+        default: return amount * 1000;
+    }
+};
+
+const refreshTokenExpiryMs = parseExpiryMs(config.JWT_REFRESH_EXPIRES_IN);
+
+const refreshTokenCookieOptions = {
+    httpOnly: true,
+    secure: config.IS_PRODUCTION,
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: refreshTokenExpiryMs,
+};
+
+const sendRefreshCookie = (res: Response, token: string) => {
+    res.cookie('refreshToken', token, refreshTokenCookieOptions);
+};
+
+const clearRefreshCookie = (res: Response) => {
+    res.clearCookie('refreshToken', { path: '/' });
+};
 
 // Password strength: ≥8 chars, 1 uppercase, 1 number
 const isStrongPassword = (password: string) => {
@@ -80,25 +112,26 @@ const register = async (req: Request, res: Response) => {
             // Auto-login: Issue tokens immediately
             const accessToken = jwt.sign(
                 { id: this.lastID, email: email.toLowerCase(), name: name, plan: 'free' },
-                JWT_SECRET,
+                config.JWT_SECRET,
                 accessTokenOptions()
             );
 
             const refreshToken = jwt.sign(
                 { id: this.lastID, type: 'refresh' },
-                JWT_REFRESH_SECRET,
+                config.JWT_REFRESH_SECRET,
                 refreshTokenOptions()
             );
 
             // Store refresh token hash
             const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            const expiresAt = new Date(Date.now() + refreshTokenExpiryMs).toISOString();
             db.run('INSERT OR REPLACE INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
                 [this.lastID, tokenHash, expiresAt]);
 
+            sendRefreshCookie(res, refreshToken);
+
             return success(res, {
                 token: accessToken,
-                refreshToken,
                 user: { id: this.lastID, email: email.toLowerCase(), name, plan: 'free' }
             }, 'Account created successfully', 201);
         });
@@ -148,26 +181,26 @@ const login = async (req: Request, res: Response) => {
 
             const accessToken = jwt.sign(
                 { id: user.id, email: user.email, plan: user.plan || 'free' },
-                JWT_SECRET,
+                config.JWT_SECRET,
                 accessTokenOptions()
             );
 
             const refreshToken = jwt.sign(
                 { id: user.id, type: 'refresh' },
-                JWT_REFRESH_SECRET,
+                config.JWT_REFRESH_SECRET,
                 refreshTokenOptions()
             );
 
             // Store refresh token hash
             const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            const expiresAt = new Date(Date.now() + refreshTokenExpiryMs).toISOString();
             db.run('INSERT OR REPLACE INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
                 [user.id, tokenHash, expiresAt]);
 
+            sendRefreshCookie(res, refreshToken);
             logger.info(`User logged in: ${email}`);
             return success(res, {
                 token: accessToken,
-                refreshToken,
                 expiresIn: 3600,
                 user: { id: user.id, email: user.email, plan: user.plan || 'free' }
             }, 'Login successful');
@@ -223,26 +256,26 @@ const googleLogin = async (req: Request, res: Response) => {
             // Issue tokens
             const accessToken = jwt.sign(
                 { id: userId, email: email.toLowerCase(), plan: userPlan },
-                JWT_SECRET,
+                config.JWT_SECRET,
                 accessTokenOptions()
             );
 
             const refreshToken = jwt.sign(
                 { id: userId, type: 'refresh' },
-                JWT_REFRESH_SECRET,
+                config.JWT_REFRESH_SECRET,
                 refreshTokenOptions()
             );
 
             // Store refresh token hash
             const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            const expiresAt = new Date(Date.now() + refreshTokenExpiryMs).toISOString();
             db.run('INSERT OR REPLACE INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
                 [userId, tokenHash, expiresAt]);
 
+            sendRefreshCookie(res, refreshToken);
             logger.info(`User logged in via Google: ${email}`);
             return success(res, {
                 token: accessToken,
-                refreshToken,
                 expiresIn: 3600,
                 user: { id: userId, email: email.toLowerCase(), name: name || user?.name, plan: userPlan, photoURL }
             }, 'Google login successful');
@@ -255,11 +288,11 @@ const googleLogin = async (req: Request, res: Response) => {
 
 // ── Refresh Token ─────────────────────────────────────────────────────────────
 const refreshToken = async (req: Request, res: Response) => {
-    const { refreshToken: token } = req.body;
+    const token = req.cookies?.refreshToken || req.body.refreshToken;
     if (!token) return apiError(res, 'Refresh token required', null, 400);
 
     try {
-        const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as jwt.JwtPayload;
+        const decoded = jwt.verify(token, config.JWT_REFRESH_SECRET) as jwt.JwtPayload;
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
         db.get('SELECT * FROM refresh_tokens WHERE token_hash = ? AND revoked = 0 AND expires_at > CURRENT_TIMESTAMP',
@@ -270,7 +303,7 @@ const refreshToken = async (req: Request, res: Response) => {
 
                 const newAccessToken = jwt.sign(
                     { id: decoded.id, email: decoded.email },
-                    JWT_SECRET,
+                    config.JWT_SECRET,
                     accessTokenOptions()
                 );
 
@@ -283,11 +316,12 @@ const refreshToken = async (req: Request, res: Response) => {
 
 // ── Logout ────────────────────────────────────────────────────────────────────
 const logout = (req: Request, res: Response) => {
-    const { refreshToken: token } = req.body;
+    const token = req.cookies?.refreshToken || req.body.refreshToken;
     if (token) {
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
         db.run('UPDATE refresh_tokens SET revoked = 1 WHERE token_hash = ?', [tokenHash]);
     }
+    clearRefreshCookie(res);
     return success(res, null, 'Logged out successfully');
 };
 

@@ -4,6 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const axiosInstance = axios.create({
     baseURL: `${API_BASE_URL}/api`,
+    withCredentials: true,
 });
 
 // Add token to requests
@@ -24,13 +25,8 @@ const processQueue = (error, token = null) => {
 
 axiosInstance.interceptors.response.use((response) => response, async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            return Promise.reject(error);
-        }
+    const retryable = error.response?.status === 401 && !original._retry && !original.url?.includes('/v1/auth/refresh');
+    if (retryable) {
         if (isRefreshing) {
             return new Promise((resolve, reject) => {
                 refreshQueue.push({ resolve, reject });
@@ -40,7 +36,7 @@ axiosInstance.interceptors.response.use((response) => response, async (error) =>
         original._retry = true;
         isRefreshing = true;
         try {
-            const res = await axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, { refreshToken });
+            const res = await axiosInstance.post('/v1/auth/refresh');
             const token = res.data?.data?.token || res.data?.token;
             if (!token) {
                 throw new Error('Refresh response did not include a token');
@@ -53,7 +49,6 @@ axiosInstance.interceptors.response.use((response) => response, async (error) =>
         } catch (refreshError) {
             processQueue(refreshError, null);
             localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
             return Promise.reject(refreshError);
         } finally {
             isRefreshing = false;
@@ -64,11 +59,11 @@ axiosInstance.interceptors.response.use((response) => response, async (error) =>
 
 const api = {
     // Auth
-    login: (email, password) => axios.post(`${API_BASE_URL}/api/v1/auth/login`, { email, password }).then(r => r.data),
-    register: (name, email, password) => axios.post(`${API_BASE_URL}/api/v1/auth/register`, { name, email, password }).then(r => r.data),
-    googleLogin: (data) => axios.post(`${API_BASE_URL}/api/v1/auth/google`, data).then(r => r.data),
-    refreshToken: (refreshToken) => axios.post(`${API_BASE_URL}/api/v1/auth/refresh`, { refreshToken }).then(r => r.data),
-    logout: (refreshToken) => axios.post(`${API_BASE_URL}/api/v1/auth/logout`, { refreshToken }).then(r => r.data),
+    login: (email, password) => axiosInstance.post('/v1/auth/login', { email, password }).then(r => r.data),
+    register: (name, email, password) => axiosInstance.post('/v1/auth/register', { name, email, password }).then(r => r.data),
+    googleLogin: (data) => axiosInstance.post('/v1/auth/google', data).then(r => r.data),
+    refreshToken: () => axiosInstance.post('/v1/auth/refresh').then(r => r.data),
+    logout: () => axiosInstance.post('/v1/auth/logout').then(r => r.data),
     updatePlan: (email, newPlan) => axiosInstance.post('/v1/auth/plan', { email, newPlan }).then(r => r.data),
     updateProfile: (data) => axiosInstance.put('/v1/auth/profile', data).then(r => r.data),
     changePassword: (data) => axiosInstance.put('/v1/auth/password', data).then(r => r.data),

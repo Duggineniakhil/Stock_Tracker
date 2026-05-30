@@ -1,12 +1,10 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
-import cron from 'node-cron';
+import cookieParser from 'cookie-parser';
 
+import { config } from './config';
 import db from './db/database';
 import logger from './utils/logger';
 import requestLogger from './middleware/requestLogger';
@@ -23,23 +21,16 @@ const authRoutes = require('./routes/auth');
 const portfolioRoutes = require('./routes/portfolio');
 const aiRoutes = require('./routes/ai');
 const adminRoutes = require('./routes/admin');
-const alertEngine = require('./services/alertEngine');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = config.PORT;
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-const allowedOrigins = [
-    "http://localhost:5173",
-    "https://stock-tracker-1-sj4n.onrender.com",
-    "https://stock-tracker-lime-nu.vercel.app"
-];
-
 app.use(cors({
     origin: function (origin, callback) {
         // allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
+        if (config.CORS_ORIGINS.indexOf(origin) === -1) {
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
             return callback(new Error(msg), false);
         }
@@ -66,6 +57,7 @@ app.use(helmet({
 
 // ── Compression ───────────────────────────────────────────────────────────────
 app.use(compression());
+app.use(cookieParser());
 
 // ── Body Parsing ──────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
@@ -132,25 +124,14 @@ app.use('/api/portfolio', portfolioRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// ── Scheduled Alert Engine ────────────────────────────────────────────────────
-if (process.env.NODE_ENV !== 'test') {
-    cron.schedule('0 * * * *', () => {
-        logger.info('Running scheduled alert engine...');
-        alertEngine.runAlertEngine().catch((err: any) => logger.error('Alert engine error', { error: err.message }));
-    });
-
-    setTimeout(() => {
-        logger.info('Running initial alert engine check...');
-        alertEngine.runAlertEngine().catch((err: any) => logger.error('Alert engine startup error', { error: err.message }));
-    }, 30000);
-}
+// Alert engine is now managed by a separate worker process.
 
 // ── Start Server ──────────────────────────────────────────────────────────────
-if (process.env.NODE_ENV !== 'test') {
+if (config.NODE_ENV !== 'test') {
     app.listen(PORT, () => {
-        logger.info(`🚀 Stock Tracker Backend running on port ${PORT}`);
-        logger.info(`📚 API Docs: http://localhost:${PORT}/api/v1/docs`);
-        logger.info(`🏥 Health:   http://localhost:${PORT}/api/v1/health`);
+        logger.info(`🚀 Stock Tracker Backend running on port ${config.PORT}`);
+        logger.info(`📚 API Docs: http://localhost:${config.PORT}/api/v1/docs`);
+        logger.info(`🏥 Health:   http://localhost:${config.PORT}/api/v1/health`);
     });
 }
 

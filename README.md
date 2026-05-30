@@ -36,7 +36,7 @@
 ### Intelligent Alerts Engine
 - **Automated Rules:** Configure alerts for percentage drops/gains, target prices, or volume spikes.
 - **Notification Center:** A real-time in-app notification inbox for tracking triggered alerts with read/unread status.
-- **Background Cron Jobs:** Reliable background engine runs every hour to evaluate rules and trigger notifications.
+- **Background Cron Jobs:** Dedicated alert worker runs hourly outside the main Express server to evaluate rules and trigger notifications.
 - **Multi-channel Notifications:** Receive instant updates via in-app dashboard alerts and email notifications.
 
 ### Robust Security & Auth
@@ -54,8 +54,8 @@
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | React 19, Vite, Tailwind CSS, Chart.js, React Router v7 |
-| **Backend** | Node.js 20, Express 4, SQLite3, node-cron, Nodemailer |
+| **Frontend** | React 19, Vite, plain CSS, Chart.js, React Router v7 |
+| **Backend** | Node.js 20, Express 4, SQLite3, Nodemailer, dedicated cron worker |
 | **Authentication**| JSON Web Tokens (JWT), bcrypt |
 | **Testing** | Backend: Jest, Supertest \| Frontend: Vitest, React Testing Library |
 | **DevOps** | Docker, Docker Compose, GitHub Actions (CI/CD) |
@@ -120,6 +120,12 @@ npm install
 npm run dev            # Starts server on port 5000
 ```
 
+**Optional: Start the Alerts Worker**
+```bash
+cd backend
+npm run worker         # Runs the dedicated alert rules engine separately
+```
+
 **2. Start the Frontend Client**
 ```bash
 cd frontend
@@ -160,7 +166,7 @@ Complete interactive documentation can be found via Swagger UI at `/api/v1/docs`
 
 ### Authentication
 - `POST /api/v1/auth/register` - Create a new user account.
-- `POST /api/v1/auth/login` - Authenticate and receive JWT + Refresh Token.
+- `POST /api/v1/auth/login` - Authenticate and receive JWT access token; refresh token is stored securely in an HTTP-only cookie.
 
 ### Portfolio & Watchlist
 - `GET /api/v1/portfolio` - Fetch all active holdings with aggregated P/L.

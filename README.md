@@ -57,7 +57,6 @@
 | **Frontend** | React 19, Vite, TypeScript, React Router v7, Chart.js |
 | **Backend** | Node.js 20, Express 4, TypeScript, SQLite3, Nodemailer, JWT auth, cron worker |
 | **Authentication** | JSON Web Tokens (JWT), bcrypt, refresh-token support |
-| **AI / Data** | OpenAI GPT-4o, Yahoo Finance API, sentiment analysis |
 | **Testing** | Backend: Jest, Supertest | Frontend: Vitest, React Testing Library |
 | **DevOps** | Docker, Docker Compose, GitHub Actions (CI/CD) |
 

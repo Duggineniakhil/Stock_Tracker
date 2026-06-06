@@ -4,7 +4,7 @@
   "description": "Backend API for stock tracking dashboard",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node server.js",
     "build": "tsc && node scripts/copy-runtime-assets.js",
     "dev": "nodemon --exec tsx server.ts",
     "worker": "tsx alertWorker.ts",
@@ -66,6 +66,7 @@
     "sqlite3": "^6.0.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "tsx": "^4.22.4",
     "winston": "^3.17.0",
     "yahoo-finance2": "^3.13.0"
   },
@@ -88,7 +89,6 @@
     "nodemon": "^3.0.2",
     "supertest": "^7.1.0",
     "ts-jest": "^29.4.6",
-    "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   }
 }

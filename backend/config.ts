@@ -7,7 +7,7 @@ const getEnv = (key: string, fallback = ''): string => process.env[key] || fallb
 const NODE_ENV = (getEnv('NODE_ENV', 'development') as 'development' | 'production' | 'test');
 const IS_PRODUCTION = NODE_ENV === 'production';
 const PORT = Number(getEnv('PORT', '5000'));
-const JWT_SECRET = getEnv('JWT_SECRET');
+const JWT_SECRET = getEnv('JWT_SECRET') || (NODE_ENV === 'test' ? 'test_jwt_secret' : '');
 const JWT_REFRESH_SECRET = getEnv('JWT_REFRESH_SECRET') || `${JWT_SECRET}_refresh`;
 const JWT_EXPIRES_IN = getEnv('JWT_EXPIRES_IN', '1h');
 const JWT_REFRESH_EXPIRES_IN = getEnv('JWT_REFRESH_EXPIRES_IN', '7d');

@@ -24,13 +24,16 @@ const RATE_LIMIT_MAX = Number(getEnv('RATE_LIMIT_MAX', '100'));
 const AUTH_RATE_LIMIT_MAX = Number(getEnv('AUTH_RATE_LIMIT_MAX', '10'));
 const MAX_LOGIN_ATTEMPTS = Number(getEnv('MAX_LOGIN_ATTEMPTS', '5'));
 const LOCKOUT_DURATION_MINUTES = Number(getEnv('LOCKOUT_DURATION_MINUTES', '15'));
-const CORS_ORIGINS = getEnv('CORS_ORIGINS')
-    ? getEnv('CORS_ORIGINS').split(',').map((origin) => origin.trim()).filter(Boolean)
-    : [
-        'http://localhost:5173',
-        'https://stock-tracker-1-sj4n.onrender.com',
-        'https://stock-tracker-lime-nu.vercel.app'
-    ];
+const DEFAULT_CORS_ORIGINS = [
+    'http://localhost:5173',
+    'https://stock-tracker-1-sj4n.onrender.com',
+    'https://stock-tracker-lime-nu.vercel.app'
+];
+const configuredCorsOrigins = getEnv('CORS_ORIGINS')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+const CORS_ORIGINS = [...new Set([...DEFAULT_CORS_ORIGINS, ...configuredCorsOrigins])];
 
 if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is required in environment configuration.');

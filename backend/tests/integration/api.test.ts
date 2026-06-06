@@ -3,6 +3,8 @@
  * Uses supertest to test HTTP endpoints end-to-end
  */
 
+export {};
+
 const request = require('supertest');
 
 // Mock auth middleware for integration tests
@@ -28,6 +30,32 @@ const app = require('../../server');
 const db = require('../../db/database');
 
 describe('API Integration Tests', () => {
+  describe('CORS preflight', () => {
+    it('allows the deployed Vercel frontend to call Google auth', async () => {
+      const origin = 'https://stock-tracker-lime-nu.vercel.app';
+      const res = await request(app)
+        .options('/api/v1/auth/google')
+        .set('Origin', origin)
+        .set('Access-Control-Request-Method', 'POST')
+        .set('Access-Control-Request-Headers', 'content-type');
+
+      expect(res.status).toBe(204);
+      expect(res.headers['access-control-allow-origin']).toBe(origin);
+      expect(res.headers['access-control-allow-credentials']).toBe('true');
+      expect(res.headers['access-control-allow-methods']).toContain('POST');
+      expect(res.headers['access-control-allow-headers']).toContain('Content-Type');
+    });
+
+    it('does not allow unknown browser origins', async () => {
+      const res = await request(app)
+        .options('/api/v1/auth/google')
+        .set('Origin', 'https://example.com')
+        .set('Access-Control-Request-Method', 'POST');
+
+      expect(res.headers['access-control-allow-origin']).toBeUndefined();
+    });
+  });
+
   describe('GET /api/v1/health', () => {
     it('should return healthy status', async () => {
       const res = await request(app).get('/api/v1/health');

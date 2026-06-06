@@ -33,7 +33,7 @@ const refreshTokenExpiryMs = parseExpiryMs(config.JWT_REFRESH_EXPIRES_IN);
 const refreshTokenCookieOptions = {
     httpOnly: true,
     secure: config.IS_PRODUCTION,
-    sameSite: 'lax' as const,
+    sameSite: config.IS_PRODUCTION ? 'none' as const : 'lax' as const,
     path: '/',
     maxAge: refreshTokenExpiryMs,
 };
@@ -43,7 +43,11 @@ const sendRefreshCookie = (res: Response, token: string) => {
 };
 
 const clearRefreshCookie = (res: Response) => {
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('refreshToken', {
+        path: '/',
+        secure: refreshTokenCookieOptions.secure,
+        sameSite: refreshTokenCookieOptions.sameSite,
+    });
 };
 
 // Password strength: ≥8 chars, 1 uppercase, 1 number

@@ -3,7 +3,7 @@
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "allowJs": true,
+    "allowJs": false,
     "checkJs": false,
     "strict": true,
     "esModuleInterop": true,
@@ -12,6 +12,6 @@
     "outDir": "./dist",
     "resolveJsonModule": true
   },
-  "include": ["**/*.ts", "**/*.js"],
-  "exclude": ["node_modules", "dist", "coverage", "tests"]
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist", "coverage"]
 }

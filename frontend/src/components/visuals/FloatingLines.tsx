@@ -195,6 +195,12 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
   fragColor = vec4(col, 1.0);
 }
+
+void main() {
+  vec4 color = vec4(0.0);
+  mainImage(color, gl_FragCoord.xy);
+  gl_FragColor = color;
+}
 `;
 
 const MAX_GRADIENT_STOPS = 8;

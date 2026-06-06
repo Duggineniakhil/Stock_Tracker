@@ -44,16 +44,16 @@ const Landing = () => {
 
             <div className="hero-wrapper">
                 <div className="hero-bg">
-                    <FloatingLines 
-                        enabledWaves={["top","middle","bottom"]}
+                    <FloatingLines
+                        enabledWaves={["top", "middle", "bottom"]}
                         lineCount={8}
                         lineDistance={8}
                         bendRadius={8}
                         bendStrength={-2}
                         interactive
-                        parallax={true}
+                        parallax
                         animationSpeed={1}
-                        linesGradient={["#00e887", "#2f4ba2", "#080c14"]}
+                        linesGradient={["#00e887", "#39d9c0", "#2f4ba2"]}
                     />
                 </div>
                 <main className="container">

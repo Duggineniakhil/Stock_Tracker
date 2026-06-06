@@ -1,8 +1,13 @@
-import React from 'react';
+
+import { ReactNode } from 'react';
 import Navbar from './Navbar';
 import AIChatBot from '../ai/AIChatBot';
 
-const MainLayout = ({ children }) => {
+interface MainLayoutProps {
+    children: ReactNode;
+}
+
+const MainLayout = ({ children }: MainLayoutProps) => {
     return (
         <div className="site">
             <Navbar />
@@ -12,8 +17,8 @@ const MainLayout = ({ children }) => {
                 </div>
             </main>
             <AIChatBot />
-            <footer className="container" style={{ 
-                padding: 'var(--sp-64) var(--sp-24)', 
+            <footer className="container" style={{
+                padding: 'var(--sp-64) var(--sp-24)',
                 borderTop: '1px solid var(--border-subtle)',
                 textAlign: 'center'
             }}>

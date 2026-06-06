@@ -1,12 +1,15 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const ThemeContext = createContext();
+import { createContext, ReactNode, useContext, useEffect } from 'react';
 
-const THEME_KEY = 'stock-tracker-theme';
+interface ThemeContextType {
+    theme: 'dark';
+    toggleTheme: () => void;
+}
 
-export const ThemeProvider = ({ children }) => {
-    // Quotra design is strictly dark theme. Support for legacy light theme removed.
-    const theme = 'dark';
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+    const theme: 'dark' = 'dark';
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', 'dark');

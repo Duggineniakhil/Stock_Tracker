@@ -1,9 +1,19 @@
-import React, { useState, useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { fetchStockSentiment } from '../../services/api';
 import './SentimentBadge.css';
 
-const SentimentBadge = ({ symbol }) => {
-    const [sentiment, setSentiment] = useState(null);
+interface SentimentData {
+    label: string;
+    score: number;
+}
+
+interface SentimentBadgeProps {
+    symbol: string;
+}
+
+const SentimentBadge = ({ symbol }: SentimentBadgeProps) => {
+    const [sentiment, setSentiment] = useState<SentimentData | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {

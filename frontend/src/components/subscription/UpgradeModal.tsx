@@ -1,8 +1,15 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import './UpgradeModal.css';
 
-const UpgradeModal = ({ isOpen, onClose, featureName, requiredPlan = 'Student' }) => {
+interface UpgradeModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    featureName: string;
+    requiredPlan?: string;
+}
+
+const UpgradeModal = ({ isOpen, onClose, featureName, requiredPlan = 'Student' }: UpgradeModalProps) => {
     const navigate = useNavigate();
 
     if (!isOpen) return null;
@@ -14,10 +21,10 @@ const UpgradeModal = ({ isOpen, onClose, featureName, requiredPlan = 'Student' }
                 <div className="modal-icon">🔒</div>
                 <h2 className="syne">Unlock {featureName}</h2>
                 <p className="small-text">
-                    This is a premium feature available on our <strong>{requiredPlan}</strong> and <strong>Pro</strong> plans. 
+                    This is a premium feature available on our <strong>{requiredPlan}</strong> and <strong>Pro</strong> plans.
                     Upgrade your account to get full access to AI insights, automated reports, and more.
                 </p>
-                
+
                 <div className="plan-comparison-mini">
                     <div className="mini-plan">
                         <span className="plan-name">Student</span>

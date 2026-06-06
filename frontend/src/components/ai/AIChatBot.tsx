@@ -1,33 +1,41 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
 import { chatWithAI, fetchChatHistory, fetchPortfolio } from '../../services/api';
 import './AIChatBot.css';
 
+interface AIChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+}
+
+interface Holding {
+    symbol: string;
+}
+
 const AIChatBot = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<AIChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [holdings, setHoldings] = useState([]);
-    const [error, setError] = useState(null);
-    const messagesEndRef = useRef(null);
+    const [holdings, setHoldings] = useState<Holding[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(() => {
         if (isOpen) {
             const loadData = async () => {
                 try {
-                    // Load History if empty
                     if (messages.length === 0) {
                         const historyData = await fetchChatHistory();
                         if (historyData.success && historyData.history.length > 0) {
                             setMessages(historyData.history);
                         }
                     }
-                    
-                    // Load Portfolio for context
+
                     const portData = await fetchPortfolio();
                     setHoldings(portData.data || portData || []);
                 } catch (err) {
@@ -44,13 +52,13 @@ const AIChatBot = () => {
         }
     }, [messages, isOpen]);
 
-    const handleSend = async (e, customText = null) => {
+    const handleSend = async (e: React.FormEvent<HTMLFormElement> | null, customText: string | null = null) => {
         if (e) e.preventDefault();
-        const textToSend = customText || input;
+        const textToSend = customText ?? input;
         if (!textToSend.trim() || isLoading) return;
 
-        const userMsg = { role: 'user', content: textToSend };
-        setMessages(prev => [...prev, userMsg]);
+        const userMsg: AIChatMessage = { role: 'user', content: textToSend };
+        setMessages((prev) => [...prev, userMsg]);
         if (!customText) setInput('');
         setIsLoading(true);
         setError(null);
@@ -58,7 +66,7 @@ const AIChatBot = () => {
         try {
             const data = await chatWithAI(textToSend);
             if (data.success) {
-                setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+                setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
             } else {
                 setError(data.message || 'Failed to get response');
             }
@@ -72,13 +80,11 @@ const AIChatBot = () => {
     const handleClear = () => {
         if (window.confirm('Clear all chat history?')) {
             setMessages([]);
-            // Note: We could add a backend endpoint for this if needed, 
-            // for now we just clear the local session.
         }
     };
 
-    const getDynamicPrompts = () => {
-        const base = ["Analyze my portfolio", "Market trends?"];
+    const getDynamicPrompts = (): string[] => {
+        const base = ['Analyze my portfolio', 'Market trends?'];
         if (holdings.length > 0) {
             const topHolding = holdings[0].symbol;
             base.push(`Tell me about ${topHolding}`);
@@ -86,7 +92,7 @@ const AIChatBot = () => {
                 base.push(`Compare ${holdings[0].symbol} vs ${holdings[1].symbol}`);
             }
         } else {
-            base.push("Risk assessment");
+            base.push('Risk assessment');
         }
         return base;
     };
@@ -120,7 +126,7 @@ const AIChatBot = () => {
                                 </div>
                             </div>
                         )}
-                        
+
                         {messages.map((msg, idx) => (
                             <div key={idx} className={`ai-msg-row ${msg.role}`}>
                                 <div className="ai-msg-bubble">
@@ -128,7 +134,7 @@ const AIChatBot = () => {
                                 </div>
                             </div>
                         ))}
-                        
+
                         {isLoading && (
                             <div className="ai-msg-row assistant">
                                 <div className="ai-msg-bubble loading">
@@ -136,12 +142,12 @@ const AIChatBot = () => {
                                 </div>
                             </div>
                         )}
-                        
+
                         {error && <div className="ai-error">{error}</div>}
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <form className="ai-chat-input" onSubmit={handleSend}>
+                    <form className="ai-chat-input" onSubmit={(e) => handleSend(e)}>
                         <input 
                             type="text" 
                             placeholder="Type a message..." 
@@ -163,5 +169,3 @@ const AIChatBot = () => {
 };
 
 export default AIChatBot;
-
-

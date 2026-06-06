@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { fetchLatestAIReport, generateAIReport } from '../../services/api';
 import './InsightCard.css';
 
+interface AIReport {
+    summary: string;
+    content_html: string;
+}
+
 const InsightCard = () => {
-    const [report, setReport] = useState(null);
+    const [report, setReport] = useState<AIReport | null>(null);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
 

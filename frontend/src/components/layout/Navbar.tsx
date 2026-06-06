@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import NotificationBell from './NotificationBell';
@@ -24,7 +25,7 @@ const Navbar = () => {
                 <Link to="/" className="logo">
                     <span className="ldot"></span>Quotra
                 </Link>
-                
+
                 <ul className={`nl ${isMenuOpen ? 'active' : ''}`}>
                     <li><Link to="/markets" onClick={() => setIsMenuOpen(false)}>Markets</Link></li>
                     <li><Link to="/portfolio" onClick={() => setIsMenuOpen(false)}>Portfolio</Link></li>
@@ -75,7 +76,7 @@ const Navbar = () => {
                             <button className="ncta">Get started free</button>
                         </Link>
                     )}
-                    
+
                     <button className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
                         <span></span>
                         <span></span>

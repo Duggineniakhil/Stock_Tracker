@@ -1,12 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import { fetchAlerts, fetchUnreadAlertCount, markAlertAsRead, markAllAlertsAsRead } from '../../services/api';
 import './NotificationBell.css';
 
+interface AlertItem {
+    id: number;
+    priority: string;
+    is_read: boolean;
+    timestamp: string;
+    symbol: string;
+    message: string;
+}
+
 const NotificationBell = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [alerts, setAlerts] = useState([]);
+    const [alerts, setAlerts] = useState<AlertItem[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    const dropdownRef = useRef(null);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
 
     const loadNotifications = async () => {
         try {
@@ -14,8 +24,9 @@ const NotificationBell = () => {
                 fetchAlerts({ limit: 5 }),
                 fetchUnreadAlertCount()
             ]);
-            setAlerts(alertsRes.data.alerts);
-            setUnreadCount(countRes.data.count);
+
+            setAlerts(alertsRes?.data?.alerts || []);
+            setUnreadCount(countRes?.data?.count || 0);
         } catch (err) {
             console.error('Failed to load notifications', err);
         }
@@ -23,22 +34,22 @@ const NotificationBell = () => {
 
     useEffect(() => {
         loadNotifications();
-        // Refresh every minute
         const interval = setInterval(loadNotifications, 60000);
         return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
+
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleMarkAsRead = async (id) => {
+    const handleMarkAsRead = async (id: number) => {
         try {
             await markAlertAsRead(id);
             loadNotifications();
@@ -76,7 +87,7 @@ const NotificationBell = () => {
                     </div>
                     <div className="notif-list">
                         {alerts.length > 0 ? (
-                            alerts.map(alert => (
+                            alerts.map((alert) => (
                                 <div 
                                     key={alert.id} 
                                     className={`notif-item ${!alert.is_read ? 'unread' : ''}`}
@@ -95,7 +106,7 @@ const NotificationBell = () => {
                         )}
                     </div>
                     <div className="notif-footer">
-                        <button className="view-all" onClick={() => { window.location.href='/alerts'; setIsOpen(false); }}>
+                        <button className="view-all" onClick={() => { window.location.href = '/alerts'; setIsOpen(false); }}>
                             View all history
                         </button>
                     </div>

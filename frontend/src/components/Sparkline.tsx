@@ -1,13 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import { Chart, registerables } from 'chart.js';
 import { fetchStockHistory } from '../services/api';
 
 Chart.register(...registerables);
 
-const Sparkline = ({ symbol, trend, colorUp = '#00e887', colorDown = '#f05050' }) => {
-    const chartRef = useRef(null);
-    const chartInstance = useRef(null);
-    const [history, setHistory] = useState([]);
+interface PricePoint {
+    close: number;
+}
+
+interface SparklineProps {
+    symbol: string;
+    trend: 'up' | 'down';
+    colorUp?: string;
+    colorDown?: string;
+}
+
+const Sparkline = ({ symbol, trend, colorUp = '#00e887', colorDown = '#f05050' }: SparklineProps) => {
+    const chartRef = useRef<HTMLCanvasElement | null>(null);
+    const chartInstance = useRef<Chart | null>(null);
+    const [history, setHistory] = useState<PricePoint[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -35,16 +47,17 @@ const Sparkline = ({ symbol, trend, colorUp = '#00e887', colorDown = '#f05050' }
             }
 
             const ctx = chartRef.current.getContext('2d');
+            if (!ctx) return;
+
             const isTrendPositive = trend === 'up';
             const color = isTrendPositive ? colorUp : colorDown;
 
-            // Optional: You could use a gradient here too
             chartInstance.current = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: history.map((_, i) => i),
                     datasets: [{
-                        data: history.map(h => h.close),
+                        data: history.map((h) => h.close),
                         borderColor: color,
                         borderWidth: 1.5,
                         fill: false,
@@ -62,7 +75,7 @@ const Sparkline = ({ symbol, trend, colorUp = '#00e887', colorDown = '#f05050' }
                     },
                     scales: {
                         x: { display: false },
-                        y: { display: false, min: Math.min(...history.map(h => h.close)) * 0.99 }
+                        y: { display: false, min: Math.min(...history.map((h) => h.close)) * 0.99 }
                     },
                     interaction: {
                         mode: 'index',
@@ -86,7 +99,7 @@ const Sparkline = ({ symbol, trend, colorUp = '#00e887', colorDown = '#f05050' }
             {loading ? (
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '10px', color: 'var(--text-muted)' }}>...</div>
             ) : history.length > 0 ? (
-                <canvas ref={chartRef} style={{ width: '100%', height: '100%' }}></canvas>
+                <canvas ref={chartRef} style={{ width: '100%', height: '100%' }} />
             ) : (
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '10px', color: 'var(--text-muted)' }}>N/A</div>
             )}

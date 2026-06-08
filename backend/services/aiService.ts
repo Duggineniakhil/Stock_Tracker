@@ -2,8 +2,8 @@ import OpenAI from 'openai';
 import db from '../db/database';
 
 // Initialize OpenAI client only if key is present
-const aiEnabled = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here';
-const openai = aiEnabled ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+const aiEnabled = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_api_key_here';
+const openai = aiEnabled ? new OpenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
 /**
  * AI Service - Business Logic for AI interactions
@@ -14,7 +14,7 @@ const aiService = {
      */
     chat: async (userId: number, userMessage: string, portfolioContext: unknown) => {
         if (!openai) {
-            return "Quotra AI is currently in 'Limited Mode' because no OpenAI API key was found. Please add a valid key to your .env file to enable the full advisor experience.";
+            return "Quotra AI is currently in 'Limited Mode' because no AI API key was found. Please add a valid key to your .env file to enable the full advisor experience.";
         }
 
         try {

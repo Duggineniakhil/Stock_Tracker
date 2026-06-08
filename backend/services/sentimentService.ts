@@ -7,8 +7,8 @@ type SentimentResult = {
     score: number;
 };
 
-const aiEnabled = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here';
-const openai = aiEnabled ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+const aiEnabled = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_api_key_here';
+const openai = aiEnabled ? new OpenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
 /**
  * Sentiment Service - News analysis
@@ -44,7 +44,7 @@ const sentimentService = {
                 return [];
             }
 
-            // 2. No cache, call OpenAI
+            // 2. No cache, call AI provider
             const prompt = `Analyze market sentiment for ${symbol} based on these news headlines:
             ${headlines.join('\n')}
             

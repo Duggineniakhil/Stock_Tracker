@@ -11,8 +11,8 @@ const JWT_SECRET = getEnv('JWT_SECRET') || (NODE_ENV === 'test' ? 'test_jwt_secr
 const JWT_REFRESH_SECRET = getEnv('JWT_REFRESH_SECRET') || `${JWT_SECRET}_refresh`;
 const JWT_EXPIRES_IN = getEnv('JWT_EXPIRES_IN', '1h');
 const JWT_REFRESH_EXPIRES_IN = getEnv('JWT_REFRESH_EXPIRES_IN', '7d');
-const OPENAI_API_KEY = getEnv('OPENAI_API_KEY');
-const AI_MODEL = getEnv('AI_MODEL', 'gpt-4o-mini');
+const GEMINI_API_KEY = getEnv('GEMINI_API_KEY');
+const AI_MODEL = getEnv('AI_MODEL', 'gemini_flash');
 const EMAIL_HOST = getEnv('EMAIL_HOST');
 const EMAIL_PORT = Number(getEnv('EMAIL_PORT', '587'));
 const EMAIL_SECURE = getEnv('EMAIL_SECURE', 'false') === 'true';
@@ -47,7 +47,7 @@ export const config = {
     JWT_REFRESH_SECRET,
     JWT_EXPIRES_IN,
     JWT_REFRESH_EXPIRES_IN,
-    OPENAI_API_KEY,
+    GEMINI_API_KEY,
     AI_MODEL,
     EMAIL_HOST,
     EMAIL_PORT,

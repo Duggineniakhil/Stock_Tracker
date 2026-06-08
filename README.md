@@ -150,8 +150,8 @@ Ensure you have configured the following crucial environment variables:
 | `EMAIL_USER` | SMTP username for alert emails | *Required* |
 | `EMAIL_PASS` | SMTP application password | *Required* |
 | `MAX_LOGIN_ATTEMPTS` | Brute-force threshold | `5` |
-| `OPENAI_API_KEY` | Key for AI features | *Required for AI* |
-| `AI_MODEL` | OpenAI Model to use | `gpt-4o-mini` |
+| `GEMINI_API_KEY` | Key for AI features | *Required for AI* |
+| `AI_MODEL` | AI model to use | `gemini_flash` |
 
 **`frontend/.env`**
 | Variable | Description | Default / Example |

@@ -8,7 +8,7 @@ const watchlistController = {
     // Add stock to watchlist
     addToWatchlist: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const { symbol } = req.body;
 
             if (!symbol) {
@@ -41,7 +41,7 @@ const watchlistController = {
     // Get all watchlist stocks
     getWatchlist: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const watchlist = await watchlistModel.getAllStocks(userId);
 
             const watchlistWithPrices = await Promise.all(
@@ -65,7 +65,7 @@ const watchlistController = {
     // Remove stock
     removeFromWatchlist: async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user?.id;
             const { id } = req.params;
 
             const result = await watchlistModel.removeStock(userId, id);

@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">11.62% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>10/86</span>
+                <span class='fraction'>0/86</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">11.9% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>10/84</span>
+                <span class='fraction'>0/84</span>
             </div>
         
             
@@ -241,15 +241,15 @@
 <a name='L176'></a><a href='#L176'>176</a>
 <a name='L177'></a><a href='#L177'>177</a>
 <a name='L178'></a><a href='#L178'>178</a>
-<a name='L179'></a><a href='#L179'>179</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<a name='L179'></a><a href='#L179'>179</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -301,9 +301,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -365,8 +365,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -417,17 +417,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import db from '../db/database';
-import stockService from './stockService';
-import emailService from './emailService';
-import aiService from './aiService';
-import logger from '../utils/logger';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import db from '../db/database';</span>
+<span class="cstat-no" title="statement not covered" >import stockService from './stockService';</span>
+<span class="cstat-no" title="statement not covered" >import emailService from './emailService';</span>
+<span class="cstat-no" title="statement not covered" >import aiService from './aiService';</span>
+<span class="cstat-no" title="statement not covered" >import logger from '../utils/logger';</span>
 &nbsp;
-const ALERT_COOLDOWN_HOURS = 24;
+const ALERT_COOLDOWN_HOURS = <span class="cstat-no" title="statement not covered" >24;</span>
 &nbsp;
-const runAlertEngine = <span class="fstat-no" title="function not covered" >async </span>() =&gt; {
+const runAlertEngine = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async </span>() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    logger.info('--- Starting Advanced Alert Engine ---');</span>
 &nbsp;
     // 1. Get all active rules with user info
@@ -479,7 +479,7 @@ const runAlertEngine = <span class="fstat-no" title="function not covered" >asyn
     });
 };
 &nbsp;
-const evaluateRule = <span class="fstat-no" title="function not covered" >async </span>(rule: any, quote: any, rsi: number | null) =&gt; {
+const evaluateRule = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async </span>(rule: any, quote: any, rsi: number | null) =&gt; {</span>
     let triggered = <span class="cstat-no" title="statement not covered" >false;</span>
     let reason = <span class="cstat-no" title="statement not covered" >'';</span>
 &nbsp;
@@ -543,7 +543,7 @@ const evaluateRule = <span class="fstat-no" title="function not covered" >async 
     }
 };
 &nbsp;
-const triggerAlert = <span class="fstat-no" title="function not covered" >async </span>(rule: any, quote: any, reason: string) =&gt; {
+const triggerAlert = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async </span>(rule: any, quote: any, reason: string) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    logger.info(`🔔 Alert Triggered: ${rule.email} | ${rule.symbol} | ${reason}`);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    try {</span>
@@ -595,7 +595,7 @@ const triggerAlert = <span class="fstat-no" title="function not covered" >async 
     }
 };
 &nbsp;
-export = { runAlertEngine };
+<span class="cstat-no" title="statement not covered" >export = { runAlertEngine };</span>
 &nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
@@ -604,7 +604,7 @@ export = { runAlertEngine };
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-23T17:09:13.898Z
+                at 2026-06-19T13:15:56.572Z
             </div>
         <script src="../prettify.js"></script>
         <script>

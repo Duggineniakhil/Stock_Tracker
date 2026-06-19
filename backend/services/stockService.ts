@@ -54,7 +54,9 @@ const stockService = {
             const quote = await yahooFinance.quote(stockSymbol);
 
             if (!quote) {
-                throw new Error('Stock symbol not found');
+                const invalidError: any = new Error('Invalid stock symbol');
+    invalidError.statusCode = 404;
+    throw invalidError;
             }
 
             const data: StockQuoteData = {

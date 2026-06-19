@@ -13,8 +13,9 @@ const stockController = {
         } catch (error: any) {
             console.error('Error fetching stock data:', error);
 
-            if (error.message?.includes('Invalid stock symbol')) {
-                return apiError(res, 'Stock symbol not found', null, 404);
+            if (error.statusCode === 404 || error.message?.includes('Invalid stock symbol') || error.message?.includes('Stock symbol not found')) {
+                const msg = error.message?.includes('Invalid stock symbol') ? error.message : 'Stock symbol not found';
+                return apiError(res, msg, null, 404);
             }
 
             return apiError(res, `Failed to fetch stock data: ${error.message}`, null, error.statusCode || 500);

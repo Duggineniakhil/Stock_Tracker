@@ -9,21 +9,21 @@ Chart.register(...registerables);
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const [summary, setSummary] = useState(null);
-    const [healthScore, setHealthScore] = useState(null);
-    const [holdings, setHoldings] = useState([]);
+    const [summary, setSummary] = useState<any | null>(null);
+    const [healthScore, setHealthScore] = useState<number | null>(null);
+    const [holdings, setHoldings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [chartLoading, setChartLoading] = useState(false);
     
     // Chart state
-    const [history, setHistory] = useState([]);
+    const [history, setHistory] = useState<any[]>([]);
     const [range, setRange] = useState('1mo');
-    const chartInstance = useRef(null);
-    const chartRef = useRef(null);
-    const [benchmarkData, setBenchmarkData] = useState([]);
+    const chartInstance = useRef<any | null>(null);
+    const chartRef = useRef<HTMLCanvasElement | null>(null);
+    const [benchmarkData, setBenchmarkData] = useState<any[]>([]);
     const [showBenchmark, setShowBenchmark] = useState(false);
 
-    const loadHistory = async (newRange) => {
+    const loadHistory = async (newRange: string) => {
         setChartLoading(true);
         try {
             const [pRes, bRes] = await Promise.all([
@@ -181,7 +181,7 @@ const Dashboard = () => {
         }
     }, [history, chartLoading, range, showBenchmark, benchmarkData]);
 
-    const handleRangeChange = (r) => {
+    const handleRangeChange = (r: string) => {
         setRange(r);
         loadHistory(r);
     };

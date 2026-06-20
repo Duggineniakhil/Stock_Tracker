@@ -3,11 +3,11 @@ import { chatWithAI, fetchChatHistory } from '../services/api';
 import './AIAdvisor.css';
 
 const AIAdvisor = () => {
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const messagesEndRef = useRef(null);
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,7 +31,7 @@ const AIAdvisor = () => {
         scrollToBottom();
     }, [messages]);
 
-    const handleSend = async (e) => {
+    const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
 
@@ -68,7 +68,7 @@ const AIAdvisor = () => {
             <div className="advisor-header">
                 <div className="advisor-title-box">
                     <h1 className="syne">AI Advisor</h1>
-                    <p className="small-text">Intelligent market insights powered by GPT-4o</p>
+                    <p className="small-text">Intelligent market insights powered by Google Gemini</p>
                 </div>
             </div>
 

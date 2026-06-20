@@ -10,7 +10,7 @@ const Settings = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
-    const handleProfileUpdate = async (e) => {
+    const handleProfileUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
@@ -23,7 +23,7 @@ const Settings = () => {
         }
     };
 
-    const handlePasswordChange = async (e) => {
+    const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         if (passData.newPassword !== passData.confirmPassword) {
             setMessage({ type: 'error', text: 'Passwords do not match' });

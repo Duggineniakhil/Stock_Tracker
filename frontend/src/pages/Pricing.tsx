@@ -59,7 +59,7 @@ const Pricing = () => {
         }
     ];
 
-    const handleUpgrade = async (planSlug, planName) => {
+    const handleUpgrade = async (planSlug: string, planName: string) => {
         if (!user) {
             alert('Please login to upgrade your plan');
             return;

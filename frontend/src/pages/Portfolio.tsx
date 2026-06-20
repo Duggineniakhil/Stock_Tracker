@@ -8,12 +8,12 @@ Chart.register(...registerables);
 
 const Portfolio = () => {
     const navigate = useNavigate();
-    const [holdings, setHoldings] = useState([]);
-    const [allocation, setAllocation] = useState([]);
+    const [holdings, setHoldings] = useState<any[]>([]);
+    const [allocation, setAllocation] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
-    const chartRef = React.useRef(null);
-    const chartInstance = React.useRef(null);
+    const chartRef = React.useRef<HTMLCanvasElement | null>(null);
+    const chartInstance = React.useRef<any | null>(null);
     
     // Simple form state for adding
     const [newAsset, setNewAsset] = useState({ symbol: '', quantity: '', buyPrice: '' });
@@ -67,7 +67,7 @@ const Portfolio = () => {
         }
     }, [allocation]);
 
-    const handleAdd = async (e) => {
+    const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             const today = new Date().toISOString().slice(0, 10);
@@ -83,7 +83,7 @@ const Portfolio = () => {
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = async (id: any) => {
         if (!window.confirm('Delete this holding?')) return;
         try {
             await deleteHolding(id);

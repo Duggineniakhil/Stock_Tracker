@@ -3,7 +3,7 @@ import { fetchAlertRules, createAlertRule, deleteAlertRule } from '../services/a
 import './Alerts.css';
 
 const Alerts = () => {
-    const [rules, setRules] = useState([]);
+    const [rules, setRules] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAdd, setShowAdd] = useState(false);
     const [newRule, setNewRule] = useState({
@@ -30,7 +30,7 @@ const Alerts = () => {
         loadRules();
     }, []);
 
-    const handleAddRule = async (e) => {
+    const handleAddRule = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             await createAlertRule(newRule);
@@ -43,7 +43,7 @@ const Alerts = () => {
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = async (id: any) => {
         if (!window.confirm('Delete this alert rule?')) return;
         try {
             await deleteAlertRule(id);

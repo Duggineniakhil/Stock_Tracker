@@ -7,9 +7,9 @@ import './Landing.css';
 
 const Landing = () => {
     const { user } = useAuth();
-    const [openFaq, setOpenFaq] = useState(0);
+    const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-    const toggleFaq = (index) => {
+    const toggleFaq = (index: number) => {
         setOpenFaq(openFaq === index ? null : index);
     };
 
@@ -134,7 +134,7 @@ const Landing = () => {
                         </div>
                         <div className="card">
                             <h3 className="h2" style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--accent-green)' }}>◈ AI Advisor</h3>
-                            <p className="muted" style={{ fontSize: '14px' }}>Chat with your personal market expert powered by GPT-4o for deep portfolio insights.</p>
+                            <p className="muted" style={{ fontSize: '14px' }}>Chat with your personal market expert powered by Google Gemini for deep portfolio insights.</p>
                         </div>
                         <div className="card">
                             <h3 className="h2" style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--accent-green)' }}>⊠ Health Analysis</h3>

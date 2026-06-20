@@ -1,6 +1,6 @@
 <div align="center">
   <h1>Quotra</h1>
-  <p>A comprehensive, full-stack stock portfolio and market tracking application - <b>Simplified and AI-Powered</b>. Built with Node.js, Express, React, SQLite, and OpenAI.</p>
+  <p>A comprehensive, full-stack stock portfolio and market tracking application - <b>Simplified and AI-Powered</b>. Built with Node.js, Express, React, SQLite, and Google Gemini.</p>
 
   ![Status](https://img.shields.io/badge/Status-v1.2.0-blue)
   ![Node.js](https://img.shields.io/badge/Node.js-v24+-green)
@@ -28,7 +28,7 @@
 - **Dark Mode UI:** A professional and sleek dark-themed interface crafted for a modern user experience with PWA support for mobile installation.
 
 ### AI-Powered Insights
-- **AI Advisor:** A GPT-4o powered chatbot that understands your portfolio and answers market questions.
+- **AI Advisor:** A Google Gemini powered chatbot that understands your portfolio and answers market questions.
 - **Sentiment Analysis:** Real-time news sentiment (Bullish/Bearish) mapped to your watchlist.
 - **Smart Reports:** Auto-generated portfolio health summaries highlighting diversification and risks.
 - **Smart Alerts:** AI-generated plain-English explanations attached to automated price alerts.

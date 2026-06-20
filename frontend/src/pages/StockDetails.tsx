@@ -10,18 +10,18 @@ Chart.register(...registerables);
 const StockDetails = () => {
     const { symbol } = useParams();
     const navigate = useNavigate();
-    const [stock, setStock] = useState(null);
-    const [history, setHistory] = useState([]);
+    const [stock, setStock] = useState<any | null>(null);
+    const [history, setHistory] = useState<any[]>([]);
     const [range, setRange] = useState('1mo');
     const [loading, setLoading] = useState(true);
     const [chartLoading, setChartLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const chartRef = useRef(null);
-    const chartInstance = useRef(null);
+    const [error, setError] = useState<string | null>(null);
+    const chartRef = useRef<HTMLCanvasElement | null>(null);
+    const chartInstance = useRef<any | null>(null);
     const [indicators, setIndicators] = useState({ sma: false, rsi: false });
 
     // Technical Analysis Helpers
-    const calculateSMA = (data, period) => {
+    const calculateSMA = (data: number[], period: number) => {
         let result = [];
         for (let i = 0; i < data.length; i++) {
             if (i < period - 1) {
@@ -34,7 +34,7 @@ const StockDetails = () => {
         return result;
     };
 
-    const calculateRSI = (data, period = 14) => {
+    const calculateRSI = (data: number[], period = 14) => {
         let result = [];
         let gains = [];
         let losses = [];
@@ -69,7 +69,7 @@ const StockDetails = () => {
         }
     };
 
-    const loadHistory = async (newRange) => {
+    const loadHistory = async (newRange: string) => {
         setChartLoading(true);
         try {
             const res = await fetchStockHistory(symbol, newRange);
@@ -198,7 +198,7 @@ const StockDetails = () => {
         }
     }, [history, chartLoading, stock, indicators]);
 
-    const handleRangeChange = (r) => {
+    const handleRangeChange = (r: string) => {
         setRange(r);
         loadHistory(r);
     };

@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchWatchlist, fetchStockData, addToWatchlist } from '../services/api';
+import { fetchWatchlist, fetchStockData, addToWatchlist, fetchTrending } from '../services/api';
 import SentimentBadge from '../components/ai/SentimentBadge';
 import Sparkline from '../components/Sparkline';
 import './Markets.css';
 
 const Markets = () => {
     const navigate = useNavigate();
-    const [watchlist, setWatchlist] = useState([]);
+    const [watchlist, setWatchlist] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchResult, setSearchResult] = useState(null);
+    const [searchResult, setSearchResult] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
     const [searching, setSearching] = useState(false);
-    const [recentSearches, setRecentSearches] = useState([]);
-    const [trending, setTrending] = useState([]);
+    const [recentSearches, setRecentSearches] = useState<string[]>([]);
+    const [trending, setTrending] = useState<any[]>([]);
 
     const loadData = async () => {
         try {
@@ -36,13 +36,13 @@ const Markets = () => {
         setRecentSearches(saved);
     }, []);
 
-    const saveRecentSearch = (symbol) => {
+    const saveRecentSearch = (symbol: string) => {
         const updated = [symbol, ...recentSearches.filter(s => s !== symbol)].slice(0, 5);
         setRecentSearches(updated);
         localStorage.setItem('recentSearches', JSON.stringify(updated));
     };
 
-    const handleSearch = async (e) => {
+    const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value.toUpperCase();
         setSearchQuery(query);
         
@@ -61,7 +61,7 @@ const Markets = () => {
         }
     };
 
-    const handleAddToWatchlist = async (symbol) => {
+    const handleAddToWatchlist = async (symbol: string) => {
         try {
             await addToWatchlist(symbol);
             setSearchResult(null);

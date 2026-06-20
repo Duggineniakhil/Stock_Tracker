@@ -3,8 +3,8 @@ import { fetchAlerts, fetchPortfolio, fetchStockSentiment } from '../services/ap
 import './Insights.css';
 
 const Insights = () => {
-    const [alerts, setAlerts] = useState([]);
-    const [signals, setSignals] = useState([]);
+    const [alerts, setAlerts] = useState<any[]>([]);
+    const [signals, setSignals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -29,7 +29,7 @@ const Insights = () => {
 
                 const sentiments = await Promise.all(symbolsToAnalyze.map(sym => fetchStockSentiment(sym).catch(() => null)));
                 
-                const generatedSignals = [];
+                const generatedSignals: any[] = [];
                 sentiments.forEach(res => {
                     if (res && res.success && res.details) {
                         res.details.forEach(detail => {

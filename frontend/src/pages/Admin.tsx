@@ -9,7 +9,7 @@ const Admin = () => {
         totalHoldings: 0,
         planDistribution: { free: 0, student: 0, pro: 0 }
     });
-    const [users, setUsers] = useState([]);
+    const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -89,7 +89,7 @@ const Admin = () => {
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan="5" className="muted" style={{ textAlign: 'center', padding: 'var(--sp-24)' }}>No recent users</td>
+                                    <td colSpan={5} className="muted" style={{ textAlign: 'center', padding: 'var(--sp-24)' }}>No recent users</td>
                                 </tr>
                             )}
                         </tbody>

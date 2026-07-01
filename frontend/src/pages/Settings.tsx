@@ -16,7 +16,7 @@ const Settings = () => {
         try {
             await updateProfile(profileData);
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
-        } catch (err) {
+        } catch (err: any) {
             setMessage({ type: 'error', text: err.response?.data?.message || 'Update failed' });
         } finally {
             setLoading(false);
@@ -34,7 +34,7 @@ const Settings = () => {
             await changePassword({ currentPassword: passData.currentPassword, newPassword: passData.newPassword });
             setMessage({ type: 'success', text: 'Password changed successfully!' });
             setPassData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        } catch (err) {
+        } catch (err: any) {
             setMessage({ type: 'error', text: err.response?.data?.message || 'Password change failed' });
         } finally {
             setLoading(false);

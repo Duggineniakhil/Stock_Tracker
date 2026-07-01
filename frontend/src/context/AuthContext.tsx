@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import api from '../services/api';
+import { apiLogin, apiRegister, googleLogin, apiLogout } from '../services/api';
 import { auth, db, googleProvider } from '../firebase/config';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -56,7 +56,7 @@ const unwrapAuthPayload = (res: any) => {
     return null;
 };
 
-export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+export const AuthProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const [user, setUser] = useState<BackendUser | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     };
 
     const syncFirebaseUserWithBackend = async (firebaseUser: any) => {
-        const res = await api.googleLogin({
+        const res = await googleLogin({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
             name: firebaseUser.displayName,
@@ -124,14 +124,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     }, []);
 
     const login = async (email: string, password: string) => {
-        const res = await api.login(email, password);
+        const res = await apiLogin(email, password);
         const authUser = persistBackendAuth(res);
         setUser(authUser);
         return authUser;
     };
 
     const register = async (name: string, email: string, password: string) => {
-        const res = await api.register(name, email, password);
+        const res = await apiRegister(name, email, password);
         const authUser = persistBackendAuth(res);
         setUser(authUser);
         return authUser;
@@ -152,7 +152,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
 
     const logout = async () => {
         try {
-            await api.logout();
+            await apiLogout();
             await signOut(auth);
             clearStoredAuth();
             setUser(null);

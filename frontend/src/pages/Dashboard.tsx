@@ -80,6 +80,7 @@ const Dashboard = () => {
             }
 
             const ctx = chartRef.current.getContext('2d');
+            if (!ctx) return;
             const gradient = ctx.createLinearGradient(0, 0, 0, 120);
             
             // Determine if overall history trend is positive
@@ -127,7 +128,9 @@ const Dashboard = () => {
                             callbacks: {
                                 label: (context) => {
                                     const val = context.parsed.y;
-                                    return `${context.dataset.label}: ${context.dataset.label.includes('Benchmark') ? val.toFixed(2) + '%' : '$' + val.toLocaleString()}`;
+                                    const label = context.dataset.label || '';
+                                    if (val === null) return '';
+                                    return `${label}: ${label.includes('Benchmark') ? val.toFixed(2) + '%' : '$' + val.toLocaleString()}`;
                                 }
                             }
                         }
@@ -174,7 +177,7 @@ const Dashboard = () => {
                     }
                 ];
                 chartInstance.current.options.scales.y.display = true;
-                chartInstance.current.options.scales.y.ticks = { callback: (v) => v + '%' };
+                chartInstance.current.options.scales.y.ticks = { callback: (v: any) => v + '%' };
             }
 
             chartInstance.current.update();
@@ -248,7 +251,7 @@ const Dashboard = () => {
                     <div className="stat-card reveal" style={{ animationDelay: '0.3s' }}>
                         <div className="stat-label">Health Score</div>
                         <div className="stat-value">
-                            <span className={healthScore > 70 ? 'up' : healthScore > 40 ? 'warning' : 'dn'}>
+                            <span className={healthScore !== null && healthScore > 70 ? 'up' : healthScore !== null && healthScore > 40 ? 'warning' : 'dn'}>
                                 {healthScore !== null ? healthScore : '--'}
                             </span>
                             <span className="unit">/100</span>

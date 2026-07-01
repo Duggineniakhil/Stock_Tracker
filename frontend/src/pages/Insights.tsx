@@ -20,19 +20,19 @@ const Insights = () => {
                 
                 // Get top 2 holdings by value
                 const topSymbols = holdings
-                    .sort((a, b) => (b.currentPrice * b.quantity) - (a.currentPrice * a.quantity))
+                    .sort((a: any, b: any) => (b.currentPrice * b.quantity) - (a.currentPrice * a.quantity))
                     .slice(0, 2)
-                    .map(h => h.symbol);
+                    .map((h: any) => h.symbol);
 
                 // If portfolio is empty, fallback to some popular symbols
                 const symbolsToAnalyze = topSymbols.length > 0 ? topSymbols : ['AAPL', 'MSFT'];
 
-                const sentiments = await Promise.all(symbolsToAnalyze.map(sym => fetchStockSentiment(sym).catch(() => null)));
+                const sentiments = await Promise.all(symbolsToAnalyze.map((sym: string) => fetchStockSentiment(sym).catch(() => null)));
                 
                 const generatedSignals: any[] = [];
                 sentiments.forEach(res => {
                     if (res && res.success && res.details) {
-                        res.details.forEach(detail => {
+                        res.details.forEach((detail: any) => {
                             let tagClass = 'tag-info';
                             if (detail.sentiment === 'bullish') tagClass = 'tag-bull';
                             if (detail.sentiment === 'bearish') tagClass = 'tag-warn';

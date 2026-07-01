@@ -33,7 +33,7 @@ const Register = () => {
         try {
             await register(name, email, password);
             navigate('/dashboard');
-        } catch (err) {
+        } catch (err: any) {
             const msg = err?.response?.data?.error?.message
                 || err?.response?.data?.message
                 || err?.message

@@ -9,7 +9,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-    const theme: 'dark' = 'dark';
+    const theme = 'dark' as const;
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', 'dark');

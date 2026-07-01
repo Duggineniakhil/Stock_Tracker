@@ -21,7 +21,7 @@ axiosInstance.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       if (!config.headers) {
-        config.headers = {};
+        config.headers = {} as any;
       }
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -195,10 +195,6 @@ export const fetchLatestAIReport = api.fetchLatestAIReport;
 export const fetchAdminStats = api.fetchAdminStats;
 export const fetchRecentUsers = api.fetchRecentUsers;
 
-axiosInstance.login = api.login;
-axiosInstance.register = api.register;
-axiosInstance.googleLogin = api.googleLogin;
-axiosInstance.refreshToken = api.refreshToken;
-axiosInstance.logout = api.logout;
+
 
 export default axiosInstance;

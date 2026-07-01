@@ -44,6 +44,7 @@ const Portfolio = () => {
             }
 
             const ctx = chartRef.current.getContext('2d');
+            if (!ctx) return;
             chartInstance.current = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -75,7 +76,7 @@ const Portfolio = () => {
             setNewAsset({ symbol: '', quantity: '', buyPrice: '' });
             setShowAddForm(false);
             loadData();
-        } catch (err) {
+        } catch (err: any) {
             const message = err?.response?.data?.message
                 || err?.response?.data?.errors?.[0]?.message
                 || 'Failed to add asset';

@@ -22,7 +22,7 @@ const StockDetails = () => {
 
     // Technical Analysis Helpers
     const calculateSMA = (data: number[], period: number) => {
-        let result = [];
+        const result = [];
         for (let i = 0; i < data.length; i++) {
             if (i < period - 1) {
                 result.push(null);
@@ -35,9 +35,9 @@ const StockDetails = () => {
     };
 
     const calculateRSI = (data: number[], period = 14) => {
-        let result = [];
-        let gains = [];
-        let losses = [];
+        const result = [];
+        const gains = [];
+        const losses = [];
         for (let i = 1; i < data.length; i++) {
             const diff = data[i] - data[i - 1];
             gains.push(diff > 0 ? diff : 0);
@@ -62,7 +62,7 @@ const StockDetails = () => {
 
     const loadStockData = async () => {
         try {
-            const res = await fetchStockData(symbol);
+            const res = await fetchStockData(symbol!);
             setStock(res.data);
         } catch (err) {
             console.error('Error fetching stock details:', err);
@@ -72,7 +72,7 @@ const StockDetails = () => {
     const loadHistory = async (newRange: string) => {
         setChartLoading(true);
         try {
-            const res = await fetchStockHistory(symbol, newRange);
+            const res = await fetchStockHistory(symbol!, newRange);
             setHistory(res.data);
         } catch (err) {
             console.error('Error fetching history:', err);
@@ -93,6 +93,7 @@ const StockDetails = () => {
             }
 
             const ctx = chartRef.current.getContext('2d');
+            if (!ctx) return;
             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
             const color = stock?.change >= 0 ? '0, 232, 135' : '240, 80, 80';
             gradient.addColorStop(0, `rgba(${color}, 0.2)`);
@@ -132,8 +133,9 @@ const StockDetails = () => {
                             displayColors: true,
                             callbacks: {
                                 label: (context) => {
-                                    const val = context.parsed.y.toFixed(2);
-                                    return `${context.dataset.label}: ${context.dataset.label === 'RSI' ? val : '$' + val}`;
+                                    const val = context.parsed.y;
+                                    if (val === null) return '';
+                                    return `${context.dataset.label}: ${context.dataset.label === 'RSI' ? val.toFixed(2) : '$' + val.toFixed(2)}`;
                                 }
                             }
                         }

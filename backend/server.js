@@ -1,2 +1,1 @@
-require('tsx/cjs');
-require('./server.ts');
+require('./dist/server.js');

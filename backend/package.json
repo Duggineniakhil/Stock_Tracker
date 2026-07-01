@@ -4,8 +4,10 @@
   "description": "Backend API for stock tracking dashboard",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node server.js",
+    "prestart": "if [ ! -f dist/server.js ]; then npm run build; fi",
     "build": "tsc && node scripts/copy-runtime-assets.js",
+    "postinstall": "npm rebuild sqlite3 --build-from-source || true",
     "dev": "nodemon --exec tsx server.ts",
     "worker": "node dist/alertWorker.js",
     "test": "jest --coverage",

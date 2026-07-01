@@ -209,6 +209,7 @@ h2, .h2 {
 .g-text { 
   background: linear-gradient(135deg, var(--accent-green) 0%, #00bcff 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .muted { color: var(--text-muted); }

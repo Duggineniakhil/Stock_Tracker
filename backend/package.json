@@ -4,10 +4,10 @@
   "description": "Backend API for stock tracking dashboard",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node dist/server.js",
     "build": "tsc && node scripts/copy-runtime-assets.js",
     "dev": "nodemon --exec tsx server.ts",
-    "worker": "tsx alertWorker.ts",
+    "worker": "node dist/alertWorker.js",
     "test": "jest --coverage",
     "test:unit": "jest tests/unit --coverage",
     "test:integration": "jest tests/integration",

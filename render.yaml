@@ -3,7 +3,7 @@ services:
     name: stock-tracker-backend
     runtime: node
     rootDir: backend
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci && npm rebuild sqlite3 --build-from-source && npm run build
     startCommand: npm start
     healthCheckPath: /api/v1/health
     envVars:

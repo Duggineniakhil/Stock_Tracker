@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { fetchPortfolioSummary, fetchPortfolio, fetchPortfolioHistory, fetchStockHistory, fetchPortfolioHealth } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import InsightCard from '../components/ai/InsightCard';
@@ -13,6 +14,7 @@ const Dashboard = () => {
     const [healthScore, setHealthScore] = useState<number | null>(null);
     const [holdings, setHoldings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [chartLoading, setChartLoading] = useState(false);
     
     // Chart state
@@ -28,7 +30,7 @@ const Dashboard = () => {
         try {
             const [pRes, bRes] = await Promise.all([
                 fetchPortfolioHistory(newRange),
-                fetchStockHistory('^GSPC', newRange === '1w' ? '5d' : newRange === '1d' ? '1d' : newRange)
+                fetchStockHistory('^GSPC', newRange)
             ]);
             setHistory(pRes.data || []);
             setBenchmarkData(bRes.data || []);
@@ -64,12 +66,18 @@ const Dashboard = () => {
                 loadHistory(range);
             } catch (err) {
                 console.error('Failed to fetch dashboard data', err);
+                setLoadError("We couldn't load your portfolio right now. Please refresh the page to try again.");
             } finally {
                 setLoading(false);
             }
         };
 
         getDashboardData();
+
+        return () => {
+            chartInstance.current?.destroy();
+            chartInstance.current = null;
+        };
     }, []);
 
     // Render Chart
@@ -191,10 +199,11 @@ const Dashboard = () => {
 
     if (loading) return <div className="page-loader">Loading Dashboard...</div>;
 
-    const totalValue = summary?.totalValue || 0;
-    const totalChange = summary?.totalChange || 0;
-    const totalChangePercent = summary?.totalChangePercent || 0;
-    const isPositive = totalChange >= 0;
+    const totalValue = summary?.totalCurrentValue || 0;
+    const totalReturnPercent = summary?.totalProfitLossPercent || 0;
+    const isPositive = totalReturnPercent >= 0;
+    const hasHoldings = holdings.length > 0;
+    const scoreClass = healthScore === null ? 'muted' : healthScore > 70 ? 'up' : healthScore > 40 ? 'warning' : 'dn';
 
     return (
         <div className="dashboard-container">
@@ -205,6 +214,8 @@ const Dashboard = () => {
                     <span className="g-text">At a Glance.</span>
                 </h1>
             </header>
+
+            {loadError && <div className="alert-banner error" role="alert">{loadError}</div>}
 
         <div className="db-wrap reveal" style={{ maxWidth: '800px', marginBottom: 'var(--sp-64)' }}>
                 <div className="db-bar">
@@ -222,27 +233,34 @@ const Dashboard = () => {
                             <div className="bal-lbl">Total portfolio value</div>
                             <div className="bal-val">
                                 ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                <span className={`bal-ch ${isPositive ? 'up' : 'dn'}`}>
-                                    {isPositive ? '+' : ''}{totalChangePercent.toFixed(2)}%
-                                </span>
+                                {hasHoldings && (
+                                    <span className={`bal-ch ${isPositive ? 'up' : 'dn'}`} title="Total return since purchase">
+                                        {isPositive ? '+' : ''}{totalReturnPercent.toFixed(2)}%
+                                        <span className="small-text muted"> total return</span>
+                                    </span>
+                                )}
                             </div>
                         </div>
                         <div className="tabs">
                             <button 
                                 className={`tab benchmark-toggle ${showBenchmark ? 'a' : ''}`}
                                 onClick={() => setShowBenchmark(!showBenchmark)}
+                                aria-pressed={showBenchmark}
+                                disabled={!hasHoldings}
                                 style={{ marginRight: 'var(--sp-12)', fontSize: '10px' }}
                             >
                                 VS S&P 500
                             </button>
-                            {['1d', '1w', '1mo', '1y'].map(r => (
+                            {['1w', '1mo', '6mo', '1y'].map(r => (
                                 <button 
                                     key={r} 
                                     className={`tab ${range === r ? 'a' : ''}`}
                                     onClick={() => handleRangeChange(r)}
+                                    aria-pressed={range === r}
+                                    disabled={!hasHoldings}
                                     style={{ textTransform: 'uppercase' }}
                                 >
-                                    {r}
+                                    {r === '1mo' ? '1M' : r === '6mo' ? '6M' : r.toUpperCase()}
                                 </button>
                             ))}
                         </div>
@@ -250,41 +268,49 @@ const Dashboard = () => {
                     
                     <div className="stat-card reveal" style={{ animationDelay: '0.3s' }}>
                         <div className="stat-label">Health Score</div>
-                        <div className="stat-value">
-                            <span className={healthScore !== null && healthScore > 70 ? 'up' : healthScore !== null && healthScore > 40 ? 'warning' : 'dn'}>
-                                {healthScore !== null ? healthScore : '--'}
-                            </span>
-                            <span className="unit">/100</span>
-                        </div>
+                        {hasHoldings ? (
+                            <div className="stat-value">
+                                <span className={scoreClass}>{healthScore ?? '--'}</span>
+                                <span className="unit">/100</span>
+                            </div>
+                        ) : (
+                            <div className="small-text">Add holdings to get a score</div>
+                        )}
                     </div>
 
                     <div className="chart-box" style={{ height: '120px', position: 'relative' }}>
                         <canvas ref={chartRef}></canvas>
                         {chartLoading && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--text-muted)' }}>Updating...</div>}
-                        {!chartLoading && history.length === 0 && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--text-muted)' }}>No history data</div>}
+                        {!chartLoading && history.length === 0 && (
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'var(--text-muted)', textAlign: 'center' }}>
+                                {hasHoldings ? 'No price history for this range yet' : 'Your performance chart will appear here'}
+                            </div>
+                        )}
                     </div>
 
                     <div className="sec-label">Top Holdings</div>
                     <div className="scards">
-                        {holdings.length > 0 ? holdings.map((h, i) => (
-                            <div className="sc" key={i}>
+                        {hasHoldings ? holdings.map((h, i) => (
+                            <Link className="sc" key={h.id || i} to={`/stock/${h.symbol}`} aria-label={`View ${h.symbol} details`}>
                                 <div className="sc-sym">{h.symbol}</div>
                                 <div className="sc-nm">{h.quantity} shares</div>
                                 <div className="sc-px">${h.currentPrice?.toFixed(2)}</div>
-                                <div className={`sc-ch ${h.change >= 0 ? 'up' : 'dn'}`}>
-                                    {h.change >= 0 ? '+' : ''}{h.changePercent?.toFixed(2)}%
+                                <div className={`sc-ch ${h.profitLossPercent >= 0 ? 'up' : 'dn'}`} title="Total return since purchase">
+                                    {h.profitLossPercent >= 0 ? '+' : ''}{h.profitLossPercent?.toFixed(2)}%
                                 </div>
-                            </div>
+                            </Link>
                         )) : (
-                            <div className="card muted" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 'var(--sp-32)' }}>
-                                No holdings yet. Start by adding an asset in Portfolio.
+                            <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+                                <strong>Your portfolio is empty</strong>
+                                <span>Add the stocks you own to track their value, performance and health score.</span>
+                                <Link to="/portfolio?add=1" className="btn btn-primary">+ Add your first holding</Link>
                             </div>
                         )}
                     </div>
                 </div>
 
                 <div className="db-sidebar reveal">
-                    <InsightCard />
+                    <InsightCard hasHoldings={hasHoldings} />
                 </div>
             </div>
         </div>

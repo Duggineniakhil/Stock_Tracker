@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchWatchlist, fetchStockData, addToWatchlist, fetchTrending } from '../services/api';
+import { fetchWatchlist, fetchStockData, addToWatchlist, removeFromWatchlist, fetchTrending } from '../services/api';
 import SentimentBadge from '../components/ai/SentimentBadge';
 import Sparkline from '../components/Sparkline';
 import './Markets.css';
+
+const SEARCH_DEBOUNCE_MS = 400;
+
+const formatPercent = (value?: number) =>
+    typeof value === 'number' ? `${value >= 0 ? '+' : ''}${value.toFixed(2)}%` : '—';
 
 const Markets = () => {
     const navigate = useNavigate();
     const [watchlist, setWatchlist] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResult, setSearchResult] = useState<any | null>(null);
+    const [searchStatus, setSearchStatus] = useState<'idle' | 'searching' | 'done'>('idle');
     const [loading, setLoading] = useState(true);
-    const [searching, setSearching] = useState(false);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [trending, setTrending] = useState<any[]>([]);
+    const latestQuery = useRef('');
 
     const loadData = async () => {
         try {
@@ -21,10 +29,12 @@ const Markets = () => {
                 fetchWatchlist(),
                 fetchTrending()
             ]);
-            setWatchlist(wRes.data);
-            setTrending(tRes.data);
+            setWatchlist(wRes.data || []);
+            setTrending(tRes.data || []);
+            setLoadError(null);
         } catch (err) {
             console.error('Error fetching market data:', err);
+            setLoadError('We couldn\'t load market data right now. Please refresh the page to try again.');
         } finally {
             setLoading(false);
         }
@@ -36,52 +46,74 @@ const Markets = () => {
         setRecentSearches(saved);
     }, []);
 
+    // Debounced symbol lookup; responses for outdated queries are ignored
+    useEffect(() => {
+        const query = searchQuery.trim();
+        latestQuery.current = query;
+
+        if (query.length < 1) {
+            setSearchResult(null);
+            setSearchStatus('idle');
+            return;
+        }
+
+        setSearchStatus('searching');
+        const timer = setTimeout(async () => {
+            try {
+                const res = await fetchStockData(query);
+                if (latestQuery.current === query) setSearchResult(res.data);
+            } catch {
+                if (latestQuery.current === query) setSearchResult(null);
+            } finally {
+                if (latestQuery.current === query) setSearchStatus('done');
+            }
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     const saveRecentSearch = (symbol: string) => {
         const updated = [symbol, ...recentSearches.filter(s => s !== symbol)].slice(0, 5);
         setRecentSearches(updated);
         localStorage.setItem('recentSearches', JSON.stringify(updated));
     };
 
-    const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const query = e.target.value.toUpperCase();
-        setSearchQuery(query);
-        
-        if (query.length > 1) {
-            setSearching(true);
-            try {
-                const res = await fetchStockData(query);
-                setSearchResult(res.data);
-            } catch (err) {
-                setSearchResult(null);
-            } finally {
-                setSearching(false);
-            }
-        } else {
-            setSearchResult(null);
-        }
+    const openStock = (symbol: string) => {
+        saveRecentSearch(symbol);
+        navigate(`/stock/${symbol}`);
     };
 
+    const watchedSymbols = new Set(watchlist.map(w => w.symbol));
+
     const handleAddToWatchlist = async (symbol: string) => {
+        setNotice(null);
         try {
             await addToWatchlist(symbol);
             setSearchResult(null);
             setSearchQuery('');
+            setNotice({ type: 'success', text: `${symbol} added to your watchlist.` });
             loadData();
-        } catch (err) {
-            alert('Failed to add to watchlist');
+        } catch (err: any) {
+            const status = err?.response?.status;
+            setNotice({
+                type: 'error',
+                text: status === 409 ? `${symbol} is already in your watchlist.` : `Couldn't add ${symbol} to your watchlist. Please try again.`,
+            });
+        }
+    };
+
+    const handleRemove = async (e: React.MouseEvent, item: any) => {
+        e.stopPropagation();
+        setNotice(null);
+        try {
+            await removeFromWatchlist(item.id);
+            setWatchlist(prev => prev.filter(w => w.id !== item.id));
+        } catch {
+            setNotice({ type: 'error', text: `Couldn't remove ${item.symbol}. Please try again.` });
         }
     };
 
     if (loading) return <div className="page-loader">Scanning Markets...</div>;
-
-    const defaultStocks = [
-        { symbol: 'AAPL', name: 'Apple Inc.', price: 189.42, change: 1.24, trend: 'up' },
-        { symbol: 'TSLA', name: 'Tesla Inc.', price: 242.18, change: -0.87, trend: 'dn' },
-        { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 875.40, change: 3.12, trend: 'up' },
-        { symbol: 'MSFT', name: 'Microsoft Corp.', price: 378.90, change: 0.63, trend: 'up' },
-        { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 141.55, change: 2.01, trend: 'up' },
-        { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 183.75, change: -0.44, trend: 'dn' }
-    ];
 
     return (
         <div className="markets-page">
@@ -90,32 +122,55 @@ const Markets = () => {
                 <h1 className="h1" style={{ margin: 0 }}>Market<br /><span className="g-text">Explorer.</span></h1>
             </header>
 
+            {loadError && <div className="alert-banner error" role="alert">{loadError}</div>}
+            {notice && <div className={`alert-banner ${notice.type}`} role="status">{notice.text}</div>}
+
             <div className="search-bar">
-                <input 
-                    type="text" 
-                    placeholder="Search by symbol (e.g., RELIANCE, MSFT)..." 
+                <label htmlFor="market-search" className="sr-only">Search by stock symbol</label>
+                <input
+                    id="market-search"
+                    type="search"
+                    placeholder="Search by symbol (e.g. AAPL, MSFT, RELIANCE.NS)"
                     value={searchQuery}
-                    onChange={handleSearch}
+                    autoComplete="off"
+                    onChange={(e) => setSearchQuery(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && searchResult) openStock(searchResult.symbol);
+                        if (e.key === 'Escape') setSearchQuery('');
+                    }}
                 />
-                {(searching || searchResult) && (
-                    <div className="search-result-card">
-                        {searching ? (
+                {searchStatus !== 'idle' && (
+                    <div className="search-result-card" role="status">
+                        {searchStatus === 'searching' ? (
                             <div className="muted">Searching...</div>
                         ) : searchResult ? (
                             <>
-                                <div>
-                                    <div style={{ fontFamily: "var(--font-site)", fontWeight: 800 }}>{searchResult.symbol}</div>
+                                <button className="search-result-info" onClick={() => openStock(searchResult.symbol)}>
+                                    <div style={{ fontFamily: 'var(--font-site)', fontWeight: 800 }}>{searchResult.symbol}</div>
                                     <div className="small-text">{searchResult.name || searchResult.companyName}</div>
-                                </div>
+                                </button>
                                 <div style={{ display: 'flex', gap: 'var(--sp-16)', alignItems: 'center' }}>
-                                    <div style={{ fontFamily: "var(--font-site)", fontWeight: 700 }}>${(searchResult.currentPrice || searchResult.price)?.toFixed(2)}</div>
-                                    <button className="btn btn-primary" style={{ height: '36px', padding: '0 var(--sp-16)', fontSize: '12px' }} onClick={() => handleAddToWatchlist(searchResult.symbol)}>
-                                        + Watchlist
-                                    </button>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontFamily: 'var(--font-site)', fontWeight: 700 }}>
+                                            ${(searchResult.currentPrice || searchResult.price)?.toFixed(2)}
+                                        </div>
+                                        <div className={`small-text ${searchResult.changePercent >= 0 ? 'up' : 'dn'}`}>
+                                            {formatPercent(searchResult.changePercent)}
+                                        </div>
+                                    </div>
+                                    {watchedSymbols.has(searchResult.symbol) ? (
+                                        <span className="small-text accent-text">✓ In watchlist</span>
+                                    ) : (
+                                        <button className="btn btn-primary btn-sm" onClick={() => handleAddToWatchlist(searchResult.symbol)}>
+                                            + Watchlist
+                                        </button>
+                                    )}
                                 </div>
                             </>
                         ) : (
-                            <div className="muted">No results found</div>
+                            <div className="muted">
+                                No stock found for "{searchQuery.trim()}". Check the ticker symbol — non-US stocks need an exchange suffix (e.g. RELIANCE.NS).
+                            </div>
                         )}
                     </div>
                 )}
@@ -123,15 +178,15 @@ const Markets = () => {
 
             {trending.length > 0 && !searchQuery && (
                 <div className="trending-section reveal">
-                    <div className="sec-label">Trending Assets</div>
+                    <div className="sec-label">Trending Today</div>
                     <div className="trending-list">
                         {trending.map(s => (
-                            <div key={s.symbol} className="trending-pill" onClick={() => navigate(`/stock/${s.symbol}`)}>
+                            <button key={s.symbol} className="trending-pill" onClick={() => openStock(s.symbol)}>
                                 <span className="p-sym">{s.symbol}</span>
                                 <span className={`p-ch ${s.changePercent >= 0 ? 'up' : 'dn'}`}>
-                                    {s.changePercent >= 0 ? '+' : ''}{s.changePercent?.toFixed(1)}%
+                                    {formatPercent(s.changePercent)}
                                 </span>
-                            </div>
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -153,35 +208,58 @@ const Markets = () => {
                 </div>
             )}
 
-            <div className="sec-label">Active Watchlist</div>
-            <div className="mkt-grid">
-                {[...defaultStocks, ...watchlist.map(w => ({ ...w, trend: w.change >= 0 ? 'up' : 'dn' }))].map((s, i) => (
-                    <div 
-                        className="card clickable" 
-                        key={s.id || s.symbol || i} 
-                        style={{ padding: 'var(--sp-24)' }}
-                        onClick={() => {
-                            saveRecentSearch(s.symbol);
-                            navigate(`/stock/${s.symbol}`);
-                        }}
-                    >
-                        <div className="mk-header">
-                            <div>
-                                <div className="mk-symbol">{s.symbol}</div>
-                                <div className="mk-name">{s.name || s.companyName || 'Stock Asset'}</div>
-                                <SentimentBadge symbol={s.symbol} />
+            <div className="sec-label">My Watchlist</div>
+            {watchlist.length > 0 ? (
+                <div className="mkt-grid">
+                    {watchlist.map((s) => {
+                        const trend = s.changePercent >= 0 ? 'up' : 'dn';
+                        return (
+                            <div
+                                className="card clickable mk-card"
+                                key={s.id || s.symbol}
+                                role="link"
+                                tabIndex={0}
+                                aria-label={`View ${s.symbol} details`}
+                                onClick={() => openStock(s.symbol)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') openStock(s.symbol); }}
+                            >
+                                <div className="mk-header">
+                                    <div>
+                                        <div className="mk-symbol">{s.symbol}</div>
+                                        <div className="mk-name">{s.name || s.companyName || 'Stock'}</div>
+                                        <SentimentBadge symbol={s.symbol} />
+                                    </div>
+                                    <div className="mk-header-right">
+                                        <div className={`mk-badge ${trend}`}>{formatPercent(s.changePercent)}</div>
+                                        <button
+                                            className="mk-remove"
+                                            aria-label={`Remove ${s.symbol} from watchlist`}
+                                            title="Remove from watchlist"
+                                            onClick={(e) => handleRemove(e, s)}
+                                            onKeyDown={(e) => e.stopPropagation()}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="mk-price">
+                                    {typeof s.currentPrice === 'number'
+                                        ? `$${s.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                        : <span className="small-text">Price unavailable</span>}
+                                </div>
+                                <div className="sparkline-box">
+                                    <Sparkline symbol={s.symbol} trend={trend} />
+                                </div>
                             </div>
-                            <div className={`mk-badge ${s.trend}`}>
-                                {s.change >= 0 ? '+' : ''}{s.change?.toFixed(2)}%
-                            </div>
-                        </div>
-                        <div className="mk-price">${(s.currentPrice || s.price)?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                        <div className="sparkline-box">
-                            <Sparkline symbol={s.symbol} trend={s.trend} />
-                        </div>
-                    </div>
-                ))}
-            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="empty-state">
+                    <strong>Your watchlist is empty</strong>
+                    <span>Search for a ticker above{trending.length > 0 ? ' or open a trending stock' : ''} and add it to follow its price here.</span>
+                </div>
+            )}
         </div>
     );
 };

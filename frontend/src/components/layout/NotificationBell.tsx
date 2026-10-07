@@ -1,5 +1,6 @@
 
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchAlerts, fetchUnreadAlertCount, markAlertAsRead, markAllAlertsAsRead } from '../../services/api';
 import './NotificationBell.css';
 
@@ -12,11 +13,22 @@ interface AlertItem {
     message: string;
 }
 
+// Show the time for today's alerts and the date for older ones
+const formatAlertTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return '';
+    const isToday = date.toDateString() === new Date().toDateString();
+    return isToday
+        ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+};
+
 const NotificationBell = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [alerts, setAlerts] = useState<AlertItem[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const navigate = useNavigate();
 
     const loadNotifications = async () => {
         try {
@@ -69,7 +81,13 @@ const NotificationBell = () => {
 
     return (
         <div className="notif-wrapper" ref={dropdownRef}>
-            <button className="notif-bell" onClick={() => setIsOpen(!isOpen)}>
+            <button
+                className="notif-bell"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+                aria-expanded={isOpen}
+                aria-haspopup="true"
+            >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -95,7 +113,7 @@ const NotificationBell = () => {
                                 >
                                     <div className="notif-meta">
                                         <span className={`notif-priority ${alert.priority.toLowerCase()}`}>{alert.priority}</span>
-                                        <span className="notif-time">{new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        <span className="notif-time">{formatAlertTime(alert.timestamp)}</span>
                                     </div>
                                     <div className="notif-symbol">{alert.symbol}</div>
                                     <div className="notif-msg">{alert.message}</div>
@@ -106,8 +124,8 @@ const NotificationBell = () => {
                         )}
                     </div>
                     <div className="notif-footer">
-                        <button className="view-all" onClick={() => { window.location.href = '/alerts'; setIsOpen(false); }}>
-                            View all history
+                        <button className="view-all" onClick={() => { setIsOpen(false); navigate('/insights'); }}>
+                            View all triggered alerts
                         </button>
                     </div>
                 </div>

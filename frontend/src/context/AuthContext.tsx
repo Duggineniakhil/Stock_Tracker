@@ -23,6 +23,7 @@ interface AuthContextState {
     signInWithGoogle: () => Promise<BackendUser>;
     logout: () => Promise<void>;
     updateUserPlan: (newPlan: string, token?: string) => void;
+    updateUser: (changes: Partial<BackendUser>, token?: string) => void;
     loading: boolean;
 }
 
@@ -157,17 +158,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
         }
     };
 
-    const updateUserPlan = (newPlan: string, token?: string) => {
+    // Apply profile changes locally and persist a re-issued token so they survive a reload
+    const updateUser = (changes: Partial<BackendUser>, token?: string) => {
         if (token) {
             localStorage.setItem('token', token);
         }
-        if (user) {
-            setUser({ ...user, plan: newPlan });
-        }
+        setUser((prev) => (prev ? { ...prev, ...changes } : prev));
     };
 
+    const updateUserPlan = (newPlan: string, token?: string) => updateUser({ plan: newPlan }, token);
+
     return (
-        <AuthContext.Provider value={{ user, login, register, signInWithGoogle, logout, updateUserPlan, loading }}>
+        <AuthContext.Provider value={{ user, login, register, signInWithGoogle, logout, updateUserPlan, updateUser, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

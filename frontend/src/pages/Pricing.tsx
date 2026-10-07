@@ -5,7 +5,8 @@ import './Pricing.css';
 
 const Pricing = () => {
     const { user, updateUserPlan } = useAuth();
-    const [loading, setLoading] = useState(false);
+    const [processingPlan, setProcessingPlan] = useState<string | null>(null);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const plans = [
         {
@@ -59,29 +60,31 @@ const Pricing = () => {
         }
     ];
 
+    const PLAN_ORDER = ['free', 'student', 'pro'];
+    const isDowngrade = (planSlug: string) => PLAN_ORDER.indexOf(planSlug) < PLAN_ORDER.indexOf(user?.plan || 'free');
+
     const handleUpgrade = async (planSlug: string, planName: string) => {
-        if (!user) {
-            alert('Please login to upgrade your plan');
-            return;
-        }
+        if (!user) return;
 
-        const confirm = window.confirm(`Confirm upgrade to ${planName}? This is a mock payment simulation.`);
-        if (!confirm) return;
+        const action = isDowngrade(planSlug) ? 'Switch' : 'Upgrade';
+        const confirmed = window.confirm(`${action} to ${planName}? This is a demo — no payment will be charged.`);
+        if (!confirmed) return;
 
-        setLoading(true);
+        setMessage(null);
+        setProcessingPlan(planSlug);
         try {
-            // Mocking a 1.5s payment processing delay
+            // Simulated payment processing delay
             await new Promise(resolve => setTimeout(resolve, 1500));
-            
+
             const res = await updatePlan(planSlug);
             updateUserPlan(planSlug, res?.data?.token);
-            
-            alert(`Successfully upgraded to ${planName}!`);
+
+            setMessage({ type: 'success', text: `You're now on the ${planName} plan.` });
         } catch (err) {
-            console.error('Upgrade failed:', err);
-            alert('Failed to update plan. Please try again.');
+            console.error('Plan change failed:', err);
+            setMessage({ type: 'error', text: "Couldn't change your plan. Please try again." });
         } finally {
-            setLoading(false);
+            setProcessingPlan(null);
         }
     };
 
@@ -92,6 +95,8 @@ const Pricing = () => {
                 <h1 className="syne">Choose your plan.</h1>
                 <p className="small-text">Flexible options for every type of investor.</p>
             </header>
+
+            {message && <div className={`alert-banner ${message.type}`} role="status">{message.text}</div>}
 
             <div className="plans-grid">
                 {plans.map((plan, idx) => (
@@ -115,10 +120,14 @@ const Pricing = () => {
 
                         <button 
                             className={`btn ${plan.featured ? 'btn-primary' : 'btn-secondary'} full-width`}
-                            disabled={plan.current || loading}
+                            disabled={plan.current || processingPlan !== null}
                             onClick={() => handleUpgrade(plan.slug, plan.name)}
                         >
-                            {loading ? 'Processing...' : (plan.current ? 'Your Current Plan' : plan.buttonText)}
+                            {processingPlan === plan.slug
+                                ? 'Processing...'
+                                : plan.current
+                                    ? 'Your Current Plan'
+                                    : isDowngrade(plan.slug) ? `Switch to ${plan.name}` : plan.buttonText}
                         </button>
                     </div>
                 ))}

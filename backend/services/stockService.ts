@@ -130,22 +130,37 @@ const stockService = {
             let interval: any = '1d';
 
             // Map range to start date and interval
-            switch (range) {
+            switch (String(range).toLowerCase()) {
                 case '1d':
                     startDate.setDate(startDate.getDate() - 1);
                     interval = '5m';
                     break;
                 case '5d':
-                    startDate.setDate(startDate.getDate() - 5);
+                case '1w':
+                    startDate.setDate(startDate.getDate() - 7);
                     interval = '15m';
                     break;
                 case '1mo':
                     startDate.setMonth(startDate.getMonth() - 1);
                     interval = '1d';
                     break;
+                case '6mo':
+                    startDate.setMonth(startDate.getMonth() - 6);
+                    interval = '1d';
+                    break;
+                case 'ytd':
+                    startDate.setMonth(0, 1);
+                    startDate.setHours(0, 0, 0, 0);
+                    interval = '1d';
+                    break;
                 case '1y':
                     startDate.setFullYear(startDate.getFullYear() - 1);
                     interval = '1d';
+                    break;
+                case '5y':
+                case 'max':
+                    startDate.setFullYear(startDate.getFullYear() - 5);
+                    interval = '1wk';
                     break;
                 default:
                     startDate.setMonth(startDate.getMonth() - 1);

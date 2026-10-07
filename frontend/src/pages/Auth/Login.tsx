@@ -20,8 +20,11 @@ const Login = () => {
         try {
             await signInWithGoogle();
             navigate('/dashboard');
-        } catch (err) {
-            setError('Failed to sign in with Google');
+        } catch (err: any) {
+            // Closing the Google popup is a normal cancel, not an error
+            if (err?.code !== 'auth/popup-closed-by-user' && err?.code !== 'auth/cancelled-popup-request') {
+                setError(err?.response?.data?.message || 'Google sign-in failed. Please try again.');
+            }
             setLoading(false);
         }
     };
@@ -110,13 +113,15 @@ const Login = () => {
 
                     <form className="auth-form" onSubmit={handleSubmit}>
                         {successMsg && <div className="auth-success">{successMsg}</div>}
-                        {error && <div className="auth-error">{error}</div>}
+                        {error && <div className="auth-error" role="alert">{error}</div>}
 
                         <div className="input-group">
-                            <label>Email Address</label>
+                            <label htmlFor="login-email-address">Email Address</label>
                             <input
+                                id="login-email-address"
                                 type="email"
                                 placeholder="name@company.com"
+                                autoComplete="email"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -124,10 +129,12 @@ const Login = () => {
                         </div>
 
                         <div className="input-group">
-                            <label>Password</label>
+                            <label htmlFor="login-password">Password</label>
                             <input
+                                id="login-password"
                                 type="password"
                                 placeholder="Enter your password"
+                                autoComplete="current-password"
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}

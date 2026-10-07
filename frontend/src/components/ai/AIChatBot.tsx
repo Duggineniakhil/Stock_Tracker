@@ -109,8 +109,8 @@ const AIChatBot = () => {
                             AI Advisor
                         </div>
                         <div className="ai-header-actions">
-                            <button className="ai-clear-btn" title="Clear Chat" onClick={handleClear}>🗑️</button>
-                            <button className="ai-close-btn" onClick={() => setIsOpen(false)}>×</button>
+                            <button className="ai-clear-btn" title="Clear chat" aria-label="Clear chat" onClick={handleClear}>🗑️</button>
+                            <button className="ai-close-btn" aria-label="Close AI assistant" onClick={() => setIsOpen(false)}>×</button>
                         </div>
                     </div>
 
@@ -161,7 +161,13 @@ const AIChatBot = () => {
                 </div>
             )}
 
-            <button className="ai-fab" onClick={() => setIsOpen(!isOpen)}>
+            <button
+                className="ai-fab"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? 'Close AI assistant' : 'Open AI assistant'}
+                aria-expanded={isOpen}
+                title="Ask Quotra AI"
+            >
                 {isOpen ? '×' : '✨'}
             </button>
         </div>

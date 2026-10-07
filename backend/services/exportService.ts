@@ -1,5 +1,6 @@
 import portfolioService from './portfolioService';
 import logger from '../utils/logger';
+import { toDateOnly } from '../utils/dates';
 
 /**
  * Export Service
@@ -36,7 +37,7 @@ const exportService = {
                 h.symbol,
                 h.quantity,
                 h.buy_price,
-                h.buy_date || 'N/A',
+                (toDateOnly(h.buy_date) as string) || 'N/A',
                 h.currentPrice,
                 h.totalInvestment,
                 h.currentValue,

@@ -6,12 +6,12 @@ import { fetchStockHistory } from '../services/api';
 Chart.register(...registerables);
 
 interface PricePoint {
-    close: number;
+    price: number;
 }
 
 interface SparklineProps {
     symbol: string;
-    trend: 'up' | 'down';
+    trend: 'up' | 'dn';
     colorUp?: string;
     colorDown?: string;
 }
@@ -49,7 +49,10 @@ const Sparkline = ({ symbol, trend, colorUp = '#00e887', colorDown = '#f05050' }
             const ctx = chartRef.current.getContext('2d');
             if (!ctx) return;
 
-            const isTrendPositive = trend === 'up';
+            // Color by the trend of the period actually drawn, falling back to the given trend
+            const isTrendPositive = history.length > 1
+                ? history[history.length - 1].price >= history[0].price
+                : trend === 'up';
             const color = isTrendPositive ? colorUp : colorDown;
 
             chartInstance.current = new Chart(ctx, {
@@ -57,7 +60,7 @@ const Sparkline = ({ symbol, trend, colorUp = '#00e887', colorDown = '#f05050' }
                 data: {
                     labels: history.map((_, i) => i),
                     datasets: [{
-                        data: history.map((h) => h.close),
+                        data: history.map((h) => h.price),
                         borderColor: color,
                         borderWidth: 1.5,
                         fill: false,
@@ -75,7 +78,7 @@ const Sparkline = ({ symbol, trend, colorUp = '#00e887', colorDown = '#f05050' }
                     },
                     scales: {
                         x: { display: false },
-                        y: { display: false, min: Math.min(...history.map((h) => h.close)) * 0.99 }
+                        y: { display: false, min: Math.min(...history.map((h) => h.price)) * 0.99 }
                     },
                     interaction: {
                         mode: 'index',

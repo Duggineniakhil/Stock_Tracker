@@ -1,4 +1,5 @@
 import db from '../db/database';
+import { toDateOnly } from '../utils/dates';
 
 type PortfolioHolding = {
     id: number;
@@ -34,7 +35,7 @@ const portfolioModel = {
         VALUES (?, ?, ?, ?, ?)
       `;
 
-            db.run(sql, [userId, symbol.toUpperCase(), quantity, buyPrice, buyDate], function (this: any, err: Error | null) {
+            db.run(sql, [userId, symbol.toUpperCase(), quantity, buyPrice, toDateOnly(buyDate)], function (this: any, err: Error | null) {
                 if (err) {
                     return reject(err);
                 }
@@ -109,7 +110,7 @@ const portfolioModel = {
                 const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
                 if (allowedFields.includes(snakeKey)) {
                     setClause.push(`${snakeKey} = ?`);
-                    values.push(updates[key]);
+                    values.push(snakeKey === 'buy_date' ? toDateOnly(updates[key]) : updates[key]);
                 }
             });
 

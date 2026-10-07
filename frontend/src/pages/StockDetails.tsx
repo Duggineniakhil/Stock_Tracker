@@ -1,15 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { fetchStockData, fetchStockHistory, addToWatchlist, fetchStockSentiment } from '../services/api';
+import { useParams, Link } from 'react-router-dom';
+import { fetchStockData, fetchStockHistory, addToWatchlist, fetchWatchlist } from '../services/api';
 import SentimentBadge from '../components/ai/SentimentBadge';
 import { Chart, registerables } from 'chart.js';
 import './StockDetails.css';
 
 Chart.register(...registerables);
 
+const RANGES = [
+    { value: '1d', label: '1D' },
+    { value: '5d', label: '5D' },
+    { value: '1mo', label: '1M' },
+    { value: '6mo', label: '6M' },
+    { value: 'ytd', label: 'YTD' },
+    { value: '1y', label: '1Y' },
+    { value: 'max', label: '5Y' },
+];
+
+// Compact number formatting: 1.2K, 3.4M, 5.6B, 7.8T
+const formatCompact = (value?: number, prefix = '') => {
+    if (typeof value !== 'number' || !isFinite(value) || value <= 0) return '—';
+    return prefix + new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(value);
+};
+
+const formatPrice = (value?: number) =>
+    typeof value === 'number' && isFinite(value) && value > 0 ? `$${value.toFixed(2)}` : '—';
+
 const StockDetails = () => {
     const { symbol } = useParams();
-    const navigate = useNavigate();
     const [stock, setStock] = useState<any | null>(null);
     const [history, setHistory] = useState<any[]>([]);
     const [range, setRange] = useState('1mo');
@@ -19,6 +37,9 @@ const StockDetails = () => {
     const chartRef = useRef<HTMLCanvasElement | null>(null);
     const chartInstance = useRef<any | null>(null);
     const [indicators, setIndicators] = useState({ sma: false, rsi: false });
+    const [following, setFollowing] = useState(false);
+    const [followBusy, setFollowBusy] = useState(false);
+    const [followError, setFollowError] = useState<string | null>(null);
 
     // Technical Analysis Helpers
     const calculateSMA = (data: number[], period: number) => {
@@ -64,8 +85,37 @@ const StockDetails = () => {
         try {
             const res = await fetchStockData(symbol!);
             setStock(res.data);
-        } catch (err) {
+            setError(null);
+        } catch (err: any) {
             console.error('Error fetching stock details:', err);
+            setStock(null);
+            setError(err?.response?.status === 404
+                ? `We couldn't find a stock with the symbol "${symbol}".`
+                : 'Stock data is temporarily unavailable. Please try again in a moment.');
+        }
+    };
+
+    const loadFollowState = async () => {
+        try {
+            const res = await fetchWatchlist();
+            setFollowing((res.data || []).some((w: any) => w.symbol === symbol?.toUpperCase()));
+        } catch {
+            // Non-critical: the button simply starts in the "Add" state
+        }
+    };
+
+    const handleFollow = async () => {
+        if (!stock) return;
+        setFollowBusy(true);
+        setFollowError(null);
+        try {
+            await addToWatchlist(stock.symbol);
+            setFollowing(true);
+        } catch (err: any) {
+            if (err?.response?.status === 409) setFollowing(true);
+            else setFollowError("Couldn't add to your watchlist. Please try again.");
+        } finally {
+            setFollowBusy(false);
         }
     };
 
@@ -83,8 +133,15 @@ const StockDetails = () => {
 
     useEffect(() => {
         setLoading(true);
-        Promise.all([loadStockData(), loadHistory(range)]).finally(() => setLoading(false));
+        setFollowing(false);
+        setFollowError(null);
+        Promise.all([loadStockData(), loadHistory(range), loadFollowState()]).finally(() => setLoading(false));
     }, [symbol]);
+
+    useEffect(() => () => {
+        chartInstance.current?.destroy();
+        chartInstance.current = null;
+    }, []);
 
     useEffect(() => {
         if (!chartLoading && history.length > 0 && chartRef.current) {
@@ -102,7 +159,12 @@ const StockDetails = () => {
             chartInstance.current = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: history.map(h => new Date(h.date).toLocaleDateString([], { month: 'short', day: 'numeric' })),
+                    labels: history.map(h => {
+                        const d = new Date(h.date);
+                        if (range === '1d') return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        if (range === 'max') return d.toLocaleDateString([], { month: 'short', year: 'numeric' });
+                        return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                    }),
                     datasets: [{
                         label: 'Price',
                         data: history.map(h => h.price),
@@ -198,7 +260,7 @@ const StockDetails = () => {
 
             chartInstance.current.update();
         }
-    }, [history, chartLoading, stock, indicators]);
+    }, [history, chartLoading, stock, indicators, range]);
 
     const handleRangeChange = (r: string) => {
         setRange(r);
@@ -207,35 +269,45 @@ const StockDetails = () => {
 
     if (loading) return <div className="page-loader">Fetching {symbol} Data...</div>;
     
-    if (error) return (
+    if (error || !stock) return (
         <div className="error-page" style={{ textAlign: 'center', marginTop: '4rem' }}>
             <h2 className="syne" style={{ marginBottom: '1rem' }}>Data Unavailable</h2>
-            <p className="muted" style={{ marginBottom: '2rem' }}>{error}</p>
-            <button className="btn btn-secondary" onClick={() => window.location.reload()}>
-                Try Again
-            </button>
+            <p className="muted" style={{ marginBottom: '2rem' }}>{error || 'This stock could not be loaded.'}</p>
+            <div style={{ display: 'flex', gap: 'var(--sp-12)', justifyContent: 'center' }}>
+                <Link to="/markets" className="btn btn-secondary">Back to Markets</Link>
+                <button className="btn btn-primary" onClick={() => window.location.reload()}>
+                    Try Again
+                </button>
+            </div>
         </div>
     );
-
-    if (!stock) return <div className="error-page">Stock not found</div>;
 
     const isPositive = stock.change >= 0;
 
     return (
         <div className="stock-details-page reveal">
+            <Link to="/markets" className="back-link">← Back to Markets</Link>
             <header className="sd-header">
                 <div className="sd-brand">
                     <div className="sd-logo">{stock.symbol.substring(0, 2)}</div>
                     <div>
                         <h1 className="syne">{stock.name}</h1>
                         <div className="sd-meta">
-                            {stock.exchange}: {stock.symbol} • <SentimentBadge symbol={stock.symbol} />
+                            {stock.exchange ? `${stock.exchange}: ` : ''}{stock.symbol} • <SentimentBadge symbol={stock.symbol} />
                         </div>
                     </div>
                 </div>
-                <button className="btn btn-secondary" onClick={() => addToWatchlist(stock.symbol)}>
-                    + Follow
-                </button>
+                <div style={{ textAlign: 'right' }}>
+                    <button
+                        className={`btn ${following ? 'btn-outline' : 'btn-secondary'}`}
+                        onClick={handleFollow}
+                        disabled={following || followBusy}
+                        aria-pressed={following}
+                    >
+                        {following ? '✓ In watchlist' : followBusy ? 'Adding...' : '+ Add to watchlist'}
+                    </button>
+                    {followError && <div className="small-text dn" role="alert" style={{ marginTop: 'var(--sp-8)' }}>{followError}</div>}
+                </div>
             </header>
 
             <div className="sd-price-section">
@@ -246,20 +318,21 @@ const StockDetails = () => {
                 <div className={`sd-change ${isPositive ? 'up' : 'dn'}`}>
                     {isPositive ? '+' : ''}{stock.change?.toFixed(2)} ({stock.changePercent?.toFixed(2)}%) 
                     <span className="sd-trend-icon">{isPositive ? '▲' : '▼'}</span>
-                    <span className="muted small-text" style={{ marginLeft: '8px' }}>past {range === '1d' ? 'day' : range}</span>
+                    <span className="muted small-text" style={{ marginLeft: '8px' }}>today</span>
                 </div>
             </div>
 
             <div className="sd-chart-container">
                 <div className="sd-chart-controls">
                     <div className="sd-range-selector">
-                        {['1d', '5d', '1mo', '6mo', 'YTD', '1y', 'max'].map(r => (
-                            <button 
-                                key={r} 
-                                className={`range-btn ${range === r ? 'active' : ''}`}
-                                onClick={() => handleRangeChange(r)}
+                        {RANGES.map(r => (
+                            <button
+                                key={r.value}
+                                className={`range-btn ${range === r.value ? 'active' : ''}`}
+                                onClick={() => handleRangeChange(r.value)}
+                                aria-pressed={range === r.value}
                             >
-                                {r.toUpperCase()}
+                                {r.label}
                             </button>
                         ))}
                     </div>
@@ -277,21 +350,22 @@ const StockDetails = () => {
                 <div className="sd-chart-box">
                     <canvas ref={chartRef}></canvas>
                     {chartLoading && <div className="chart-overlay">Loading Chart...</div>}
+                    {!chartLoading && history.length === 0 && <div className="chart-overlay">No price history available for this range.</div>}
                 </div>
             </div>
 
             <div className="sd-stats-grid">
                 <div className="sd-stat-item">
                     <span className="stat-label">Open</span>
-                    <span className="stat-val">${stock.open?.toFixed(2) || '—'}</span>
+                    <span className="stat-val">{formatPrice(stock.open)}</span>
                 </div>
                 <div className="sd-stat-item">
                     <span className="stat-label">Mkt cap</span>
-                    <span className="stat-val">{(stock.marketCap / 1e12).toFixed(2)}T</span>
+                    <span className="stat-val">{formatCompact(stock.marketCap, '$')}</span>
                 </div>
                 <div className="sd-stat-item">
                     <span className="stat-label">High</span>
-                    <span className="stat-val">${stock.dayHigh?.toFixed(2) || '—'}</span>
+                    <span className="stat-val">{formatPrice(stock.dayHigh)}</span>
                 </div>
                 <div className="sd-stat-item">
                     <span className="stat-label">P/E ratio</span>
@@ -299,19 +373,19 @@ const StockDetails = () => {
                 </div>
                 <div className="sd-stat-item">
                     <span className="stat-label">Low</span>
-                    <span className="stat-val">${stock.dayLow?.toFixed(2) || '—'}</span>
+                    <span className="stat-val">{formatPrice(stock.dayLow)}</span>
                 </div>
                 <div className="sd-stat-item">
                     <span className="stat-label">52-wk high</span>
-                    <span className="stat-val">${stock.fiftyTwoWeekHigh?.toFixed(2) || '—'}</span>
+                    <span className="stat-val">{formatPrice(stock.fiftyTwoWeekHigh)}</span>
                 </div>
                 <div className="sd-stat-item">
                     <span className="stat-label">Volume</span>
-                    <span className="stat-val">{(stock.volume / 1e6).toFixed(2)}M</span>
+                    <span className="stat-val">{formatCompact(stock.volume)}</span>
                 </div>
                 <div className="sd-stat-item">
                     <span className="stat-label">52-wk low</span>
-                    <span className="stat-val">${stock.fiftyTwoWeekLow?.toFixed(2) || '—'}</span>
+                    <span className="stat-val">{formatPrice(stock.fiftyTwoWeekLow)}</span>
                 </div>
             </div>
         </div>

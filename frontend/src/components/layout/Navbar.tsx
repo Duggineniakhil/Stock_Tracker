@@ -1,14 +1,38 @@
 
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
+const APP_LINKS = [
+    { to: '/dashboard', label: 'Dashboard' },
+    { to: '/markets', label: 'Markets' },
+    { to: '/portfolio', label: 'Portfolio' },
+    { to: '/insights', label: 'Insights' },
+    { to: '/alerts', label: 'Alerts' },
+    { to: '/advisor', label: 'AI Advisor' },
+];
+
+const PUBLIC_LINKS = APP_LINKS.filter((l) => l.to !== '/dashboard' && l.to !== '/advisor');
+
 const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Close the mobile menu whenever the route changes or Escape is pressed
+    useEffect(() => {
+        setIsMenuOpen(false);
+    }, [pathname]);
+
+    useEffect(() => {
+        if (!isMenuOpen) return;
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsMenuOpen(false); };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [isMenuOpen]);
 
     const handleLogout = async () => {
         try {
@@ -19,39 +43,42 @@ const Navbar = () => {
         }
     };
 
+    const links = user ? APP_LINKS : PUBLIC_LINKS;
+    const displayName = user ? (user.name?.split(' ')[0] || user.email?.split('@')[0]) : '';
+
     return (
-        <nav className="nav">
+        <nav className="nav" aria-label="Main">
             <div className="nav-container">
-                <Link to="/" className="logo">
+                <Link to={user ? '/dashboard' : '/'} className="logo">
                     <span className="ldot"></span>Quotra
                 </Link>
 
-                <ul className={`nl ${isMenuOpen ? 'active' : ''}`}>
-                    <li><Link to="/markets" onClick={() => setIsMenuOpen(false)}>Markets</Link></li>
-                    <li><Link to="/portfolio" onClick={() => setIsMenuOpen(false)}>Portfolio</Link></li>
-                    <li><Link to="/insights" onClick={() => setIsMenuOpen(false)}>Insights</Link></li>
-                    <li><Link to="/alerts" onClick={() => setIsMenuOpen(false)}>Alerts</Link></li>
+                <ul id="main-menu" className={`nl ${isMenuOpen ? 'active' : ''}`}>
+                    {links.map((l) => (
+                        <li key={l.to}>
+                            <NavLink to={l.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
+                                {l.label}
+                            </NavLink>
+                        </li>
+                    ))}
                     {user ? (
                         <>
                             <li className="mobile-only">
-                                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
+                                <NavLink to="/settings">Settings</NavLink>
                             </li>
                             <li className="mobile-only">
-                                <Link to="/settings" onClick={() => setIsMenuOpen(false)}>Settings</Link>
-                            </li>
-                            <li className="mobile-only">
-                                <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="logout-mobile">
-                                    Logout
+                                <button onClick={handleLogout} className="logout-mobile">
+                                    Log out
                                 </button>
                             </li>
                         </>
                     ) : (
                         <>
                             <li className="mobile-only">
-                                <Link to="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
+                                <Link to="/login">Log in</Link>
                             </li>
                             <li className="mobile-only">
-                                <Link to="/register" onClick={() => setIsMenuOpen(false)} style={{ color: 'var(--accent-green)' }}>Join Quotra</Link>
+                                <Link to="/register" style={{ color: 'var(--accent-green)' }}>Join Quotra</Link>
                             </li>
                         </>
                     )}
@@ -61,23 +88,30 @@ const Navbar = () => {
                     {user ? (
                         <>
                             <NotificationBell />
-                            <div className="user-meta desktop-only">
-                                <span className="small-text">
-                                    Hi, {user.name?.split(' ')[0] || user.email.split('@')[0]}
+                            <NavLink to="/settings" className="user-chip desktop-only" title="Account settings">
+                                <span className="user-avatar" aria-hidden="true">
+                                    {displayName?.charAt(0).toUpperCase()}
                                 </span>
-                                <Link to="/dashboard" className="small-text" style={{ textDecoration: 'underline' }}>Dashboard</Link>
-                            </div>
-                            <button onClick={handleLogout} className="ncta desktop-only">
-                                Logout
+                                <span className="user-name">{displayName}</span>
+                            </NavLink>
+                            <button onClick={handleLogout} className="nav-logout desktop-only">
+                                Log out
                             </button>
                         </>
                     ) : (
-                        <Link to="/register" className="desktop-only">
-                            <button className="ncta">Get started free</button>
-                        </Link>
+                        <>
+                            <Link to="/login" className="nav-login desktop-only">Log in</Link>
+                            <Link to="/register" className="ncta desktop-only">Get started free</Link>
+                        </>
                     )}
 
-                    <button className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                    <button
+                        className={`menu-toggle ${isMenuOpen ? 'open' : ''}`}
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                        aria-expanded={isMenuOpen}
+                        aria-controls="main-menu"
+                    >
                         <span></span>
                         <span></span>
                         <span></span>

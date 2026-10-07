@@ -78,6 +78,13 @@
     background: rgba(0,255,140,0.05);
 }
 
+.option-btn.selected {
+    border-color: var(--accent-green);
+    background: var(--accent-green-dim);
+    color: var(--accent-green);
+    font-weight: 700;
+}
+
 .summary-box {
     background: #0d0d0d;
     padding: 1.5rem;

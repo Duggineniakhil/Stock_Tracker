@@ -11,6 +11,7 @@ const Admin = () => {
     });
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const getAdminData = async () => {
@@ -21,9 +22,11 @@ const Admin = () => {
                 ]);
                 setStats(statsRes.data || statsRes);
                 setUsers(usersRes.data || usersRes);
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Error fetching admin data:', err);
-                alert('Failed to load admin data. Are you an admin?');
+                setError(err?.response?.status === 403
+                    ? "You don't have access to the admin portal."
+                    : "Couldn't load admin data. Please try again later.");
             } finally {
                 setLoading(false);
             }
@@ -32,6 +35,13 @@ const Admin = () => {
     }, []);
 
     if (loading) return <div className="page-loader">Loading Admin Portal...</div>;
+
+    if (error) return (
+        <div className="empty-state" style={{ marginTop: 'var(--sp-64)' }}>
+            <strong>Admin portal unavailable</strong>
+            <span>{error}</span>
+        </div>
+    );
 
     const paidCount = (stats.planDistribution?.pro || 0) + (stats.planDistribution?.student || 0);
 

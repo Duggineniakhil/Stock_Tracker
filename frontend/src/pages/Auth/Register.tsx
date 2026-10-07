@@ -19,8 +19,11 @@ const Register = () => {
         try {
             await signInWithGoogle();
             navigate('/dashboard');
-        } catch (err) {
-            setError('Failed to sign in with Google');
+        } catch (err: any) {
+            // Closing the Google popup is a normal cancel, not an error
+            if (err?.code !== 'auth/popup-closed-by-user' && err?.code !== 'auth/cancelled-popup-request') {
+                setError(err?.response?.data?.message || 'Google sign-in failed. Please try again.');
+            }
             setLoading(false);
         }
     };
@@ -117,13 +120,15 @@ const Register = () => {
                     <div className="auth-divider">Or continue with email</div>
 
                     <form className="auth-form" onSubmit={handleSubmit}>
-                        {error && <div className="auth-error">{error}</div>}
+                        {error && <div className="auth-error" role="alert">{error}</div>}
 
                         <div className="input-group">
-                            <label>Full Name</label>
+                            <label htmlFor="register-full-name">Full Name</label>
                             <input
+                                id="register-full-name"
                                 type="text"
                                 placeholder="John Doe"
+                                autoComplete="name"
                                 required
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
@@ -131,10 +136,12 @@ const Register = () => {
                         </div>
 
                         <div className="input-group">
-                            <label>Email Address</label>
+                            <label htmlFor="register-email-address">Email Address</label>
                             <input
+                                id="register-email-address"
                                 type="email"
                                 placeholder="name@company.com"
+                                autoComplete="email"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -142,21 +149,22 @@ const Register = () => {
                         </div>
 
                         <div className="input-group">
-                            <label>Password</label>
+                            <label htmlFor="register-password">Password</label>
                             <input
+                                id="register-password"
                                 type="password"
-                                placeholder="Min. 8 characters"
+                                placeholder="Create a password"
+                                autoComplete="new-password"
+                                aria-describedby="register-password-rules"
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
-                            {password.length > 0 && (
-                                <div className="pw-hints">
-                                    <span className={hasLength ? 'pw-ok' : 'pw-fail'}>8+ chars</span>
-                                    <span className={hasUpper ? 'pw-ok' : 'pw-fail'}>Uppercase</span>
-                                    <span className={hasNumber ? 'pw-ok' : 'pw-fail'}>Number</span>
-                                </div>
-                            )}
+                            <div className="pw-hints" id="register-password-rules" aria-live="polite">
+                                <span className={password && hasLength ? 'pw-ok' : 'pw-fail'}>{hasLength ? '✓' : '•'} 8+ characters</span>
+                                <span className={password && hasUpper ? 'pw-ok' : 'pw-fail'}>{hasUpper ? '✓' : '•'} 1 uppercase letter</span>
+                                <span className={password && hasNumber ? 'pw-ok' : 'pw-fail'}>{hasNumber ? '✓' : '•'} 1 number</span>
+                            </div>
                         </div>
 
                         <button type="submit" className="auth-submit" disabled={loading || !isStrong}>

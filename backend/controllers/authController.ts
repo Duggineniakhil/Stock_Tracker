@@ -185,7 +185,7 @@ const login = async (req: Request, res: Response) => {
             recordLoginAttempt(email, ip, true);
 
             const accessToken = jwt.sign(
-                { id: user.id, email: user.email, plan: user.plan || 'free' },
+                { id: user.id, email: user.email, name: user.name, plan: user.plan || 'free' },
                 config.JWT_SECRET,
                 accessTokenOptions()
             );
@@ -207,7 +207,7 @@ const login = async (req: Request, res: Response) => {
             return success(res, {
                 token: accessToken,
                 expiresIn: 3600,
-                user: { id: user.id, email: user.email, plan: user.plan || 'free' }
+                user: { id: user.id, email: user.email, name: user.name, plan: user.plan || 'free' }
             }, 'Login successful');
         });
     } catch (err: any) {
@@ -392,7 +392,12 @@ const updateProfile = (req: AuthenticatedRequest, res: Response) => {
         return apiError(res, 'Name and email are required', null, 400);
     }
 
-    db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email.toLowerCase(), userId], function(err: Error | null) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return apiError(res, 'Invalid email format', null, 400);
+    }
+
+    const normalizedEmail = email.toLowerCase();
+    db.run('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, normalizedEmail, userId], function(err: Error | null) {
         if (err) {
             if (err.message.includes('UNIQUE constraint failed')) {
                 return apiError(res, 'Email already in use', null, 409);
@@ -400,7 +405,15 @@ const updateProfile = (req: AuthenticatedRequest, res: Response) => {
             logger.error('Error updating profile', { error: err.message });
             return apiError(res, 'Failed to update profile', null, 500);
         }
-        return success(res, { name, email }, 'Profile updated successfully');
+
+        // Re-issue the access token so the updated name/email are reflected in its claims
+        const token = jwt.sign(
+            { id: userId, email: normalizedEmail, name, plan: req.user?.plan || 'free' },
+            config.JWT_SECRET,
+            accessTokenOptions()
+        );
+
+        return success(res, { name, email: normalizedEmail, token }, 'Profile updated successfully');
     });
 };
 

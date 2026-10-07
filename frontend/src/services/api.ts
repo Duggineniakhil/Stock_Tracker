@@ -93,7 +93,7 @@ const api = {
   googleLogin: (data: unknown) => axiosInstance.post('/v1/auth/google', data).then((r) => r.data),
   refreshToken: () => axiosInstance.post('/v1/auth/refresh').then((r) => r.data),
   logout: () => axiosInstance.post('/v1/auth/logout').then((r) => r.data),
-  updatePlan: (email: string, newPlan: string) => axiosInstance.post('/v1/auth/plan', { email, newPlan }).then((r) => r.data),
+  updatePlan: (newPlan: string) => axiosInstance.post('/v1/auth/plan', { newPlan }).then((r) => r.data),
   updateProfile: (data: unknown) => axiosInstance.put('/v1/auth/profile', data).then((r) => r.data),
   changePassword: (data: unknown) => axiosInstance.put('/v1/auth/password', data).then((r) => r.data),
   fetchWatchlist: () => axiosInstance.get('/v1/watchlist').then((r) => r.data),

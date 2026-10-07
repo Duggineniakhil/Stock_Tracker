@@ -7,6 +7,7 @@ import logger from '../utils/logger';
 import { success, error as apiError } from '../utils/responseWrapper';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { config } from '../config';
+import { isFirebaseAuthConfigured, verifyFirebaseIdToken } from '../services/firebaseAuthService';
 
 const MAX_LOGIN_ATTEMPTS = config.MAX_LOGIN_ATTEMPTS;
 const LOCKOUT_DURATION_MS = config.LOCKOUT_DURATION_MINUTES * 60 * 1000;
@@ -217,12 +218,26 @@ const login = async (req: Request, res: Response) => {
 
 // ── Google Login ──────────────────────────────────────────────────────────────
 const googleLogin = async (req: Request, res: Response) => {
-    const { email, name, photoURL, uid } = req.body;
-    const ip = req.ip || req.connection?.remoteAddress;
+    const { idToken } = req.body;
 
-    if (!email) {
-        return apiError(res, 'Email is required', null, 400);
+    if (!idToken || typeof idToken !== 'string') {
+        return apiError(res, 'Firebase ID token is required', null, 400);
     }
+
+    if (!isFirebaseAuthConfigured()) {
+        logger.error('Google login attempted but FIREBASE_PROJECT_ID is not set');
+        return apiError(res, 'Google sign-in is not configured on the server', null, 503);
+    }
+
+    // Identity comes only from the verified token, never from client-supplied fields
+    let identity;
+    try {
+        identity = await verifyFirebaseIdToken(idToken);
+    } catch (err: any) {
+        logger.warn('Rejected Google login: invalid Firebase ID token', { error: err.message });
+        return apiError(res, 'Invalid or expired Google credentials', null, 401);
+    }
+    const { email, name, picture: photoURL } = identity;
 
     try {
         db.get('SELECT * FROM users WHERE email = ?', [email.toLowerCase()], async (err: Error | null, user: any) => {
@@ -330,28 +345,41 @@ const logout = (req: Request, res: Response) => {
 };
 
 // ── Update Plan (Mock Stripe Integration) ──────────────────────────────────
-const updatePlan = (req: Request, res: Response) => {
-    const { email, newPlan } = req.body;
-    
-    if (!email || !newPlan) {
-        return apiError(res, 'Email and new plan are required', null, 400);
+const updatePlan = (req: AuthenticatedRequest, res: Response) => {
+    const { newPlan } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+        return apiError(res, 'Authentication required', null, 401);
     }
-    
+
+    if (!newPlan) {
+        return apiError(res, 'New plan is required', null, 400);
+    }
+
     if (!['free', 'student', 'pro'].includes(newPlan)) {
         return apiError(res, 'Invalid plan type', null, 400);
     }
 
-    db.run('UPDATE users SET plan = ? WHERE email = ?', [newPlan, email.toLowerCase()], function(this: any, err: Error | null) {
+    // Only the authenticated user's own plan can be changed
+    db.run('UPDATE users SET plan = ? WHERE id = ?', [newPlan, userId], function(this: any, err: Error | null) {
         if (err) {
             logger.error('Error updating plan', { error: err.message });
             return apiError(res, 'Failed to update subscription plan', null, 500);
         }
-        
+
         if (this.changes === 0) {
             return apiError(res, 'User not found', null, 404);
         }
-        
-        return success(res, { plan: newPlan }, `Successfully upgraded to ${newPlan} plan`);
+
+        // Re-issue the access token so the new plan is reflected in its claims
+        const token = jwt.sign(
+            { id: userId, email: req.user?.email, plan: newPlan },
+            config.JWT_SECRET,
+            accessTokenOptions()
+        );
+
+        return success(res, { plan: newPlan, token }, `Successfully upgraded to ${newPlan} plan`);
     });
 };
 

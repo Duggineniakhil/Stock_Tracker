@@ -22,7 +22,7 @@ interface AuthContextState {
     register: (name: string, email: string, password: string) => Promise<BackendUser>;
     signInWithGoogle: () => Promise<BackendUser>;
     logout: () => Promise<void>;
-    updateUserPlan: (newPlan: string) => void;
+    updateUserPlan: (newPlan: string, token?: string) => void;
     loading: boolean;
 }
 
@@ -72,12 +72,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
     };
 
     const syncFirebaseUserWithBackend = async (firebaseUser: any) => {
-        const res = await googleLogin({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-        });
+        const idToken = await firebaseUser.getIdToken();
+        const res = await googleLogin({ idToken });
 
         const backendUser = persistBackendAuth(res);
         return { ...firebaseUser, ...backendUser } as BackendUser;
@@ -161,7 +157,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
         }
     };
 
-    const updateUserPlan = (newPlan: string) => {
+    const updateUserPlan = (newPlan: string, token?: string) => {
+        if (token) {
+            localStorage.setItem('token', token);
+        }
         if (user) {
             setUser({ ...user, plan: newPlan });
         }

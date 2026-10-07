@@ -24,6 +24,11 @@ const RATE_LIMIT_MAX = Number(getEnv('RATE_LIMIT_MAX', '100'));
 const AUTH_RATE_LIMIT_MAX = Number(getEnv('AUTH_RATE_LIMIT_MAX', '10'));
 const MAX_LOGIN_ATTEMPTS = Number(getEnv('MAX_LOGIN_ATTEMPTS', '5'));
 const LOCKOUT_DURATION_MINUTES = Number(getEnv('LOCKOUT_DURATION_MINUTES', '15'));
+const FIREBASE_PROJECT_ID = getEnv('FIREBASE_PROJECT_ID');
+const ADMIN_EMAILS = getEnv('ADMIN_EMAILS')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
 const DEFAULT_CORS_ORIGINS = [
     'http://localhost:5173',
     'https://stock-tracker-1-sj4n.onrender.com',
@@ -60,5 +65,7 @@ export const config = {
     AUTH_RATE_LIMIT_MAX,
     MAX_LOGIN_ATTEMPTS,
     LOCKOUT_DURATION_MINUTES,
+    FIREBASE_PROJECT_ID,
+    ADMIN_EMAILS,
     CORS_ORIGINS
 };

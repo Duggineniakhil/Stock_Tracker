@@ -14,6 +14,8 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-before-production-refresh}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       AI_MODEL: ${AI_MODEL:-gemini_flash}
       EMAIL_HOST: ${EMAIL_HOST:-}

@@ -73,8 +73,8 @@ const Pricing = () => {
             // Mocking a 1.5s payment processing delay
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            await updatePlan(user.email, planSlug);
-            updateUserPlan(planSlug);
+            const res = await updatePlan(planSlug);
+            updateUserPlan(planSlug, res?.data?.token);
             
             alert(`Successfully upgraded to ${planName}!`);
         } catch (err) {

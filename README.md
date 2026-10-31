@@ -37,6 +37,7 @@
 - **Automated Rules:** Configure alerts for percentage drops/gains, target prices, or volume spikes.
 - **Notification Center:** A real-time in-app notification inbox for tracking triggered alerts with read/unread status.
 - **Background Cron Jobs:** Dedicated alert worker runs hourly outside the main Express server to evaluate rules and trigger notifications.
+- **Airflow + PySpark Pipeline:** The same hourly alert engine is also available as an Apache Airflow DAG that evaluates rules with PySpark, with retry-safe alert loading (see [`data/`](data/README.md)).
 - **Multi-channel Notifications:** Receive instant updates via in-app dashboard alerts and email notifications.
 
 ### Robust Security & Auth
@@ -56,8 +57,9 @@
 |-------|-----------|
 | **Frontend** | React 19, Vite, TypeScript, React Router v7, Chart.js |
 | **Backend** | Node.js 20, Express 4, TypeScript, SQLite3, Nodemailer, JWT auth, cron worker |
+| **Data Pipeline** | Apache Airflow, PySpark, PyArrow (Parquet), yfinance |
 | **Authentication** | JSON Web Tokens (JWT), bcrypt, refresh-token support |
-| **Testing** | Backend: Jest, Supertest | Frontend: Vitest, React Testing Library |
+| **Testing** | Backend: Jest, Supertest · Frontend: Vitest, React Testing Library · Data: pytest |
 | **DevOps** | Docker, Docker Compose, GitHub Actions (CI/CD) |
 
 ---
@@ -77,6 +79,10 @@ stock-tracker-agent-main/
 │   ├── src/pages/           # Main application views
 │   ├── src/components/      # Reusable UI components
 │   └── src/context/         # Global auth state management
+├── data/                    # Airflow + PySpark data pipelines
+│   ├── dags/                # Alert engine DAG and its extract/load/email steps
+│   ├── jobs/                # PySpark rule-evaluation job
+│   └── tests/               # pytest suite
 └── docker-compose.yml       # container orchestration
 ```
 
@@ -125,6 +131,15 @@ npm run dev            # Starts server on port 5000
 cd backend
 npm run worker         # Runs the dedicated alert rules engine separately
 ```
+
+**Alternative: Run the Alert Engine on Airflow + PySpark**
+
+Instead of `npm run worker`, deploy the `quotra_alert_engine` DAG from [`data/`](data/README.md) (Python 3.9+, Java 17+ for Spark). Run only one of the two engines, or every alert will be sent twice.
+```bash
+cd data
+pip install -r requirements.txt
+```
+Point Airflow's `dags_folder` at `data/dags`, configure the `spark_default` connection, and set `QUOTRA_DB_PATH`, `QUOTRA_STAGING_DIR` and the backend's `EMAIL_*` settings on the workers. Full details are in [`data/README.md`](data/README.md).
 
 **2. Start the Frontend Client**
 ```bash
@@ -186,6 +201,9 @@ cd backend && npm test
 
 # Run frontend tests with coverage
 cd frontend && npm run test:coverage
+
+# Run data pipeline tests (needs Java 17+ for PySpark)
+cd data && pip install pyspark pyarrow pytest && pytest tests
 ```
 
 ---

@@ -1,0 +1,8 @@
+apache-airflow>=2.9
+apache-airflow-providers-apache-spark>=4.0
+pyspark>=3.5
+pyarrow>=14
+yfinance>=0.2.40
+
+# tests
+pytest>=8

@@ -239,66 +239,60 @@ const googleLogin = async (req: Request, res: Response) => {
     }
     const { email, name, picture: photoURL } = identity;
 
+    const normalizedEmail = email.toLowerCase();
+    const dbGet = (sql: string, params: unknown[]) => new Promise<any>((resolve, reject) =>
+        db.get(sql, params, (err: Error | null, row: any) => (err ? reject(err) : resolve(row))));
+    const dbRun = (sql: string, params: unknown[]) => new Promise<void>((resolve, reject) =>
+        db.run(sql, params, (err: Error | null) => (err ? reject(err) : resolve())));
+
     try {
-        db.get('SELECT * FROM users WHERE email = ?', [email.toLowerCase()], async (err: Error | null, user: any) => {
-            if (err) return apiError(res, 'Database error', null, 500);
+        let user = await dbGet('SELECT * FROM users WHERE email = ?', [normalizedEmail]);
 
-            let userId;
-            let userPlan = 'free';
+        if (!user) {
+            // Google users never log in with a password, so store a hash of random bytes.
+            // INSERT OR IGNORE keeps two simultaneous first logins for the same account from
+            // failing on the UNIQUE email constraint; both then read back the same row.
+            const randomPassword = crypto.randomBytes(16).toString('hex');
+            const hashedPassword = await bcrypt.hash(randomPassword, 12);
+            await dbRun('INSERT OR IGNORE INTO users (name, email, password_hash, plan) VALUES (?, ?, ?, ?)',
+                [name || normalizedEmail.split('@')[0], normalizedEmail, hashedPassword, 'free']);
+            user = await dbGet('SELECT * FROM users WHERE email = ?', [normalizedEmail]);
+            if (!user) throw new Error('User row missing after insert');
+            logger.info(`New user registered via Google: ${normalizedEmail}`);
+        } else if (name && !user.name) {
+            await dbRun("UPDATE users SET name = ? WHERE id = ? AND (name IS NULL OR name = '')", [name, user.id]);
+            user.name = name;
+        }
 
-            if (!user) {
-                // Create new user for Google login
-                // We generate a random password hash since they'll use Google to log in
-                const randomPassword = crypto.randomBytes(16).toString('hex');
-                const hashedPassword = await bcrypt.hash(randomPassword, 12);
-                
-                await new Promise<void>((resolve, reject) => {
-                    db.run('INSERT INTO users (name, email, password_hash, plan) VALUES (?, ?, ?, ?)', 
-                        [name || email.split('@')[0], email.toLowerCase(), hashedPassword, 'free'], 
-                        function(this: any, err: Error | null) {
-                            if (err) reject(err);
-                            else {
-                                userId = this.lastID;
-                                resolve();
-                            }
-                        }
-                    );
-                });
-                logger.info(`New user registered via Google: ${email}`);
-            } else {
-                userId = user.id;
-                userPlan = user.plan || 'free';
-                // Optionally update name/photo if needed
-                db.run('UPDATE users SET name = ? WHERE id = ? AND (name IS NULL OR name = "")', [name, userId]);
-            }
+        const userId = user.id;
+        const userPlan = user.plan || 'free';
+        const userName = user.name || name;
 
-            // Issue tokens
-            const accessToken = jwt.sign(
-                { id: userId, email: email.toLowerCase(), plan: userPlan },
-                config.JWT_SECRET,
-                accessTokenOptions()
-            );
+        const accessToken = jwt.sign(
+            { id: userId, email: normalizedEmail, name: userName, plan: userPlan },
+            config.JWT_SECRET,
+            accessTokenOptions()
+        );
 
-            const refreshToken = jwt.sign(
-                { id: userId, type: 'refresh' },
-                config.JWT_REFRESH_SECRET,
-                refreshTokenOptions()
-            );
+        const refreshToken = jwt.sign(
+            { id: userId, type: 'refresh' },
+            config.JWT_REFRESH_SECRET,
+            refreshTokenOptions()
+        );
 
-            // Store refresh token hash
-            const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-            const expiresAt = new Date(Date.now() + refreshTokenExpiryMs).toISOString();
-            db.run('INSERT OR REPLACE INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
-                [userId, tokenHash, expiresAt]);
+        // Store refresh token hash
+        const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        const expiresAt = new Date(Date.now() + refreshTokenExpiryMs).toISOString();
+        await dbRun('INSERT OR REPLACE INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
+            [userId, tokenHash, expiresAt]);
 
-            sendRefreshCookie(res, refreshToken);
-            logger.info(`User logged in via Google: ${email}`);
-            return success(res, {
-                token: accessToken,
-                expiresIn: 3600,
-                user: { id: userId, email: email.toLowerCase(), name: name || user?.name, plan: userPlan, photoURL }
-            }, 'Google login successful');
-        });
+        sendRefreshCookie(res, refreshToken);
+        logger.info(`User logged in via Google: ${normalizedEmail}`);
+        return success(res, {
+            token: accessToken,
+            expiresIn: 3600,
+            user: { id: userId, email: normalizedEmail, name: userName, plan: userPlan, photoURL }
+        }, 'Google login successful');
     } catch (err: any) {
         logger.error('Google login error', { error: err.message });
         return apiError(res, 'Server error during Google login', null, 500);
@@ -314,19 +308,28 @@ const refreshToken = async (req: Request, res: Response) => {
         const decoded = jwt.verify(token, config.JWT_REFRESH_SECRET) as jwt.JwtPayload;
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
-        db.get('SELECT * FROM refresh_tokens WHERE token_hash = ? AND revoked = 0 AND expires_at > CURRENT_TIMESTAMP',
+        // expires_at is stored as an ISO string, so compare it as a datetime rather than as text
+        db.get('SELECT * FROM refresh_tokens WHERE token_hash = ? AND revoked = 0 AND datetime(expires_at) > CURRENT_TIMESTAMP',
             [tokenHash], (err: Error | null, storedToken: any) => {
                 if (err || !storedToken) {
                     return apiError(res, 'Invalid or expired refresh token', null, 401);
                 }
 
-                const newAccessToken = jwt.sign(
-                    { id: decoded.id, email: decoded.email },
-                    config.JWT_SECRET,
-                    accessTokenOptions()
-                );
+                // The refresh token only carries the id; reload the profile so the new access
+                // token keeps the same claims (email, name, plan) as one issued at login
+                db.get('SELECT id, email, name, plan FROM users WHERE id = ?', [decoded.id], (userErr: Error | null, user: any) => {
+                    if (userErr || !user) {
+                        return apiError(res, 'Invalid or expired refresh token', null, 401);
+                    }
 
-                return success(res, { token: newAccessToken, expiresIn: 3600 }, 'Token refreshed successfully');
+                    const newAccessToken = jwt.sign(
+                        { id: user.id, email: user.email, name: user.name, plan: user.plan || 'free' },
+                        config.JWT_SECRET,
+                        accessTokenOptions()
+                    );
+
+                    return success(res, { token: newAccessToken, expiresIn: 3600 }, 'Token refreshed successfully');
+                });
             });
     } catch (err: any) {
         return apiError(res, 'Invalid refresh token', null, 401);

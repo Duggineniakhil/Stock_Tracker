@@ -73,12 +73,41 @@ describe('googleLogin', () => {
         db.get.mockImplementation((_sql: string, params: any[], cb: Function) => {
             cb(null, { id: 7, email: params[0], plan: 'free' });
         });
+        db.run.mockImplementation((_sql: string, _params: any[], cb: Function) => cb(null));
         const res = mockRes();
         await authController.googleLogin({ body: { idToken: 'valid', email: 'victim@example.com' } }, res);
 
         expect(db.get.mock.calls[0][1]).toEqual(['real@example.com']);
         const body = res.json.mock.calls[0][0];
         expect(body.data.user.email).toBe('real@example.com');
+    });
+
+    it('creates a new user without failing when the account already appeared (concurrent first login)', async () => {
+        firebaseAuth.verifyFirebaseIdToken.mockResolvedValue({ uid: 'u2', email: 'new@example.com', name: 'New' });
+        // First lookup: no user yet. After INSERT OR IGNORE: the row exists (written by us or a parallel request).
+        db.get
+            .mockImplementationOnce((_sql: string, _params: any[], cb: Function) => cb(null, undefined))
+            .mockImplementation((_sql: string, params: any[], cb: Function) =>
+                cb(null, { id: 11, email: params[0], name: 'New', plan: 'free' }));
+        db.run.mockImplementation((_sql: string, _params: any[], cb: Function) => cb(null));
+        const res = mockRes();
+        await authController.googleLogin({ body: { idToken: 'valid' } }, res);
+
+        expect(db.run.mock.calls[0][0]).toMatch(/INSERT OR IGNORE INTO users/);
+        const body = res.json.mock.calls[0][0];
+        expect(body.data.user).toMatchObject({ id: 11, email: 'new@example.com' });
+        expect(res.cookie).toHaveBeenCalled();
+    });
+
+    it('returns 500 instead of crashing when a database write fails', async () => {
+        firebaseAuth.verifyFirebaseIdToken.mockResolvedValue({ uid: 'u3', email: 'x@example.com', name: 'X' });
+        db.get.mockImplementation((_sql: string, _params: any[], cb: Function) => cb(null, undefined));
+        db.run.mockImplementation((_sql: string, _params: any[], cb: Function) =>
+            cb(new Error('SQLITE_CONSTRAINT: UNIQUE constraint failed: users.email')));
+        const res = mockRes();
+        await authController.googleLogin({ body: { idToken: 'valid' } }, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
     });
 });
 
@@ -144,5 +173,39 @@ describe('requireAdmin', () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(db.get).not.toHaveBeenCalled();
+    });
+});
+
+describe('authenticateToken', () => {
+    const authenticateToken = require('../../middleware/auth').default;
+
+    it('returns 401 (not 403) for a token signed with another secret, so the client re-authenticates', (done) => {
+        const foreignToken = jwt.sign({ id: 1 }, 'some-other-backends-secret');
+        const res = mockRes();
+        const next = jest.fn();
+        authenticateToken({ headers: { authorization: `Bearer ${foreignToken}` }, query: {} }, res, next);
+
+        setImmediate(() => {
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(next).not.toHaveBeenCalled();
+            done();
+        });
+    });
+});
+
+describe('refreshToken', () => {
+    it('keeps email, name and plan in the refreshed access token', () => {
+        const refresh = jwt.sign({ id: 7, type: 'refresh' }, config.JWT_REFRESH_SECRET);
+        db.get
+            .mockImplementationOnce((_sql: string, _params: any[], cb: Function) => cb(null, { id: 1 }))
+            .mockImplementationOnce((_sql: string, _params: any[], cb: Function) =>
+                cb(null, { id: 7, email: 'pro@example.com', name: 'Pro User', plan: 'pro' }));
+        const res = mockRes();
+
+        authController.refreshToken({ cookies: { refreshToken: refresh }, body: {} }, res);
+
+        const payload = res.json.mock.calls[0][0];
+        const claims = jwt.verify(payload.data.token, config.JWT_SECRET);
+        expect(claims).toMatchObject({ id: 7, email: 'pro@example.com', name: 'Pro User', plan: 'pro' });
     });
 });

@@ -1,6 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import { apiLogin, apiRegister, googleLogin, apiLogout } from '../services/api';
+import { apiLogin, apiRegister, googleLogin, apiLogout, SESSION_EXPIRED_EVENT } from '../services/api';
 import { auth, db, googleProvider } from '../firebase/config';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -72,12 +72,24 @@ export const AuthProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
         return { ...decoded, ...authPayload.user } as BackendUser;
     };
 
-    const syncFirebaseUserWithBackend = async (firebaseUser: any) => {
-        const idToken = await firebaseUser.getIdToken();
-        const res = await googleLogin({ idToken });
+    // signInWithGoogle and the onAuthStateChanged listener both fire right after the popup
+    // closes; share one in-flight backend exchange so the server only sees a single login.
+    const backendSyncRef = useRef<{ uid: string; promise: Promise<BackendUser> } | null>(null);
 
-        const backendUser = persistBackendAuth(res);
-        return { ...firebaseUser, ...backendUser } as BackendUser;
+    const syncFirebaseUserWithBackend = (firebaseUser: any): Promise<BackendUser> => {
+        const inFlight = backendSyncRef.current;
+        if (inFlight && inFlight.uid === firebaseUser.uid) return inFlight.promise;
+
+        const promise = (async () => {
+            const idToken = await firebaseUser.getIdToken();
+            const res = await googleLogin({ idToken });
+            const backendUser = persistBackendAuth(res);
+            return { ...firebaseUser, ...backendUser } as BackendUser;
+        })().finally(() => {
+            if (backendSyncRef.current?.promise === promise) backendSyncRef.current = null;
+        });
+        backendSyncRef.current = { uid: firebaseUser.uid, promise };
+        return promise;
     };
 
     useEffect(() => {
@@ -102,9 +114,15 @@ export const AuthProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
                     nextUser = { ...firebaseUser, ...nextUser } as BackendUser;
                 }
 
-                const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                if (userDoc.exists()) {
-                    nextUser = { ...nextUser, ...userDoc.data() } as BackendUser;
+                // The Firestore profile is optional extra data; failing to read it (offline,
+                // rules) must not throw away a valid backend session.
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                    if (userDoc.exists()) {
+                        nextUser = { ...nextUser, ...userDoc.data() } as BackendUser;
+                    }
+                } catch (profileError) {
+                    console.warn('Could not load Firestore profile:', profileError);
                 }
                 setUser(nextUser);
             } catch (error) {
@@ -118,6 +136,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren<unknown>> = ({ child
         });
 
         return () => unsubscribe();
+    }, []);
+
+    // The API client fires this when the backend rejects the token and it can't be refreshed.
+    // Signing out of Firebase too means a Google user gets a fresh backend token on next sign-in.
+    useEffect(() => {
+        const handleSessionExpired = () => {
+            clearStoredAuth();
+            setUser(null);
+            signOut(auth).catch(() => {});
+        };
+        window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+        return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
     }, []);
 
     const login = async (email: string, password: string) => {

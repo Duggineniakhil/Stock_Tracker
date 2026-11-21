@@ -16,6 +16,8 @@ const Markets = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResult, setSearchResult] = useState<any | null>(null);
     const [searchStatus, setSearchStatus] = useState<'idle' | 'searching' | 'done'>('idle');
+    // Set when the lookup failed for a reason other than an unknown symbol (e.g. provider outage)
+    const [searchError, setSearchError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -61,9 +63,17 @@ const Markets = () => {
         const timer = setTimeout(async () => {
             try {
                 const res = await fetchStockData(query);
-                if (latestQuery.current === query) setSearchResult(res.data);
-            } catch {
-                if (latestQuery.current === query) setSearchResult(null);
+                if (latestQuery.current === query) {
+                    setSearchResult(res.data);
+                    setSearchError(null);
+                }
+            } catch (err: any) {
+                if (latestQuery.current === query) {
+                    setSearchResult(null);
+                    setSearchError(err?.response?.status === 404
+                        ? null
+                        : err?.response?.data?.message || 'Market data is unavailable right now. Please try again shortly.');
+                }
             } finally {
                 if (latestQuery.current === query) setSearchStatus('done');
             }
@@ -167,6 +177,8 @@ const Markets = () => {
                                     )}
                                 </div>
                             </>
+                        ) : searchError ? (
+                            <div className="muted">{searchError}</div>
                         ) : (
                             <div className="muted">
                                 No stock found for "{searchQuery.trim()}". Check the ticker symbol — non-US stocks need an exchange suffix (e.g. RELIANCE.NS).

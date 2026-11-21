@@ -37,6 +37,109 @@ const historicalCache = new Map<string, { data: HistoricalPricePoint[]; timestam
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const HISTORICAL_TTL = 15 * 60 * 1000; // 15 minutes
 
+// Yahoo's quote endpoint needs a session "crumb", and Yahoo rate-limits fetching it from
+// cloud IPs (e.g. Render). Its chart endpoint needs no crumb, so when quotes are blocked we
+// build them from chart data instead, and skip the quote endpoint for a while.
+const QUOTE_BLOCK_COOLDOWN = 15 * 60 * 1000; // 15 minutes
+let quoteEndpointBlockedUntil = 0;
+
+const isProviderBlock = (message = '') => /fetch failed|403|429|too many requests|crumb/i.test(message);
+
+const invalidSymbolError = () => {
+    const invalidError: any = new Error('Invalid stock symbol');
+    invalidError.statusCode = 404;
+    return invalidError;
+};
+
+const quoteFromQuoteEndpoint = async (stockSymbol: string): Promise<StockQuoteData> => {
+    const quote = await yahooFinance.quote(stockSymbol);
+    if (!quote) throw invalidSymbolError();
+
+    return {
+        symbol: quote.symbol,
+        currentPrice: quote.regularMarketPrice ?? 0,
+        previousClose: quote.regularMarketPreviousClose ?? 0,
+        open: quote.regularMarketOpen ?? 0,
+        dayHigh: quote.regularMarketDayHigh ?? 0,
+        dayLow: quote.regularMarketDayLow ?? 0,
+        change: quote.regularMarketChange ?? 0,
+        changePercent: quote.regularMarketChangePercent ?? 0,
+        volume: quote.regularMarketVolume ?? 0,
+        avgVolume: quote.averageDailyVolume3Month || quote.averageDailyVolume10Day || 0,
+        marketCap: quote.marketCap ?? 0,
+        trailingPE: quote.trailingPE,
+        fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh ?? 0,
+        fiftyTwoWeekLow: quote.fiftyTwoWeekLow ?? 0,
+        exchange: (quote.fullExchangeName || quote.exchange) ?? '',
+        name: (quote.longName || quote.shortName) ?? stockSymbol,
+        sector: (quote as any).sector || 'N/A',
+        industry: (quote as any).industry || 'N/A'
+    };
+};
+
+// Builds a quote from 3 months of daily bars. Market cap and P/E aren't in chart data.
+const quoteFromChart = async (stockSymbol: string): Promise<StockQuoteData> => {
+    const period1 = new Date();
+    period1.setMonth(period1.getMonth() - 3);
+    const result: any = await yahooFinance.chart(stockSymbol, { period1, interval: '1d' });
+    const meta = result?.meta;
+    if (!meta || typeof meta.regularMarketPrice !== 'number') throw invalidSymbolError();
+
+    const bars = (result.quotes || []).filter((bar: any) => typeof bar.close === 'number');
+    const price: number = meta.regularMarketPrice;
+
+    // Compare trading days in the exchange's timezone; the latest bar may be the current
+    // session (then the previous close is the bar before it) or the last completed one.
+    const exchangeDay = (date: Date | string | number) =>
+        new Date(new Date(date).getTime() + (meta.gmtoffset || 0) * 1000).toISOString().slice(0, 10);
+    const last = bars[bars.length - 1];
+    const lastIsCurrentSession = Boolean(last && meta.regularMarketTime)
+        && exchangeDay(last.date) === exchangeDay(meta.regularMarketTime);
+    const previousBar = lastIsCurrentSession ? bars[bars.length - 2] : last;
+    const previousClose: number = previousBar?.close ?? price;
+    const change = price - previousClose;
+
+    const volumes: number[] = bars.map((bar: any) => bar.volume).filter((v: any) => typeof v === 'number' && v > 0);
+    const avgVolume = volumes.length ? Math.round(volumes.reduce((sum, v) => sum + v, 0) / volumes.length) : 0;
+
+    return {
+        symbol: meta.symbol || stockSymbol,
+        currentPrice: price,
+        previousClose,
+        open: lastIsCurrentSession ? last.open ?? 0 : 0,
+        dayHigh: meta.regularMarketDayHigh ?? 0,
+        dayLow: meta.regularMarketDayLow ?? 0,
+        change,
+        changePercent: previousClose ? (change / previousClose) * 100 : 0,
+        volume: meta.regularMarketVolume ?? 0,
+        avgVolume,
+        marketCap: 0,
+        trailingPE: undefined,
+        fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh ?? 0,
+        fiftyTwoWeekLow: meta.fiftyTwoWeekLow ?? 0,
+        exchange: (meta.fullExchangeName || meta.exchangeName) ?? '',
+        name: (meta.longName || meta.shortName) ?? stockSymbol,
+        sector: 'N/A',
+        industry: 'N/A'
+    };
+};
+
+const fetchQuote = async (stockSymbol: string): Promise<StockQuoteData> => {
+    if (Date.now() < quoteEndpointBlockedUntil) {
+        return quoteFromChart(stockSymbol);
+    }
+
+    try {
+        return await quoteFromQuoteEndpoint(stockSymbol);
+    } catch (error: any) {
+        if (error.statusCode === 404 || !isProviderBlock(error.message)) throw error;
+
+        console.warn(`⚠️ Yahoo quote endpoint blocked (${error.message}); using chart data for quotes`);
+        quoteEndpointBlockedUntil = Date.now() + QUOTE_BLOCK_COOLDOWN;
+        return quoteFromChart(stockSymbol);
+    }
+};
+
 const stockService = {
     // Get current stock quote from Yahoo Finance
     getStockQuote: async (symbol: string): Promise<StockQuoteData> => {
@@ -51,48 +154,24 @@ const stockService = {
         }
 
         try {
-            const quote = await yahooFinance.quote(stockSymbol);
-
-            if (!quote) {
-                const invalidError: any = new Error('Invalid stock symbol');
-    invalidError.statusCode = 404;
-    throw invalidError;
-            }
-
-            const data: StockQuoteData = {
-                symbol: quote.symbol,
-                currentPrice: quote.regularMarketPrice ?? 0,
-                previousClose: quote.regularMarketPreviousClose ?? 0,
-                open: quote.regularMarketOpen ?? 0,
-                dayHigh: quote.regularMarketDayHigh ?? 0,
-                dayLow: quote.regularMarketDayLow ?? 0,
-                change: quote.regularMarketChange ?? 0,
-                changePercent: quote.regularMarketChangePercent ?? 0,
-                volume: quote.regularMarketVolume ?? 0,
-                avgVolume: quote.averageDailyVolume3Month || quote.averageDailyVolume10Day || 0,
-                marketCap: quote.marketCap ?? 0,
-                trailingPE: quote.trailingPE,
-                fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh ?? 0,
-                fiftyTwoWeekLow: quote.fiftyTwoWeekLow ?? 0,
-                exchange: (quote.fullExchangeName || quote.exchange) ?? '',
-                name: (quote.longName || quote.shortName) ?? stockSymbol,
-                sector: (quote as any).sector || 'N/A',
-                industry: (quote as any).industry || 'N/A'
-            };
+            const data = await fetchQuote(stockSymbol);
 
             // 2. Update Cache
             quoteCache.set(stockSymbol, { data, timestamp: Date.now() });
 
             return data;
         } catch (error: any) {
+            // Unknown symbol (Yahoo returned no quote) - not a provider failure
+            if (error.statusCode === 404) throw error;
+
             // 3. Fallback to expired cache if available during network failure
             if (quoteCache.has(stockSymbol)) {
                 console.warn(`⚠️ Fetch failed for ${stockSymbol}, serving stale cache: ${error.message}`);
                 return quoteCache.get(stockSymbol)!.data;
             }
 
-            // Enhanced logging for "fetch failed" issues (common with Yahoo Finance on cloud IPs)
-            if (error.message?.includes('fetch failed') || error.message?.includes('403')) {
+            // Both Yahoo endpoints blocked or rate-limited
+            if (isProviderBlock(error.message)) {
                 console.error(`❌ YAHOO FINANCE BLOCK on ${stockSymbol}:`, error.message);
                 const blockError: any = new Error('Market data currently unavailable from our provider. Please try again later.');
                 blockError.statusCode = 503;

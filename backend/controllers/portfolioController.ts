@@ -39,6 +39,9 @@ const portfolioController = {
             return success(res, holding, 'Holding added successfully', 201);
         } catch (err: any) {
             console.error('Error adding holding:', err);
+            if (err.statusCode === 503) {
+                return error(res, err.message, null, 503);
+            }
             return error(res, 'Failed to add holding', null, 500);
         }
     },
@@ -136,6 +139,10 @@ const portfolioController = {
             return success(res, updatedHolding, 'Holding updated successfully');
         } catch (err: any) {
             console.error('Error updating holding:', err);
+
+            if (err.statusCode === 503) {
+                return error(res, err.message, null, 503);
+            }
 
             if (err.message.includes('not found') || err.message.includes('unauthorized')) {
                 return error(res, err.message, null, 404);

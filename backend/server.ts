@@ -31,7 +31,11 @@ app.use(cors({
         // allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
         const normalizedOrigin = origin.replace(/\/+$/, '');
-        if (!config.CORS_ORIGINS.includes(normalizedOrigin)) {
+        // In development, allow the local frontend on any port (Vite moves off 5173 when it's taken)
+        const isLocalDevOrigin = !config.IS_PRODUCTION
+            && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(normalizedOrigin);
+        if (!isLocalDevOrigin && !config.CORS_ORIGINS.includes(normalizedOrigin)) {
+            logger.warn('Blocked request from origin not in CORS_ORIGINS', { origin: normalizedOrigin });
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
             return callback(new Error(msg), false);
         }

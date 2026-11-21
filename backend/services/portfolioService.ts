@@ -322,14 +322,16 @@ const portfolioService = {
     /**
      * Validate stock symbol exists
      * @param {string} symbol - Stock symbol
-     * @returns {Promise<boolean>} True if valid
+     * @returns {Promise<boolean>} True if valid, false if the symbol is unknown
+     * @throws when market data is unavailable, so an outage isn't reported as a bad symbol
      */
     validateSymbol: async (symbol: string) => {
         try {
             const quote = await stockService.getStockQuote(symbol);
             return quote && quote.currentPrice !== undefined;
         } catch (error: any) {
-            return false;
+            if (error.statusCode === 404) return false;
+            throw error;
         }
     },
 

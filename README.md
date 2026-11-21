@@ -21,7 +21,7 @@
 ## Key Features
 
 ### Interactive Dashboard & Portfolio Management
-- **Real-Time Data:** Live stock price tracking via Yahoo Finance integration with 30-second auto-refresh.
+- **Real-Time Data:** Live stock price tracking via Yahoo Finance integration with 30-second auto-refresh. If Yahoo rate-limits its quote endpoint (common on cloud hosts like Render), quotes are built from Yahoo's chart data instead, which needs no API key; market cap and P/E are unavailable while that fallback is active.
 - **Portfolio Tracking:** Manage holdings, track purchase prices, calculate real-time P/L, and visualize allocation with interactive chart overlays.
 - **Advanced Charting:** View historical price trends ranging from 1D, 5D, 1M, YTD up to Max using Chart.js with integrated Technical Analysis (RSI, SMA).
 - **Portfolio Benchmarking:** Compare your portfolio performance directly against the S&P 500 (^GSPC) to measure relative success.

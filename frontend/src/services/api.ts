@@ -11,6 +11,8 @@ interface ApiResponse<T = any> {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+export const SESSION_EXPIRED_EVENT = 'auth:session-expired';
+
 const axiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
@@ -76,6 +78,8 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         localStorage.removeItem('token');
+        // Session can't be renewed (expired, or issued by a different backend): AuthContext logs out
+        window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

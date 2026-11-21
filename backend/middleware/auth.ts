@@ -16,8 +16,9 @@ const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextF
 
     if (!token) return res.sendStatus(401);
 
+    // An expired or foreign token means "not authenticated" (401), so the client refreshes or re-logs in
     jwt.verify(token, config.JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
+        if (err) return res.status(401).json({ success: false, message: 'Session expired. Please log in again.' });
         req.user = user;
         next();
     });

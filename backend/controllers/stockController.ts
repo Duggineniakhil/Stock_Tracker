@@ -18,6 +18,10 @@ const stockController = {
                 return apiError(res, msg, null, 404);
             }
 
+            if (error.statusCode === 503) {
+                return apiError(res, error.message, null, 503);
+            }
+
             return apiError(res, `Failed to fetch stock data: ${error.message}`, null, error.statusCode || 500);
         }
     },
